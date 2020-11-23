@@ -19,7 +19,7 @@ var (
 )
 
 func buildLibrary() fyne.CanvasObject {
-	widgets := []string{"Button", "Icon", "Label", "Entry"}
+	widgets := []string{"Card", "Button", "Icon", "Label", "Entry"}
 
 	var selected fyne.CanvasObject
 	list := widget.NewList(func() int {
@@ -31,6 +31,8 @@ func buildLibrary() fyne.CanvasObject {
 	})
 	list.OnSelected = func(i widget.ListItemID) {
 		switch widgets[i] {
+		case "Card":
+			selected = widget.NewCard("Title", "Subtitle", widget.NewLabel("Content here"))
 		case "Button":
 			selected = widget.NewButton("Button", func() {})
 		case "Icon":
@@ -116,6 +118,18 @@ func choose(o fyne.CanvasObject) {
 			obj.SetText(text)
 		}
 		items = []fyne.CanvasObject{widget.NewForm(widget.NewFormItem("Text", entry))}
+	case *widget.Card:
+		title := widget.NewEntry()
+		title.SetText(obj.Title)
+		title.OnChanged = func(text string) {
+			obj.SetTitle(text)
+		}
+		subtitle := widget.NewEntry()
+		subtitle.SetText(obj.Subtitle)
+		subtitle.OnChanged = func(text string) {
+			obj.SetSubTitle(text)
+		}
+		items = []fyne.CanvasObject{widget.NewForm(widget.NewFormItem("Title", title), widget.NewFormItem("Title", subtitle))}
 	case *widget.Button:
 		entry := widget.NewEntry()
 		entry.SetText(obj.Text)
@@ -123,7 +137,7 @@ func choose(o fyne.CanvasObject) {
 			obj.SetText(text)
 		}
 		items = []fyne.CanvasObject{widget.NewForm(widget.NewFormItem("Text", entry),
-			widget.NewFormItem("Icon", widget.NewSelect([]string{}, func(selected string) {})))}
+			widget.NewFormItem("Icon", widget.NewSelect(iconNames, func(selected string) { obj.SetIcon(icons[selected]) })))}
 	}
 	paletteList.Objects = items
 	paletteList.Refresh()
