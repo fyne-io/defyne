@@ -15,7 +15,7 @@ import (
 
 var (
 	widType     *widget.Label
-	paletteList *widget.Box
+	paletteList *fyne.Container
 )
 
 func buildLibrary() fyne.CanvasObject {
@@ -72,13 +72,13 @@ func buildUI() fyne.CanvasObject {
 		}))
 
 	widType = widget.NewLabelWithStyle("(None Selected)", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
-	paletteList = widget.NewVBox()
+	paletteList = container.NewVBox()
 	palette := container.NewBorder(widType, nil, nil, nil,
 		container.NewGridWithRows(2, widget.NewCard("Properties", "", paletteList),
 			widget.NewCard("Component List", "", buildLibrary()),
 		))
 
-	split := widget.NewHSplitContainer(overlay, palette)
+	split := container.NewHSplit(overlay, palette)
 	split.Offset = 0.8
 	return fyne.NewContainerWithLayout(layout.NewBorderLayout(toolbar, nil, nil, nil), toolbar,
 		split)
@@ -125,7 +125,7 @@ func choose(o fyne.CanvasObject) {
 		items = []fyne.CanvasObject{widget.NewForm(widget.NewFormItem("Text", entry),
 			widget.NewFormItem("Icon", widget.NewSelect([]string{}, func(selected string) {})))}
 	}
-	paletteList.Children = items
+	paletteList.Objects = items
 	paletteList.Refresh()
 }
 
