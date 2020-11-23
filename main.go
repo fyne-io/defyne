@@ -19,29 +19,17 @@ var (
 )
 
 func buildLibrary() fyne.CanvasObject {
-	widgets := []string{"Card", "Button", "Icon", "Label", "Entry"}
-
 	var selected fyne.CanvasObject
 	list := widget.NewList(func() int {
-		return len(widgets)
+		return len(widgetNames)
 	}, func() fyne.CanvasObject {
 		return widget.NewLabel("")
 	}, func(i widget.ListItemID, obj fyne.CanvasObject) {
-		obj.(*widget.Label).SetText(widgets[i])
+		obj.(*widget.Label).SetText(widgets[widgetNames[i]].name)
 	})
 	list.OnSelected = func(i widget.ListItemID) {
-		switch widgets[i] {
-		case "Card":
-			selected = widget.NewCard("Title", "Subtitle", widget.NewLabel("Content here"))
-		case "Button":
-			selected = widget.NewButton("Button", func() {})
-		case "Icon":
-			selected = widget.NewIcon(theme.HelpIcon())
-		case "Label":
-			selected = widget.NewLabel("Label")
-		case "Entry":
-			selected = widget.NewEntry()
-			selected.(*widget.Entry).SetPlaceHolder("Entry")
+		if match, ok := widgets[widgetNames[i]]; ok {
+			selected = match.create()
 		}
 	}
 
@@ -90,62 +78,12 @@ func choose(o fyne.CanvasObject) {
 	typeName := reflect.TypeOf(o).Elem().Name()
 	widType.SetText(typeName)
 
-	var items []fyne.CanvasObject
-	switch obj := o.(type) {
-	case *fyne.Container:
-		items = []fyne.CanvasObject{
-			widget.NewForm(widget.NewFormItem("Layout", widget.NewSelect([]string{"Center", "Grid", "GridWrap", "Max"}, func(l string) {
-				switch l {
-				case "Center":
-					obj.Layout = layout.NewCenterLayout()
-					obj.Refresh()
-				case "Grid":
-					obj.Layout = layout.NewGridLayout(2)
-					obj.Refresh()
-				case "GridWrap":
-					obj.Layout = layout.NewGridWrapLayout(fyne.NewSize(100, 100))
-					obj.Refresh()
-				case "Max":
-					obj.Layout = layout.NewMaxLayout()
-					obj.Refresh()
-				}
-			}))),
-		}
-	case *widget.Label:
-		entry := widget.NewEntry()
-		entry.SetText(obj.Text)
-		entry.OnChanged = func(text string) {
-			obj.SetText(text)
-		}
-		items = []fyne.CanvasObject{widget.NewForm(widget.NewFormItem("Text", entry))}
-	case *widget.Card:
-		title := widget.NewEntry()
-		title.SetText(obj.Title)
-		title.OnChanged = func(text string) {
-			obj.SetTitle(text)
-		}
-		subtitle := widget.NewEntry()
-		subtitle.SetText(obj.Subtitle)
-		subtitle.OnChanged = func(text string) {
-			obj.SetSubTitle(text)
-		}
-		items = []fyne.CanvasObject{widget.NewForm(widget.NewFormItem("Title", title), widget.NewFormItem("Title", subtitle))}
-	case *widget.Button:
-		entry := widget.NewEntry()
-		entry.SetText(obj.Text)
-		entry.OnChanged = func(text string) {
-			obj.SetText(text)
-		}
-		items = []fyne.CanvasObject{widget.NewForm(widget.NewFormItem("Text", entry),
-			widget.NewFormItem("Icon", widget.NewSelect(iconNames, func(selected string) {
-				obj.SetIcon(icons[selected])
-			})))}
-	case *widget.Icon:
-		items = []fyne.CanvasObject{widget.NewForm(widget.NewFormItem("Icon", widget.NewSelect(iconNames, func(selected string) {
-			obj.SetResource(icons[selected])
-		})))}
+	var items []*widget.FormItem
+	if match, ok := widgets[reflect.TypeOf(o).String()]; ok {
+		items = match.edit(o)
 	}
-	paletteList.Objects = items
+
+	paletteList.Objects = []fyne.CanvasObject{widget.NewForm(items...)}
 	paletteList.Refresh()
 }
 
