@@ -68,8 +68,8 @@ func (w *overlayWidget) CreateRenderer() fyne.WidgetRenderer {
 	return &overRender{p: w, r: border}
 }
 
-func (o *overlayWidget) GoString() string {
-	return fmt.Sprintf("%#v", o.child)
+func (w *overlayWidget) GoString() string {
+	return fmt.Sprintf("%#v", w.child)
 }
 
 func (w *overlayWidget) Object() fyne.CanvasObject {
