@@ -2,6 +2,8 @@ package main
 
 import (
 	"fyne.io/fyne"
+	"fyne.io/fyne/container"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -105,6 +107,33 @@ var widgets = map[string]widgetInfo{
 			}
 			return []*widget.FormItem{
 				widget.NewFormItem("Text", entry)}
+		},
+	},
+	"*fyne.Container": {
+		name: "Container",
+		create: func() fyne.CanvasObject{
+			return container.NewMax()
+		},
+		edit: func (obj fyne.CanvasObject) []*widget.FormItem{
+			c := obj.(*fyne.Container)
+			return []*widget.FormItem{
+				widget.NewFormItem("Layout", widget.NewSelect([]string{"Center", "Grid", "GridWrap", "Max"}, func(l string) {
+					switch l {
+					case "Center":
+						c.Layout = layout.NewCenterLayout()
+						c.Refresh()
+					case "Grid":
+						c.Layout = layout.NewGridLayout(2)
+						c.Refresh()
+					case "GridWrap":
+						c.Layout = layout.NewGridWrapLayout(fyne.NewSize(100, 100))
+						c.Refresh()
+					case "Max":
+						c.Layout = layout.NewMaxLayout()
+						c.Refresh()
+					}
+				})),
+			}
 		},
 	},
 }
