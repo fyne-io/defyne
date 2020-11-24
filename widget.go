@@ -111,10 +111,10 @@ var widgets = map[string]widgetInfo{
 	},
 	"*fyne.Container": {
 		name: "Container",
-		create: func() fyne.CanvasObject{
+		create: func() fyne.CanvasObject {
 			return container.NewMax()
 		},
-		edit: func (obj fyne.CanvasObject) []*widget.FormItem{
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 			c := obj.(*fyne.Container)
 			return []*widget.FormItem{
 				// TODO figure out how to work Border...
