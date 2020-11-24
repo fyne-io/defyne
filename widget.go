@@ -2,6 +2,7 @@ package main
 
 import (
 	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
@@ -80,7 +81,7 @@ var widgets = map[string]widgetInfo{
 	"*widget.Icon": {
 		name: "Icon",
 		create: func() fyne.CanvasObject {
-			return widget.NewLabel("Label")
+			return widget.NewIcon(theme.HelpIcon())
 		},
 		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 			i := obj.(*widget.Icon)

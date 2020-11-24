@@ -19,7 +19,7 @@ var (
 )
 
 func buildLibrary() fyne.CanvasObject {
-	var selected fyne.CanvasObject
+	var selected *widgetInfo
 	list := widget.NewList(func() int {
 		return len(widgetNames)
 	}, func() fyne.CanvasObject {
@@ -29,14 +29,14 @@ func buildLibrary() fyne.CanvasObject {
 	})
 	list.OnSelected = func(i widget.ListItemID) {
 		if match, ok := widgets[widgetNames[i]]; ok {
-			selected = match.create()
+			selected = &match
 		}
 	}
 
 	return container.NewBorder(nil, widget.NewButtonWithIcon("Insert", theme.ContentAddIcon(), func() {
 		if c, ok := current.(*overlayContainer); ok {
 			if selected != nil {
-				c.c.Objects = append(c.c.Objects, wrapContent(selected))
+				c.c.Objects = append(c.c.Objects, wrapContent(selected.create()))
 				c.c.Refresh()
 			}
 			return
