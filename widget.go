@@ -117,10 +117,14 @@ var widgets = map[string]widgetInfo{
 		edit: func (obj fyne.CanvasObject) []*widget.FormItem{
 			c := obj.(*fyne.Container)
 			return []*widget.FormItem{
-				widget.NewFormItem("Layout", widget.NewSelect([]string{"Center", "Grid", "GridWrap", "Max"}, func(l string) {
+				// TODO figure out how to work Border...
+				widget.NewFormItem("Layout", widget.NewSelect([]string{"Center", "Form", "Grid", "GridWrap", "HBox", "Max", "Padded", "VBox"}, func(l string) {
 					switch l {
 					case "Center":
 						c.Layout = layout.NewCenterLayout()
+						c.Refresh()
+					case "Form":
+						c.Layout = layout.NewFormLayout()
 						c.Refresh()
 					case "Grid":
 						c.Layout = layout.NewGridLayout(2)
@@ -128,8 +132,17 @@ var widgets = map[string]widgetInfo{
 					case "GridWrap":
 						c.Layout = layout.NewGridWrapLayout(fyne.NewSize(100, 100))
 						c.Refresh()
+					case "HBox":
+						c.Layout = layout.NewHBoxLayout()
+						c.Refresh()
 					case "Max":
 						c.Layout = layout.NewMaxLayout()
+						c.Refresh()
+					case "Padded":
+						c.Layout = layout.NewPaddedLayout()
+						c.Refresh()
+					case "VBox":
+						c.Layout = layout.NewVBoxLayout()
 						c.Refresh()
 					}
 				})),
