@@ -24,7 +24,8 @@ func setCurrent(o fyne.CanvasObject) {
 
 type overlayContainer struct {
 	widget.BaseWidget
-	c *fyne.Container
+	c     *fyne.Container
+	props map[string]string
 }
 
 func (o *overlayContainer) CreateRenderer() fyne.WidgetRenderer {
@@ -49,7 +50,7 @@ func (o *overlayContainer) Resize(s fyne.Size) {
 
 func (o *overlayContainer) Tapped(e *fyne.PointEvent) {
 	setCurrent(o)
-	choose(o.c)
+	choose(o.c, o.props)
 }
 
 func (o *overlayContainer) Object() fyne.CanvasObject {
@@ -78,7 +79,7 @@ func (w *overlayWidget) Object() fyne.CanvasObject {
 
 func (w *overlayWidget) Tapped(e *fyne.PointEvent) {
 	setCurrent(w)
-	choose(w.child)
+	choose(w.child, nil)
 }
 
 type overRender struct {
@@ -128,6 +129,7 @@ func wrapContent(o fyne.CanvasObject) fyne.CanvasObject {
 		}
 
 		o := &overlayContainer{c: fyne.NewContainerWithLayout(obj.Layout, items...)}
+		o.props = map[string]string{"layout": "VBox"}
 		o.ExtendBaseWidget(o)
 		return o
 	case fyne.Widget:

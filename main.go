@@ -14,6 +14,7 @@ import (
 )
 
 var (
+	editForm    *widget.Form
 	widType     *widget.Label
 	paletteList *fyne.Container
 )
@@ -74,16 +75,17 @@ func buildUI() fyne.CanvasObject {
 		split)
 }
 
-func choose(o fyne.CanvasObject) {
+func choose(o fyne.CanvasObject, props map[string]string) {
 	typeName := reflect.TypeOf(o).Elem().Name()
 	widType.SetText(typeName)
 
 	var items []*widget.FormItem
 	if match, ok := widgets[reflect.TypeOf(o).String()]; ok {
-		items = match.edit(o)
+		items = match.edit(o, props)
 	}
 
-	paletteList.Objects = []fyne.CanvasObject{widget.NewForm(items...)}
+	editForm = widget.NewForm(items...)
+	paletteList.Objects = []fyne.CanvasObject{editForm}
 	paletteList.Refresh()
 }
 
@@ -96,7 +98,7 @@ func main() {
 }
 
 func previewUI() fyne.CanvasObject {
-	return fyne.NewContainerWithLayout(layout.NewGridLayout(2),
+	return fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
 		widget.NewIcon(theme.ContentAddIcon()),
 		widget.NewLabel("label"),
 		widget.NewButton("Button", func() {}))
