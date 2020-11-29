@@ -59,7 +59,7 @@ func buildUI() fyne.CanvasObject {
 		}),
 		widget.NewToolbarAction(theme.MailForwardIcon(), func() {
 			code := fmt.Sprintf("%#v", overlay)
-			log.Println(code)
+			fmt.Println(code)
 		}))
 
 	widType = widget.NewLabelWithStyle("(None Selected)", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})

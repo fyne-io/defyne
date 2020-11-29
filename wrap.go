@@ -35,7 +35,12 @@ func (o *overlayContainer) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (o *overlayContainer) GoString() string {
-	return fmt.Sprintf("%#v", o.c)
+	objs := ""
+	for _, obj := range o.c.Objects {
+		objs += fmt.Sprintf("\t%#v,\n", obj.(*fyne.Container).Objects[0])
+	}
+	l := o.props["layout"]
+	return fmt.Sprintf("&fyne.Container{Layout: layout.New%s(), Objects: []fyne.CanvasObject{\n%s}}", l, objs)
 }
 
 func (o *overlayContainer) Move(p fyne.Position) {
