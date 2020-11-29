@@ -10,7 +10,7 @@ import (
 type widgetInfo struct {
 	name   string
 	create func() fyne.CanvasObject
-	edit   func(fyne.CanvasObject, map[string]string) []*widget.FormItem
+	edit   func(fyne.CanvasObject) []*widget.FormItem
 }
 
 var widgets = map[string]widgetInfo{
@@ -19,7 +19,7 @@ var widgets = map[string]widgetInfo{
 		create: func() fyne.CanvasObject {
 			return widget.NewButton("Button", func() {})
 		},
-		edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 			b := obj.(*widget.Button)
 			entry := widget.NewEntry()
 			entry.SetText(b.Text)
@@ -38,7 +38,7 @@ var widgets = map[string]widgetInfo{
 		create: func() fyne.CanvasObject {
 			return widget.NewCard("Title", "Subtitle", widget.NewLabel("Content here"))
 		},
-		edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 			c := obj.(*widget.Card)
 			title := widget.NewEntry()
 			title.SetText(c.Title)
@@ -62,7 +62,7 @@ var widgets = map[string]widgetInfo{
 			e.SetPlaceHolder("Entry")
 			return e
 		},
-		edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 			l := obj.(*widget.Entry)
 			entry1 := widget.NewEntry()
 			entry1.SetText(l.Text)
@@ -84,7 +84,7 @@ var widgets = map[string]widgetInfo{
 		create: func() fyne.CanvasObject {
 			return widget.NewIcon(theme.HelpIcon())
 		},
-		edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 			i := obj.(*widget.Icon)
 			return []*widget.FormItem{
 				widget.NewFormItem("Icon", widget.NewSelect(iconNames, func(selected string) {
@@ -97,7 +97,7 @@ var widgets = map[string]widgetInfo{
 		create: func() fyne.CanvasObject {
 			return widget.NewLabel("Label")
 		},
-		edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 			l := obj.(*widget.Label)
 			entry := widget.NewEntry()
 			entry.SetText(l.Text)
@@ -113,22 +113,24 @@ var widgets = map[string]widgetInfo{
 		create: func() fyne.CanvasObject {
 			return container.NewMax()
 		},
-		edit: func(obj fyne.CanvasObject, prop map[string]string) []*widget.FormItem {
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 			c := obj.(*fyne.Container)
+			props := layoutProps[c]
+
 			var items []*widget.FormItem
 			var choose *widget.FormItem
 			// TODO figure out how to work Border...
 			choose = widget.NewFormItem("Layout", widget.NewSelect(layoutNames, func(l string) {
 				lay := layouts[l]
-				prop["layout"] = l
-				c.Layout = lay.create()
+				props["layout"] = l
+				c.Layout = lay.create(props)
 				c.Refresh()
 				choose.Widget.Hide()
 
 				edit := lay.edit
 				items = []*widget.FormItem{choose}
 				if edit != nil {
-					items = append(items, edit()...)
+					items = append(items, edit(c, props)...)
 				}
 
 				editForm = widget.NewForm(items...)
@@ -136,7 +138,7 @@ var widgets = map[string]widgetInfo{
 				choose.Widget.Show()
 				paletteList.Refresh()
 			}))
-			choose.Widget.(*widget.Select).SetSelected(prop["layout"])
+			choose.Widget.(*widget.Select).SetSelected(props["layout"])
 			return items
 		},
 	},

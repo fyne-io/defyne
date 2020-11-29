@@ -1,61 +1,181 @@
 package main
 
 import (
+	"strconv"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
 )
 
+var layoutProps = make(map[*fyne.Container]map[string]string)
+
 type layoutInfo struct {
-	create func() fyne.Layout
-	edit   func() []*widget.FormItem
+	create func(map[string]string) fyne.Layout
+	edit   func(*fyne.Container, map[string]string) []*widget.FormItem
 }
 
 var layouts = map[string]layoutInfo{
 	"Center": {
-		layout.NewCenterLayout,
+		func(map[string]string) fyne.Layout {
+			return layout.NewCenterLayout()
+		},
 		nil,
 	},
 	"Form": {
-		layout.NewFormLayout,
+		func (map[string]string) fyne.Layout {
+			return layout.NewFormLayout()
+		},
 		nil,
 	},
 	"Grid": {
-		func() fyne.Layout {
-			return layout.NewGridLayout(2)
+		func(props map[string]string) fyne.Layout {
+			rowCol := props["grid_type"]
+			if rowCol == "" {
+				rowCol = "Columns"
+			}
+			count := props["count"]
+			if count == "" {
+				count = "2"
+			}
+
+			num, err := strconv.ParseInt(count, 0, 0)
+			if err != nil {
+				num = 2
+			}
+
+			if rowCol == "Rows" {
+				return layout.NewGridLayoutWithRows(int(num))
+			} else {
+				return layout.NewGridLayoutWithColumns(int(num))
+			}
 		},
-		func() []*widget.FormItem {
+		func(c *fyne.Container, props map[string]string) []*widget.FormItem {
+			rowCol := props["grid_type"]
+			if rowCol == "" {
+				rowCol = "Columns"
+			}
+			count := props["count"]
+			if count == "" {
+				count = "2"
+			}
+
+			cols := widget.NewEntry()
+			cols.SetText(count)
+			vert := widget.NewSelect([]string{"Columns", "Rows"}, nil)
+			vert.SetSelected(rowCol)
+			change := func(string) {
+				if cols.Text == "" {
+					return
+				}
+				num, err := strconv.ParseInt(cols.Text, 0, 0)
+				if err != nil {
+					return
+				}
+
+				props["grid_type"] = vert.Selected
+				props["count"] = cols.Text
+				if vert.Selected == "Rows" {
+					c.Layout = layout.NewGridLayoutWithRows(int(num))
+				} else {
+					c.Layout = layout.NewGridLayoutWithColumns(int(num))
+				}
+				c.Refresh()
+			}
+			cols.OnChanged = change
+			vert.OnChanged = change
 			return []*widget.FormItem{
-				widget.NewFormItem("Columns", widget.NewEntry()),
-				widget.NewFormItem("Vertical", widget.NewCheck("", func(bool) {})),
+				widget.NewFormItem("Count", cols),
+				widget.NewFormItem("Arrange in", vert),
 			}
 		},
 	},
 	"GridWrap": {
-		func() fyne.Layout {
-			return layout.NewGridWrapLayout(fyne.NewSize(100, 100))
+		func(props map[string]string) fyne.Layout {
+			width := props["width"]
+			if width == "" {
+				width = "100"
+			}
+			height := props["height"]
+			if height == "" {
+				height = "100"
+			}
+			w, err := strconv.ParseInt(width, 0, 0)
+			if err != nil {
+				w = 100
+			}
+			h, err := strconv.ParseInt(height, 0, 0)
+			if err != nil {
+				h = 100
+			}
+
+			return layout.NewGridWrapLayout(fyne.NewSize(int(w), int(h)))
 		},
-		func() []*widget.FormItem {
+		func(c *fyne.Container, props map[string]string) []*widget.FormItem {
+			width := props["width"]
+			if width == "" {
+				width = "100"
+			}
+			height := props["height"]
+			if height == "" {
+				height = "100"
+			}
+
+			widthEnt := widget.NewEntry()
+			widthEnt.SetText(width)
+			heightEnt := widget.NewEntry()
+			heightEnt.SetText(height)
+			change := func(string) {
+				if widthEnt.Text == "" {
+					return
+				}
+				w, err := strconv.ParseInt(widthEnt.Text, 0, 0)
+				if err != nil {
+					return
+				}
+				if widthEnt.Text == "" {
+					return
+				}
+				h, err := strconv.ParseInt(heightEnt.Text, 0, 0)
+				if err != nil {
+					return
+				}
+
+				props["width"] = widthEnt.Text
+				props["height"] = heightEnt.Text
+				c.Layout = layout.NewGridWrapLayout(fyne.NewSize(int(w), int(h)))
+				c.Refresh()
+			}
+			widthEnt.OnChanged = change
+			heightEnt.OnChanged = change
 			return []*widget.FormItem{
-				widget.NewFormItem("Item Width", widget.NewEntry()),
-				widget.NewFormItem("Item Height", widget.NewEntry()),
+				widget.NewFormItem("Item Width", widthEnt),
+				widget.NewFormItem("Item Height", heightEnt),
 			}
 		},
 	},
 	"HBox": {
-		layout.NewHBoxLayout,
+		func(props map[string]string) fyne.Layout {
+			return layout.NewHBoxLayout()
+		},
 		nil,
 	},
 	"Max": {
-		layout.NewMaxLayout,
+		func(props map[string]string) fyne.Layout {
+			return layout.NewMaxLayout()
+		},
 		nil,
 	},
 	"Padded": {
-		layout.NewPaddedLayout,
+		func(props map[string]string) fyne.Layout {
+			return layout.NewPaddedLayout()
+		},
 		nil,
 	},
 	"VBox": {
-		layout.NewVBoxLayout,
+		func(props map[string]string) fyne.Layout {
+			return layout.NewVBoxLayout()
+		},
 		nil,
 	},
 }

@@ -75,13 +75,13 @@ func buildUI() fyne.CanvasObject {
 		split)
 }
 
-func choose(o fyne.CanvasObject, props map[string]string) {
+func choose(o fyne.CanvasObject) {
 	typeName := reflect.TypeOf(o).Elem().Name()
 	widType.SetText(typeName)
 
 	var items []*widget.FormItem
 	if match, ok := widgets[reflect.TypeOf(o).String()]; ok {
-		items = match.edit(o, props)
+		items = match.edit(o)
 	}
 
 	editForm = widget.NewForm(items...)
