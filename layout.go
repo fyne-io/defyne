@@ -46,9 +46,8 @@ var layouts = map[string]layoutInfo{
 
 			if rowCol == "Rows" {
 				return layout.NewGridLayoutWithRows(int(num))
-			} else {
-				return layout.NewGridLayoutWithColumns(int(num))
 			}
+			return layout.NewGridLayoutWithColumns(int(num))
 		},
 		func(c *fyne.Container, props map[string]string) []*widget.FormItem {
 			rowCol := props["grid_type"]
