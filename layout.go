@@ -23,7 +23,7 @@ var layouts = map[string]layoutInfo{
 		nil,
 	},
 	"Form": {
-		func (map[string]string) fyne.Layout {
+		func(map[string]string) fyne.Layout {
 			return layout.NewFormLayout()
 		},
 		nil,
