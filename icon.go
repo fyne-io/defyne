@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 // icons Has the hashmap of icons from the standard theme.

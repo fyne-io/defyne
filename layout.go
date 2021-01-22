@@ -3,9 +3,9 @@ package main
 import (
 	"strconv"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/widget"
 )
 
 var layoutProps = make(map[*fyne.Container]map[string]string)
@@ -108,7 +108,7 @@ var layouts = map[string]layoutInfo{
 				h = 100
 			}
 
-			return layout.NewGridWrapLayout(fyne.NewSize(int(w), int(h)))
+			return layout.NewGridWrapLayout(fyne.NewSize(float32(w), float32(h)))
 		},
 		func(c *fyne.Container, props map[string]string) []*widget.FormItem {
 			width := props["width"]
@@ -142,7 +142,7 @@ var layouts = map[string]layoutInfo{
 
 				props["width"] = widthEnt.Text
 				props["height"] = heightEnt.Text
-				c.Layout = layout.NewGridWrapLayout(fyne.NewSize(int(w), int(h)))
+				c.Layout = layout.NewGridWrapLayout(fyne.NewSize(float32(w), float32(h)))
 				c.Refresh()
 			}
 			widthEnt.OnChanged = change
