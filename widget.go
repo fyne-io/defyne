@@ -124,7 +124,7 @@ var widgets = map[string]widgetInfo{
 				c.Text = text
 				c.Refresh()
 			}
-			isChecked := widget.NewCheck("isChecked", func(b bool) { c.SetChecked(b) })
+			isChecked := widget.NewCheck("", func(b bool) { c.SetChecked(b) })
 			isChecked.SetChecked(c.Checked)
 			return []*widget.FormItem{
 				widget.NewFormItem("Title", title),
