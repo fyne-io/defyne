@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"strings"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
@@ -52,7 +55,7 @@ var widgets = map[string]widgetInfo{
 			}
 			return []*widget.FormItem{
 				widget.NewFormItem("Title", title),
-				widget.NewFormItem("Title", subtitle)}
+				widget.NewFormItem("Subtitle", subtitle)}
 		},
 	},
 	"*widget.Entry": {
@@ -108,6 +111,25 @@ var widgets = map[string]widgetInfo{
 				widget.NewFormItem("Text", entry)}
 		},
 	},
+	"*widget.RadioGroup": {
+		name: "RadioGroup",
+		create: func() fyne.CanvasObject {
+			fmt.Println("I was here3")
+			return widget.NewRadioGroup([]string{"Option 1", "Option 2"}, func(s string) {})
+		},
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
+			r := obj.(*widget.RadioGroup)
+			entry := widget.NewMultiLineEntry()
+			entry.SetText(strings.Join(r.Options, "\n"))
+			entry.OnChanged = func(text string) {
+				r.Options = strings.Split(text, "\n")
+				r.Refresh()
+			}
+			return []*widget.FormItem{
+				widget.NewFormItem("Options", entry)}
+		},
+	},
+
 	"*fyne.Container": {
 		name: "Container",
 		create: func() fyne.CanvasObject {
