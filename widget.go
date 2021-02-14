@@ -139,14 +139,19 @@ var widgets = map[string]widgetInfo{
 		},
 		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 			r := obj.(*widget.RadioGroup)
+			initialOption := widget.NewRadioGroup(r.Options, func(s string) { r.SetSelected(s) })
+			initialOption.SetSelected(r.Selected)
 			entry := widget.NewMultiLineEntry()
 			entry.SetText(strings.Join(r.Options, "\n"))
 			entry.OnChanged = func(text string) {
 				r.Options = strings.Split(text, "\n")
 				r.Refresh()
+				initialOption.Options = strings.Split(text, "\n")
+				initialOption.Refresh()
 			}
 			return []*widget.FormItem{
-				widget.NewFormItem("Options", entry)}
+				widget.NewFormItem("Options", entry),
+				widget.NewFormItem("Initial Option", initialOption)}
 		},
 	},
 
