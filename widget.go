@@ -111,6 +111,26 @@ var widgets = map[string]widgetInfo{
 				widget.NewFormItem("Text", entry)}
 		},
 	},
+	"*widget.Check": {
+		name: "CheckBox",
+		create: func() fyne.CanvasObject {
+			return widget.NewCheck("Tick it or don't", func(b bool) {})
+		},
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
+			c := obj.(*widget.Check)
+			title := widget.NewEntry()
+			title.SetText(c.Text)
+			title.OnChanged = func(text string) {
+				c.Text = text
+				c.Refresh()
+			}
+			isChecked := widget.NewCheck("isChecked", func(b bool) { c.SetChecked(b) })
+			isChecked.SetChecked(c.Checked)
+			return []*widget.FormItem{
+				widget.NewFormItem("Title", title),
+				widget.NewFormItem("isChecked", isChecked)}
+		},
+	},
 	"*widget.RadioGroup": {
 		name: "RadioGroup",
 		create: func() fyne.CanvasObject {
