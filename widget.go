@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -134,7 +133,6 @@ var widgets = map[string]widgetInfo{
 	"*widget.RadioGroup": {
 		name: "RadioGroup",
 		create: func() fyne.CanvasObject {
-			fmt.Println("I was here3")
 			return widget.NewRadioGroup([]string{"Option 1", "Option 2"}, func(s string) {})
 		},
 		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
@@ -146,6 +144,28 @@ var widgets = map[string]widgetInfo{
 			entry.OnChanged = func(text string) {
 				r.Options = strings.Split(text, "\n")
 				r.Refresh()
+				initialOption.Options = strings.Split(text, "\n")
+				initialOption.Refresh()
+			}
+			return []*widget.FormItem{
+				widget.NewFormItem("Options", entry),
+				widget.NewFormItem("Initial Option", initialOption)}
+		},
+	},
+	"*widget.Select": {
+		name: "Select",
+		create: func() fyne.CanvasObject {
+			return widget.NewSelect([]string{"Option 1", "Option 2"}, func(value string) {})
+		},
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
+			s := obj.(*widget.Select)
+			initialOption := widget.NewSelect(s.Options, func(opt string) { s.SetSelected(opt) })
+			initialOption.SetSelected(s.Selected)
+			entry := widget.NewMultiLineEntry()
+			entry.SetText(strings.Join(s.Options, "\n"))
+			entry.OnChanged = func(text string) {
+				s.Options = strings.Split(text, "\n")
+				s.Refresh()
 				initialOption.Options = strings.Split(text, "\n")
 				initialOption.Refresh()
 			}
