@@ -174,6 +174,17 @@ var widgets = map[string]widgetInfo{
 				widget.NewFormItem("Initial Option", initialOption)}
 		},
 	},
+	"*widget.Accordion": {
+		name: "Accordion",
+		create: func() fyne.CanvasObject {
+			return widget.NewAccordion(widget.NewAccordionItem("Item 1", widget.NewLabel("The content goes here")), widget.NewAccordionItem("Item 2", widget.NewLabel("Content part 2 goes here")))
+		},
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
+			// TODO: Need to add the properties
+			// entry := widget.NewEntry()
+			return []*widget.FormItem{}
+		},
+	},
 
 	"*fyne.Container": {
 		name: "Container",
