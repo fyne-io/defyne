@@ -132,7 +132,7 @@ func wrapContent(o fyne.CanvasObject) fyne.CanvasObject {
 			items[i] = wrapContent(child)
 		}
 
-		o := &overlayContainer{c: fyne.NewContainerWithLayout(obj.Layout, items...)}
+		o := &overlayContainer{c: container.New(obj.Layout, items...)}
 		layoutProps[o.c] = map[string]string{"layout": "VBox"}
 		o.ExtendBaseWidget(o)
 		return o

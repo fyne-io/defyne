@@ -71,7 +71,7 @@ func buildUI() fyne.CanvasObject {
 
 	split := container.NewHSplit(overlay, palette)
 	split.Offset = 0.8
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(toolbar, nil, nil, nil), toolbar,
+	return container.New(layout.NewBorderLayout(toolbar, nil, nil, nil), toolbar,
 		split)
 }
 
@@ -98,7 +98,7 @@ func main() {
 }
 
 func previewUI() fyne.CanvasObject {
-	return fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
+	return container.New(layout.NewVBoxLayout(),
 		widget.NewIcon(theme.ContentAddIcon()),
 		widget.NewLabel("label"),
 		widget.NewButton("Button", func() {}))
