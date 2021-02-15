@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/url"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -33,6 +34,30 @@ var widgets = map[string]widgetInfo{
 				widget.NewFormItem("Icon", widget.NewSelect(iconNames, func(selected string) {
 					b.SetIcon(icons[selected])
 				}))}
+		},
+	},
+	"*widget.Hyperlink": {
+		name: "Hyperlink",
+		create: func() fyne.CanvasObject {
+			fyneURL, _ := url.Parse("https://fyne.io")
+			return widget.NewHyperlink("Link Text", fyneURL)
+		},
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
+			link := obj.(*widget.Hyperlink)
+			title := widget.NewEntry()
+			title.SetText(link.Text)
+			title.OnChanged = func(text string) {
+				link.SetText(text)
+			}
+			subtitle := widget.NewEntry()
+			subtitle.SetText(link.URL.String())
+			subtitle.OnChanged = func(text string) {
+				fyneURL, _ := url.Parse(text)
+				link.SetURL(fyneURL)
+			}
+			return []*widget.FormItem{
+				widget.NewFormItem("Text", title),
+				widget.NewFormItem("URL", subtitle)}
 		},
 	},
 	"*widget.Card": {
