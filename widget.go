@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -301,6 +302,26 @@ var widgets = map[string]widgetInfo{
 				widget.NewFormItem("Text", text),
 				// widget.NewFormItem("Hide password", placeholder),
 				widget.NewFormItem("PlaceHolder", placeholder)}
+		},
+	},
+	"*widget.ProgressBar": {
+		name: "Progress Bar",
+		create: func() fyne.CanvasObject {
+			p := widget.NewProgressBar()
+			p.SetValue(0.1)
+			return p
+		},
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
+			p := obj.(*widget.ProgressBar)
+			value := widget.NewEntry()
+			value.SetText(fmt.Sprintf("%f", p.Value))
+			value.OnChanged = func(s string) {
+				if f, err := strconv.ParseFloat(s, 64); err == nil {
+					p.SetValue(f)
+				}
+			}
+			return []*widget.FormItem{
+				widget.NewFormItem("Value", value)}
 		},
 	},
 
