@@ -273,6 +273,36 @@ var widgets = map[string]widgetInfo{
 				widget.NewFormItem("Value", value)}
 		},
 	},
+	"*widget.PasswordEntry": {
+		name: "Password Entry",
+		create: func() fyne.CanvasObject {
+			e := widget.NewPasswordEntry()
+			e.SetPlaceHolder("Password Entry")
+			return e
+		},
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
+			l := obj.(*widget.Entry)
+			text := widget.NewPasswordEntry()
+			text.SetText(l.Text)
+			text.OnChanged = func(text string) {
+				l.SetText(text)
+			}
+			placeholder := widget.NewEntry()
+			placeholder.SetText(l.PlaceHolder)
+			placeholder.OnChanged = func(text string) {
+				l.SetPlaceHolder(text)
+			}
+			// hidePassword := widget.NewCheck("Hide Password", func(b bool) {})
+			// hidePassword.SetChecked(l.Hidden)
+			// hidePassword.OnChanged = func(b bool) {
+			// 	l.Hidden = b
+			// }
+			return []*widget.FormItem{
+				widget.NewFormItem("Text", text),
+				// widget.NewFormItem("Hide password", placeholder),
+				widget.NewFormItem("PlaceHolder", placeholder)}
+		},
+	},
 
 	"*fyne.Container": {
 		name: "Container",
