@@ -237,6 +237,15 @@ var widgets = map[string]widgetInfo{
 			return []*widget.FormItem{}
 		},
 	},
+	"*widget.Form": {
+		name: "Form",
+		create: func() fyne.CanvasObject {
+			return widget.NewForm(widget.NewFormItem("Username", widget.NewEntry()), widget.NewFormItem("Password", widget.NewPasswordEntry()), widget.NewFormItem("", container.NewGridWithColumns(2, widget.NewButton("Submit", func() { fmt.Println("Form is submitted") }), widget.NewButton("Cancel", func() { fmt.Println("Form is Cancelled") }))))
+		},
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
+			return []*widget.FormItem{}
+		},
+	},
 
 	"*fyne.Container": {
 		name: "Container",
