@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -207,6 +208,21 @@ var widgets = map[string]widgetInfo{
 		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 			// TODO: Need to add the properties
 			// entry := widget.NewEntry()
+			return []*widget.FormItem{}
+		},
+	},
+	"*widget.List": {
+		name: "List",
+		create: func() fyne.CanvasObject {
+			myList := []string{"Item 1", "Item 2", "Item 3", "Item 4"}
+			// TODO: Need to make the list get adjusted to show the full list of items, currently it has only one item height apprx.
+			return widget.NewList(func() int { return len(myList) }, func() fyne.CanvasObject {
+				return container.New(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
+			}, func(id widget.ListItemID, item fyne.CanvasObject) {
+				item.(*fyne.Container).Objects[1].(*widget.Label).SetText(myList[id])
+			})
+		},
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 			return []*widget.FormItem{}
 		},
 	},
