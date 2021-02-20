@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -221,6 +222,16 @@ var widgets = map[string]widgetInfo{
 			}, func(id widget.ListItemID, item fyne.CanvasObject) {
 				item.(*fyne.Container).Objects[1].(*widget.Label).SetText(myList[id])
 			})
+		},
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
+			return []*widget.FormItem{}
+		},
+	},
+	"*widget.Menu": {
+		name: "Menu",
+		create: func() fyne.CanvasObject {
+			myMenu := fyne.NewMenu("Menu Name", fyne.NewMenuItem("Item 1", func() { fmt.Println("From Item 1") }), fyne.NewMenuItem("Item 2", func() { fmt.Println("From Item 2") }), fyne.NewMenuItem("Item 3", func() { fmt.Println("From Item 3") }))
+			return widget.NewMenu(myMenu)
 		},
 		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 			return []*widget.FormItem{}
