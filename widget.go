@@ -246,6 +246,33 @@ var widgets = map[string]widgetInfo{
 			return []*widget.FormItem{}
 		},
 	},
+	"*widget.MultiLineEntry": {
+		name: "Multi Line Entry",
+		create: func() fyne.CanvasObject {
+			mle := widget.NewMultiLineEntry()
+			mle.SetPlaceHolder("Enter Some \nLong text \nHere")
+			mle.Wrapping = fyne.TextWrapWord
+			return mle
+		},
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
+			mle := obj.(*widget.Entry)
+			placeholder := widget.NewMultiLineEntry()
+			placeholder.Wrapping = fyne.TextWrapWord
+			placeholder.SetText(mle.PlaceHolder)
+			placeholder.OnChanged = func(s string) {
+				mle.SetPlaceHolder(s)
+			}
+			value := widget.NewMultiLineEntry()
+			value.Wrapping = fyne.TextWrapWord
+			value.SetText(mle.Text)
+			value.OnChanged = func(s string) {
+				mle.SetText(s)
+			}
+			return []*widget.FormItem{
+				widget.NewFormItem("Placeholder", placeholder),
+				widget.NewFormItem("Value", value)}
+		},
+	},
 
 	"*fyne.Container": {
 		name: "Container",
