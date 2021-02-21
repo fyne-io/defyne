@@ -395,6 +395,28 @@ var widgets = map[string]widgetInfo{
 				widget.NewFormItem("Text", entry)}
 		},
 	},
+	"*widget.Toolbar": {
+		name: "Toolbar",
+		create: func() fyne.CanvasObject {
+			return widget.NewToolbar(
+				widget.NewToolbarAction(icons["FileIcon"], func() { fmt.Println("Clicked on FileIcon") }),
+				widget.NewToolbarSeparator(),
+				widget.NewToolbarAction(icons["HomeIcon"], func() { fmt.Println("Clicked on HomeIcon") }),
+				widget.NewToolbarSeparator(),
+				widget.NewToolbarAction(icons["DownloadIcon"], func() { fmt.Println("Clicked on DownloadIcon") }),
+				widget.NewToolbarSeparator(),
+				widget.NewToolbarAction(icons["ViewRefreshIcon"], func() { fmt.Println("Clicked on ViewRefreshIcon") }),
+				widget.NewToolbarAction(icons["NavigateBackIcon"], func() { fmt.Println("Clicked on NavigateBackIcon") }),
+				widget.NewToolbarAction(icons["NavigateNextIcon"], func() { fmt.Println("Clicked on NavigateNextIcon") }),
+				widget.NewToolbarAction(icons["MailSendIcon"], func() { fmt.Println("Clicked on MailSendIcon") }),
+				widget.NewToolbarSpacer(),
+				widget.NewToolbarAction(icons["HelpIcon"], func() { fmt.Println("Clicked on HelpIcon") }),
+			)
+		},
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
+			return []*widget.FormItem{}
+		},
+	},
 
 	"*fyne.Container": {
 		name: "Container",
