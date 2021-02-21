@@ -187,7 +187,12 @@ var widgets = map[string]widgetInfo{
 		},
 		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 			s := obj.(*widget.Select)
-			initialOption := widget.NewSelect(s.Options, func(opt string) { s.SetSelected(opt) })
+			initialOption := widget.NewSelect(append([]string{"(Select one)"}, s.Options...), func(opt string) {
+				s.SetSelected(opt)
+				if opt == "(Select one)" {
+					s.ClearSelected()
+				}
+			})
 			initialOption.SetSelected(s.Selected)
 			entry := widget.NewMultiLineEntry()
 			entry.SetText(strings.Join(s.Options, "\n"))
