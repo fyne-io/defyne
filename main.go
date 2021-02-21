@@ -23,6 +23,10 @@ var (
 func buildLibrary() fyne.CanvasObject {
 	var selected *widgetInfo
 	tempNames := []string{}
+	widgetLowerNames := []string{}
+	for _, name := range widgetNames {
+		widgetLowerNames = append(widgetLowerNames, strings.ToLower(name))
+	}
 	list := widget.NewList(func() int {
 		return len(tempNames)
 	}, func() fyne.CanvasObject {
@@ -39,10 +43,11 @@ func buildLibrary() fyne.CanvasObject {
 	entry := widget.NewEntry()
 	entry.SetPlaceHolder("Search Widgets")
 	entry.OnChanged = func(s string) {
+		s = strings.ToLower(s)
 		tempNames = []string{}
-		for _, n := range widgetNames {
-			if strings.Contains(n, s) {
-				tempNames = append(tempNames, n)
+		for i := 0; i < len(widgetLowerNames); i++ {
+			if strings.Contains(widgetLowerNames[i], s) {
+				tempNames = append(tempNames, widgetNames[i])
 			}
 		}
 		list.Refresh()
