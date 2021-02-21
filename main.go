@@ -26,6 +26,7 @@ func buildLibrary() fyne.CanvasObject {
 	widgetLowerNames := []string{}
 	for _, name := range widgetNames {
 		widgetLowerNames = append(widgetLowerNames, strings.ToLower(name))
+		tempNames = append(tempNames, name)
 	}
 	list := widget.NewList(func() int {
 		return len(tempNames)
@@ -52,8 +53,6 @@ func buildLibrary() fyne.CanvasObject {
 		}
 		list.Refresh()
 	}
-	searchBox.SetText(" ")
-	searchBox.SetText("")
 
 	return container.NewBorder(searchBox, widget.NewButtonWithIcon("Insert", theme.ContentAddIcon(), func() {
 		if c, ok := current.(*overlayContainer); ok {
