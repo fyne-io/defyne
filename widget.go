@@ -334,6 +334,28 @@ var widgets = map[string]widgetInfo{
 			return []*widget.FormItem{}
 		},
 	},
+	"*widget.Slider": {
+		name: "Slider",
+		create: func() fyne.CanvasObject {
+			s := widget.NewSlider(0, 100)
+			s.OnChanged = func(f float64) {
+				fmt.Println("Slider changed to", f)
+			}
+			return s
+		},
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
+			slider := obj.(*widget.Slider)
+			val := widget.NewEntry()
+			val.SetText(fmt.Sprintf("%f", slider.Value))
+			val.OnChanged = func(s string) {
+				if f, err := strconv.ParseFloat(s, 64); err == nil {
+					slider.SetValue(f)
+				}
+			}
+			return []*widget.FormItem{
+				widget.NewFormItem("Value", val)}
+		},
+	},
 
 	"*fyne.Container": {
 		name: "Container",
