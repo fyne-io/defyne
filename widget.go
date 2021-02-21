@@ -417,6 +417,52 @@ var widgets = map[string]widgetInfo{
 			return []*widget.FormItem{}
 		},
 	},
+	"*widget.Tree": {
+		name: "Tree",
+		create: func() fyne.CanvasObject {
+			data := map[string][]string{
+				"":  {"A"},
+				"A": {"B", "D", "H", "J", "L", "O", "P", "S", "V"},
+				"B": {"C"},
+				"C": {"abc"},
+				"D": {"E"},
+				"E": {"F", "G"},
+				"F": {"adef"},
+				"G": {"adeg"},
+				"H": {"I"},
+				"I": {"ahi"},
+				"O": {"ao"},
+				"P": {"Q"},
+				"Q": {"R"},
+				"R": {"apqr"},
+				"S": {"T"},
+				"T": {"U"},
+				"U": {"astu"},
+				"V": {"W"},
+				"W": {"X"},
+				"X": {"Y"},
+				"Y": {"Z"},
+				"Z": {"avwxyz"},
+			}
+
+			tree := widget.NewTreeWithStrings(data)
+			tree.OnSelected = func(id string) {
+				fmt.Println("Tree node selected:", id)
+			}
+			tree.OnUnselected = func(id string) {
+				fmt.Println("Tree node unselected:", id)
+			}
+			tree.OpenBranch("A")
+			tree.OpenBranch("D")
+			tree.OpenBranch("E")
+			tree.OpenBranch("L")
+			tree.OpenBranch("M")
+			return tree
+		},
+		edit: func(co fyne.CanvasObject) []*widget.FormItem {
+			return []*widget.FormItem{}
+		},
+	},
 
 	"*fyne.Container": {
 		name: "Container",
