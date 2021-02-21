@@ -377,6 +377,24 @@ var widgets = map[string]widgetInfo{
 			return []*widget.FormItem{}
 		},
 	},
+	"*widget.TextGrid": {
+		name: "Text Grid",
+		create: func() fyne.CanvasObject {
+			to := widget.NewTextGrid()
+			to.SetText("ABCD \nEFGH")
+			return to
+		},
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
+			to := obj.(*widget.TextGrid)
+			entry := widget.NewEntry()
+			entry.SetText(to.Text())
+			entry.OnChanged = func(s string) {
+				to.SetText(s)
+			}
+			return []*widget.FormItem{
+				widget.NewFormItem("Text", entry)}
+		},
+	},
 
 	"*fyne.Container": {
 		name: "Container",
