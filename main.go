@@ -77,10 +77,20 @@ func buildUI() fyne.CanvasObject {
 
 func choose(o fyne.CanvasObject) {
 	typeName := reflect.TypeOf(o).Elem().Name()
+	widName := reflect.TypeOf(o).String()
+	l := reflect.ValueOf(o).Elem()
+	if typeName == "Entry" {
+		if l.FieldByName("Password").Bool() {
+			typeName = "PasswordEntry"
+		} else if l.FieldByName("MultiLine").Bool() {
+			typeName = "MultiLineEntry"
+		}
+		widName = "*widget." + typeName
+	}
 	widType.SetText(typeName)
 
 	var items []*widget.FormItem
-	if match, ok := widgets[reflect.TypeOf(o).String()]; ok {
+	if match, ok := widgets[widName]; ok {
 		items = match.edit(o)
 	}
 
