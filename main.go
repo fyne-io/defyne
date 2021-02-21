@@ -40,9 +40,9 @@ func buildLibrary() fyne.CanvasObject {
 		}
 	}
 
-	entry := widget.NewEntry()
-	entry.SetPlaceHolder("Search Widgets")
-	entry.OnChanged = func(s string) {
+	searchBox := widget.NewEntry()
+	searchBox.SetPlaceHolder("Search Widgets")
+	searchBox.OnChanged = func(s string) {
 		s = strings.ToLower(s)
 		tempNames = []string{}
 		for i := 0; i < len(widgetLowerNames); i++ {
@@ -52,10 +52,10 @@ func buildLibrary() fyne.CanvasObject {
 		}
 		list.Refresh()
 	}
-	entry.SetText(" ")
-	entry.SetText("")
+	searchBox.SetText(" ")
+	searchBox.SetText("")
 
-	return container.NewBorder(entry, widget.NewButtonWithIcon("Insert", theme.ContentAddIcon(), func() {
+	return container.NewBorder(searchBox, widget.NewButtonWithIcon("Insert", theme.ContentAddIcon(), func() {
 		if c, ok := current.(*overlayContainer); ok {
 			if selected != nil {
 				c.c.Objects = append(c.c.Objects, wrapContent(selected.create()))
