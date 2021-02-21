@@ -324,6 +324,16 @@ var widgets = map[string]widgetInfo{
 				widget.NewFormItem("Value", value)}
 		},
 	},
+	"*widget.Separator": {
+		// Separator's height(or width as you may call) and color come from the theme, so not sure if we can change the color and height here
+		name: "Separator",
+		create: func() fyne.CanvasObject {
+			return widget.NewSeparator()
+		},
+		edit: func(obj fyne.CanvasObject) []*widget.FormItem {
+			return []*widget.FormItem{}
+		},
+	},
 
 	"*fyne.Container": {
 		name: "Container",
