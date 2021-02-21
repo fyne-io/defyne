@@ -80,9 +80,9 @@ func choose(o fyne.CanvasObject) {
 	widName := reflect.TypeOf(o).String()
 	l := reflect.ValueOf(o).Elem()
 	if typeName == "Entry" {
-		if l.FieldByName("Password").Bool() == true {
+		if l.FieldByName("Password").Bool() {
 			typeName = "PasswordEntry"
-		} else if l.FieldByName("MultiLine").Bool() == true {
+		} else if l.FieldByName("MultiLine").Bool() {
 			typeName = "MultiLineEntry"
 		}
 		widName = "*widget." + typeName
