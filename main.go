@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -21,20 +22,35 @@ var (
 
 func buildLibrary() fyne.CanvasObject {
 	var selected *widgetInfo
+	tempNames := []string{}
 	list := widget.NewList(func() int {
-		return len(widgetNames)
+		return len(tempNames)
 	}, func() fyne.CanvasObject {
 		return widget.NewLabel("")
 	}, func(i widget.ListItemID, obj fyne.CanvasObject) {
-		obj.(*widget.Label).SetText(widgets[widgetNames[i]].name)
+		obj.(*widget.Label).SetText(widgets[tempNames[i]].name)
 	})
 	list.OnSelected = func(i widget.ListItemID) {
-		if match, ok := widgets[widgetNames[i]]; ok {
+		if match, ok := widgets[tempNames[i]]; ok {
 			selected = &match
 		}
 	}
 
-	return container.NewBorder(nil, widget.NewButtonWithIcon("Insert", theme.ContentAddIcon(), func() {
+	entry := widget.NewEntry()
+	entry.SetPlaceHolder("Search Widgets")
+	entry.OnChanged = func(s string) {
+		tempNames = []string{}
+		for _, n := range widgetNames {
+			if strings.Contains(n, s) {
+				tempNames = append(tempNames, n)
+			}
+		}
+		list.Refresh()
+	}
+	entry.SetText(" ")
+	entry.SetText("")
+
+	return container.NewBorder(entry, widget.NewButtonWithIcon("Insert", theme.ContentAddIcon(), func() {
 		if c, ok := current.(*overlayContainer); ok {
 			if selected != nil {
 				c.c.Objects = append(c.c.Objects, wrapContent(selected.create()))
