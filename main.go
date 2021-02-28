@@ -40,6 +40,9 @@ func buildLibrary() fyne.CanvasObject {
 			selected = &match
 		}
 	}
+	list.OnUnselected = func(widget.ListItemID) {
+		selected = nil
+	}
 
 	searchBox := widget.NewEntry()
 	searchBox.SetPlaceHolder("Search Widgets")
@@ -54,7 +57,6 @@ func buildLibrary() fyne.CanvasObject {
 		list.Refresh()
 		list.Select(0)   // Needed for new selection
 		list.Unselect(0) // Without this (and with the above), list is behaving in a weird way
-		// This way, when the list is empty, the first of last list of items that showed before the list got emptied will get inserted, if the `Insert` button is pressed
 	}
 
 	return container.NewBorder(searchBox, widget.NewButtonWithIcon("Insert", theme.ContentAddIcon(), func() {
