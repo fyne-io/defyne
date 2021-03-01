@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -21,20 +22,44 @@ var (
 
 func buildLibrary() fyne.CanvasObject {
 	var selected *widgetInfo
+	tempNames := []string{}
+	widgetLowerNames := []string{}
+	for _, name := range widgetNames {
+		widgetLowerNames = append(widgetLowerNames, strings.ToLower(name))
+		tempNames = append(tempNames, name)
+	}
 	list := widget.NewList(func() int {
-		return len(widgetNames)
+		return len(tempNames)
 	}, func() fyne.CanvasObject {
 		return widget.NewLabel("")
 	}, func(i widget.ListItemID, obj fyne.CanvasObject) {
-		obj.(*widget.Label).SetText(widgets[widgetNames[i]].name)
+		obj.(*widget.Label).SetText(widgets[tempNames[i]].name)
 	})
 	list.OnSelected = func(i widget.ListItemID) {
-		if match, ok := widgets[widgetNames[i]]; ok {
+		if match, ok := widgets[tempNames[i]]; ok {
 			selected = &match
 		}
 	}
+	list.OnUnselected = func(widget.ListItemID) {
+		selected = nil
+	}
 
-	return container.NewBorder(nil, widget.NewButtonWithIcon("Insert", theme.ContentAddIcon(), func() {
+	searchBox := widget.NewEntry()
+	searchBox.SetPlaceHolder("Search Widgets")
+	searchBox.OnChanged = func(s string) {
+		s = strings.ToLower(s)
+		tempNames = []string{}
+		for i := 0; i < len(widgetLowerNames); i++ {
+			if strings.Contains(widgetLowerNames[i], s) {
+				tempNames = append(tempNames, widgetNames[i])
+			}
+		}
+		list.Refresh()
+		list.Select(0)   // Needed for new selection
+		list.Unselect(0) // Without this (and with the above), list is behaving in a weird way
+	}
+
+	return container.NewBorder(searchBox, widget.NewButtonWithIcon("Insert", theme.ContentAddIcon(), func() {
 		if c, ok := current.(*overlayContainer); ok {
 			if selected != nil {
 				c.c.Objects = append(c.c.Objects, wrapContent(selected.create()))
