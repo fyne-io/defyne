@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go/format"
 	"log"
 	"os"
 	"os/exec"
@@ -152,7 +153,7 @@ func exportCode(pkgs []string, obj fyne.CanvasObject) string {
 	for i := 0; i < len(pkgs); i++ {
 		pkgs[i] = fmt.Sprintf(`	"fyne.io/fyne/v2%s"`, pkgs[i])
 	}
-	return fmt.Sprintf(`
+	code := fmt.Sprintf(`
 package main
 
 import (
@@ -165,6 +166,12 @@ func makeUI() fyne.CanvasObject {
 `,
 		strings.Join(pkgs, "\n"),
 		obj)
+
+	formatted, err := format.Source([]byte(code))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return fmt.Sprintf("%s", formatted)
 }
 
 func main() {
