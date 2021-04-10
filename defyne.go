@@ -1,20 +1,21 @@
 package main
 
 import (
-	"io/ioutil"
 	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
+
+	xWidget "fyne.io/x/fyne/widget"
 )
 
 type defyne struct {
 	win         fyne.Window
 	projectRoot fyne.URI
 	fileTabs    *container.DocTabs
+	fileTree    *xWidget.FileTree
+	openEditors map[*container.TabItem]editor
 }
 
 func (d *defyne) openEditor(u fyne.URI) {
@@ -22,14 +23,17 @@ func (d *defyne) openEditor(u fyne.URI) {
 		return // TODO let's add pluggable editor providers
 	}
 
-	text := widget.NewMultiLineEntry()
-	text.TextStyle.Monospace = true
-	f, _ := storage.Reader(u)
-	b, _ := ioutil.ReadAll(f)
-	text.SetText(string(b))
-	_ = f.Close()
+	editor := newTextEditor(u)
+	newTab := container.NewTabItemWithIcon(u.Name(), theme.FileTextIcon(), editor.content())
+	d.openEditors[newTab] = editor
 
-	newTab := container.NewTabItemWithIcon(u.Name(), theme.FileTextIcon(), text)
 	d.fileTabs.Append(newTab)
 	d.fileTabs.Select(newTab)
+}
+
+type editor interface {
+	changed() bool
+	close()
+	content() fyne.CanvasObject
+	save()
 }

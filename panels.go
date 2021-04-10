@@ -7,7 +7,9 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+
 	xWidget "fyne.io/x/fyne/widget"
+
 	"github.com/fyne-io/terminal"
 )
 
@@ -17,10 +19,31 @@ func (d *defyne) makeEditorPanel() fyne.CanvasObject {
 		container.NewTabItemWithIcon("Welcome", theme.HomeIcon(),
 			container.NewCenter(welcome)))
 
+	d.fileTabs.CloseIntercept = func(t *container.TabItem) {
+		ed, ok := d.openEditors[t]
+		if !ok { // welcome tab
+			return
+		}
+		if !ed.changed() {
+			ed.close()
+			d.fileTabs.Remove(t)
+			return
+		}
+		dialog.ShowConfirm("File is unsaved", "Are you sure you wish to close?",
+			func(ok bool) {
+				if !ok {
+					return
+				}
+
+				ed.close()
+				d.openEditors[t] = nil
+			}, d.win)
+	}
+
 	return container.NewMax(d.fileTabs)
 }
 
-func (d *defyne) makeFilesPanel() fyne.CanvasObject {
+func (d *defyne) makeFilesPanel() *xWidget.FileTree {
 	files := xWidget.NewFileTree(d.projectRoot)
 	files.Filter = filterHidden()
 	files.Sorter = func(u1, u2 fyne.URI) bool {
