@@ -9,12 +9,17 @@ import (
 	xWidget "fyne.io/x/fyne/widget"
 )
 
+type fileTab struct {
+	editor
+	uri fyne.URI
+}
+
 type defyne struct {
 	win         fyne.Window
 	projectRoot fyne.URI
 	fileTabs    *container.DocTabs
 	fileTree    *xWidget.FileTree
-	openEditors map[*container.TabItem]editor
+	openEditors map[*container.TabItem]*fileTab
 }
 
 func (d *defyne) openEditor(u fyne.URI) {
@@ -24,9 +29,16 @@ func (d *defyne) openEditor(u fyne.URI) {
 		return
 	}
 
+	for tab, item := range d.openEditors {
+		if item.uri.String() == u.String() {
+			d.fileTabs.Select(tab)
+			return
+		}
+	}
+
 	ed := editors[u.MimeType()](u)
 	newTab := container.NewTabItemWithIcon(u.Name(), theme.FileTextIcon(), ed.content())
-	d.openEditors[newTab] = ed
+	d.openEditors[newTab] = &fileTab{ed, u}
 
 	d.fileTabs.Append(newTab)
 	d.fileTabs.Select(newTab)

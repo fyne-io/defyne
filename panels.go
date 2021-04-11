@@ -44,6 +44,8 @@ func (d *defyne) makeEditorPanel() fyne.CanvasObject {
 }
 
 func (d *defyne) makeFilesPanel() *xWidget.FileTree {
+	d.openEditors = make(map[*container.TabItem]*fileTab)
+
 	files := xWidget.NewFileTree(d.projectRoot)
 	files.Filter = filterHidden()
 	files.Sorter = func(u1, u2 fyne.URI) bool {

@@ -22,7 +22,6 @@ func main() {
 	pwd, _ := os.Getwd()
 	root := storage.NewFileURI(pwd)
 	ide := &defyne{win: w, projectRoot: root}
-	ide.openEditors = make(map[*container.TabItem]editor)
 
 	content := container.NewVSplit(ide.makeEditorPanel(), ide.makeTerminalPanel())
 	content.Offset = 0.8
