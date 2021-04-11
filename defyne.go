@@ -1,10 +1,9 @@
 package main
 
 import (
-	"strings"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 
 	xWidget "fyne.io/x/fyne/widget"
@@ -19,21 +18,16 @@ type defyne struct {
 }
 
 func (d *defyne) openEditor(u fyne.URI) {
-	if u.Extension() != ".go" && u.Extension() != ".mod" && !strings.Contains(u.MimeType(), "text/") {
-		return // TODO let's add pluggable editor providers
+	if _, ok := editors[u.MimeType()]; !ok {
+		dialog.ShowInformation("No registered editor",
+			"No known editor for mime "+u.MimeType(), d.win)
+		return
 	}
 
-	editor := newTextEditor(u)
-	newTab := container.NewTabItemWithIcon(u.Name(), theme.FileTextIcon(), editor.content())
-	d.openEditors[newTab] = editor
+	ed := editors[u.MimeType()](u)
+	newTab := container.NewTabItemWithIcon(u.Name(), theme.FileTextIcon(), ed.content())
+	d.openEditors[newTab] = ed
 
 	d.fileTabs.Append(newTab)
 	d.fileTabs.Select(newTab)
-}
-
-type editor interface {
-	changed() bool
-	close()
-	content() fyne.CanvasObject
-	save()
 }

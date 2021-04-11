@@ -14,7 +14,7 @@ type textEditor struct {
 	edited bool
 }
 
-func newTextEditor(u fyne.URI) *textEditor {
+func newTextEditor(u fyne.URI) editor {
 	text := widget.NewMultiLineEntry()
 	text.TextStyle.Monospace = true
 	editor := &textEditor{uri: u, entry: text}
