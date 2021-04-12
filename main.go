@@ -17,7 +17,7 @@ import (
 func main() {
 	a := app.NewWithID("io.fyne.defyne")
 	a.SetIcon(resourceIconPng)
-	w := a.NewWindow("DEFyne")
+	w := a.NewWindow("Defyne")
 
 	pwd, _ := os.Getwd()
 	root := storage.NewFileURI(pwd)

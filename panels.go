@@ -14,7 +14,7 @@ import (
 )
 
 func (d *defyne) makeEditorPanel() fyne.CanvasObject {
-	welcome := widget.NewLabel("Welcome to DEFyne, the Fyne IDE.\n\nChoose a project file from the list.")
+	welcome := widget.NewLabel("Welcome to Defyne, the Fyne IDE.\n\nChoose a project file from the list.")
 	d.fileTabs = container.NewDocTabs(
 		container.NewTabItemWithIcon("Welcome", theme.HomeIcon(),
 			container.NewCenter(welcome)))
