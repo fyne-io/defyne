@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 	"strconv"
 	"strings"
@@ -14,9 +15,10 @@ import (
 )
 
 type widgetInfo struct {
-	name   string
-	create func() fyne.CanvasObject
-	edit   func(fyne.CanvasObject) []*widget.FormItem
+	name     string
+	create   func() fyne.CanvasObject
+	edit     func(fyne.CanvasObject) []*widget.FormItem
+	gostring func(fyne.CanvasObject) string
 }
 
 var widgets = map[string]widgetInfo{
@@ -136,6 +138,10 @@ var widgets = map[string]widgetInfo{
 			}
 			return []*widget.FormItem{
 				widget.NewFormItem("Text", entry)}
+		},
+		gostring: func(obj fyne.CanvasObject) string {
+			l := obj.(*widget.Label)
+			return fmt.Sprintf("NewLabel(\"%s\")", l.Text)
 		},
 	},
 	"*widget.Check": {
@@ -501,6 +507,24 @@ var widgets = map[string]widgetInfo{
 			}))
 			choose.Widget.(*widget.Select).SetSelected(props["layout"])
 			return items
+		},
+		gostring: func(obj fyne.CanvasObject) string {
+			c := obj.(*fyne.Container)
+			l := layoutProps[c]["layout"]
+			str := strings.Builder{}
+			str.WriteString(fmt.Sprintf("container.New%s(", l))
+			for i, o := range c.Objects {
+				if _, ok := o.(*overlayContainer); !ok {
+					o = o.(*fyne.Container).Objects[1]
+					log.Print("WHAT IS O", o)
+				}
+				str.WriteString(fmt.Sprintf("\n\t\t\t%#v", o))
+				if i < len(c.Objects)-1 {
+					str.WriteRune(',')
+				}
+			}
+			str.WriteString(")\n")
+			return str.String()
 		},
 	},
 }

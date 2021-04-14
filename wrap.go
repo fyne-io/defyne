@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"reflect"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -34,12 +35,7 @@ func (o *overlayContainer) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (o *overlayContainer) GoString() string {
-	objs := ""
-	for _, obj := range o.c.Objects {
-		objs += fmt.Sprintf("\t%#v,\n", obj.(*fyne.Container).Objects[0])
-	}
-	l := layoutProps[o.c]["layout"]
-	return fmt.Sprintf("&fyne.Container{Layout: layout.New%s(), Objects: []fyne.CanvasObject{\n%s}}", l, objs)
+	return widgets["*fyne.Container"].gostring(o.c)
 }
 
 func (o *overlayContainer) Move(p fyne.Position) {
@@ -74,6 +70,11 @@ func (w *overlayWidget) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (w *overlayWidget) GoString() string {
+	name := reflect.TypeOf(w.child).String()
+	if widgets[name].gostring != nil {
+		return widgets[name].gostring(w.child)
+	}
+
 	return fmt.Sprintf("%#v", w.child)
 }
 

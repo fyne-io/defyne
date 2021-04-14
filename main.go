@@ -83,7 +83,7 @@ func buildUI() fyne.CanvasObject {
 			log.Println("TODO")
 		}),
 		widget.NewToolbarAction(theme.MailForwardIcon(), func() {
-			code := fmt.Sprintf("%#v", overlay)
+			code := fmt.Sprintf("\tfunc makeUI() fyne.CanvasObject {\n\t\treturn %#v\n\t}", overlay)
 			fmt.Println(code)
 		}))
 
