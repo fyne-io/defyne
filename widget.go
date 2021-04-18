@@ -75,6 +75,10 @@ func initWidgets() {
 					widget.NewFormItem("Text", title),
 					widget.NewFormItem("URL", subtitle)}
 			},
+			gostring: func(obj fyne.CanvasObject) string {
+				link := obj.(*widget.Hyperlink)
+				return fmt.Sprintf("widget.NewHyperLink(\"%s\", \"%s\")", link.Text, link.URL)
+			},
 		},
 		"*widget.Card": {
 			name: "Card",
