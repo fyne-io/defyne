@@ -45,11 +45,11 @@ func initWidgets() {
 			gostring: func(obj fyne.CanvasObject) string {
 				b := obj.(*widget.Button)
 				if b.Icon == nil {
-					return fmt.Sprintf("widget.NewButton(\"%s\", func() {})", b.Text)
+					return fmt.Sprintf("widget.NewButton(\"%s\", func() {})", encodeDoubleQuote(b.Text))
 				}
 
 				icon := "theme." + iconReverse[fmt.Sprintf("%p", b.Icon)] + "()"
-				return fmt.Sprintf("widget.NewButtonWithIcon(\"%s\", %s, func() {})", b.Text, icon)
+				return fmt.Sprintf("widget.NewButtonWithIcon(\"%s\", %s, func() {})", encodeDoubleQuote(b.Text), icon)
 			},
 		},
 		"*widget.Hyperlink": {
@@ -77,7 +77,7 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				link := obj.(*widget.Hyperlink)
-				return fmt.Sprintf("widget.NewHyperLink(\"%s\", \"%s\")", link.Text, link.URL)
+				return fmt.Sprintf("widget.NewHyperLink(\"%s\", \"%s\")", encodeDoubleQuote(link.Text),	 encodeDoubleQuote(link.URL.String()))
 			},
 		},
 		"*widget.Card": {
@@ -103,7 +103,8 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				c := obj.(*widget.Card)
-				return fmt.Sprintf("widget.NewCard(\"%s\", \"%s\", widget.NewLabel(\"Content here\")", c.Title, c.Subtitle)
+				return fmt.Sprintf("widget.NewCard(\"%s\", \"%s\", widget.NewLabel(\"Content here\")",
+					encodeDoubleQuote(c.Title), encodeDoubleQuote(c.Subtitle))
 			},
 		},
 		"*widget.Entry": {
@@ -166,7 +167,7 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				l := obj.(*widget.Label)
-				return fmt.Sprintf("widget.NewLabel(\"%s\")", l.Text)
+				return fmt.Sprintf("widget.NewLabel(\"%s\")", encodeDoubleQuote(l.Text))
 			},
 		},
 		"*widget.Check": {
@@ -190,7 +191,7 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				c := obj.(*widget.Check)
-				return fmt.Sprintf("widget.NewCheck(\"%s\", func(b bool) {}", c.Text)
+				return fmt.Sprintf("widget.NewCheck(\"%s\", func(b bool) {}", encodeDoubleQuote(c.Text))
 			},
 		},
 		"*widget.RadioGroup": {
@@ -218,7 +219,7 @@ func initWidgets() {
 				r := obj.(*widget.RadioGroup)
 				var opts []string
 				for _, v := range r.Options {
-					opts = append(opts, strings.ReplaceAll(v, "\"", "\\\""))
+					opts = append(opts, encodeDoubleQuote(v))
 				}
 				return fmt.Sprintf("widget.NewRadioGroup([]string{%s}, func(s string) {})", "\""+strings.Join(opts, "\", \"")+"\"")
 			},
@@ -253,7 +254,7 @@ func initWidgets() {
 				s := obj.(*widget.Select)
 				var opts []string
 				for _, v := range s.Options {
-					opts = append(opts, strings.ReplaceAll(v, "\"", "\\\""))
+					opts = append(opts, encodeDoubleQuote(v))
 				}
 				return fmt.Sprintf("widget.NewSelect([]string{%s}, func(s string) {})", "\""+strings.Join(opts, "\", \"")+"\"")
 			},
@@ -452,7 +453,7 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				to := obj.(*widget.TextGrid)
-				return fmt.Sprintf("widget.NewTextGrid(\"%s\")", to.Text())
+				return fmt.Sprintf("widget.NewTextGrid(\"%s\")", encodeDoubleQuote(to.Text()))
 			},
 		},
 		"*widget.Toolbar": {
