@@ -132,7 +132,7 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				l := obj.(*widget.Entry)
-				return fmt.Sprintf("widget.Entry{Text: \"%s\", PlaceHolder: \"%s\"}", encodeDoubleQuote(l.Text), encodeDoubleQuote(l.PlaceHolder))
+				return fmt.Sprintf("&widget.Entry{Text: \"%s\", PlaceHolder: \"%s\"}", encodeDoubleQuote(l.Text), encodeDoubleQuote(l.PlaceHolder))
 			},
 		},
 		"*widget.Icon": {
@@ -352,7 +352,7 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				mle := obj.(*widget.Entry)
-				return fmt.Sprintf("widget.MultiLineEntry{Text: \"%s\", PlaceHolder: \"%s\"}", encodeDoubleQuote(mle.Text), encodeDoubleQuote(mle.PlaceHolder))
+				return fmt.Sprintf("&widget.MultiLineEntry{Text: \"%s\", PlaceHolder: \"%s\"}", encodeDoubleQuote(mle.Text), encodeDoubleQuote(mle.PlaceHolder))
 			},
 		},
 		"*widget.PasswordEntry": {
@@ -386,7 +386,7 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				l := obj.(*widget.Entry)
-				return fmt.Sprintf("widget.MultiLineEntry{Text: \"%s\", PlaceHolder: \"%s\"}", encodeDoubleQuote(l.Text), encodeDoubleQuote(l.PlaceHolder))
+				return fmt.Sprintf("&widget.MultiLineEntry{Text: \"%s\", PlaceHolder: \"%s\"}", encodeDoubleQuote(l.Text), encodeDoubleQuote(l.PlaceHolder))
 			},
 		},
 		"*widget.ProgressBar": {
@@ -410,7 +410,7 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				p := obj.(*widget.ProgressBar)
-				return fmt.Sprintf("widget.ProgressBar{Value: %f}", p.Value)
+				return fmt.Sprintf("&widget.ProgressBar{Value: %f}", p.Value)
 			},
 		},
 		"*widget.Separator": {
@@ -449,7 +449,7 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				slider := obj.(*widget.Slider)
-				return fmt.Sprintf("widget.Slider(Min:0, Max:100, Value:%f)", slider.Value)
+				return fmt.Sprintf("widget.NewSlider(Min:0, Max:100, Value:%f)", slider.Value)
 			},
 		},
 		"*widget.Table": {
