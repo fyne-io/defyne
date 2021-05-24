@@ -38,6 +38,15 @@ func (o *overlayContainer) GoString() string {
 	return widgets["*fyne.Container"].gostring(o.c)
 }
 
+func (o *overlayContainer) MinSize() fyne.Size {
+	min := o.c.MinSize()
+	if min.IsZero() {
+		return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+	}
+
+	return min
+}
+
 func (o *overlayContainer) Move(p fyne.Position) {
 	o.c.Move(p)
 	o.BaseWidget.Move(p)
