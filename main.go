@@ -126,6 +126,9 @@ func choose(o fyne.CanvasObject) {
 
 func main() {
 	a := app.NewWithID("xyz.andy.fynebuilder")
+	initIcons()
+	initWidgets()
+
 	w := a.NewWindow("Fyne Builder")
 	w.SetContent(buildUI())
 	w.Resize(fyne.NewSize(600, 400))
