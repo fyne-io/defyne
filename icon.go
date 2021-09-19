@@ -117,8 +117,6 @@ var iconReverse map[string]string
 // iconNames is an array with the list of names of all the icons
 var iconNames []string
 
-var cancelAddr uint64
-
 // extractIconNames returns all the list of names of all the icons from the hashmap `icons`
 func extractIconNames() []string {
 	var iconNamesFromData = make([]string, len(icons))

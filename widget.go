@@ -42,13 +42,13 @@ func initWidgets() {
 						b.SetIcon(icons[selected])
 					}))}
 			},
-			gostring:  func(obj fyne.CanvasObject) string {
+			gostring: func(obj fyne.CanvasObject) string {
 				b := obj.(*widget.Button)
 				if b.Icon == nil {
 					return fmt.Sprintf("widget.NewButton(\"%s\", func() {})", b.Text)
 				}
 
-				icon := "theme."+iconReverse[fmt.Sprintf("%p", b.Icon)]+"()"
+				icon := "theme." + iconReverse[fmt.Sprintf("%p", b.Icon)] + "()"
 				return fmt.Sprintf("widget.NewButtonWithIcon(\"%s\", %s, func() {})", b.Text, icon)
 			},
 		},
@@ -142,10 +142,10 @@ func initWidgets() {
 						i.SetResource(icons[selected])
 					}))}
 			},
-			gostring:  func(obj fyne.CanvasObject) string {
+			gostring: func(obj fyne.CanvasObject) string {
 				i := obj.(*widget.Icon)
 
-				res := "theme."+iconReverse[fmt.Sprintf("%p", i.Resource)]+"()"
+				res := "theme." + iconReverse[fmt.Sprintf("%p", i.Resource)] + "()"
 				return fmt.Sprintf("widget.NewIcon(%s)", res)
 			},
 		},
