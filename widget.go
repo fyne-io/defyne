@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"strconv"
 	"strings"
@@ -519,7 +518,6 @@ func initWidgets() {
 				for i, o := range c.Objects {
 					if _, ok := o.(*overlayContainer); !ok {
 						o = o.(*fyne.Container).Objects[1]
-						log.Print("WHAT IS O", o)
 					}
 					str.WriteString(fmt.Sprintf("\n\t\t\t%#v", o))
 					if i < len(c.Objects)-1 {
