@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"reflect"
 	"strings"
 
@@ -82,32 +85,30 @@ func buildUI() fyne.CanvasObject {
 		widget.NewToolbarAction(theme.DocumentSaveIcon(), func() {
 			log.Println("TODO")
 		}),
+		widget.NewToolbarAction(theme.DownloadIcon(), func() {
+			packagesList := []string{"", "/container", "/theme", "/widget"} //ToDo: Will fetch it dynamically later
+			code := exportCode(packagesList, overlay)
+			fmt.Println(code)
+		}),
 		widget.NewToolbarAction(theme.MailForwardIcon(), func() {
-			packagesList := []string{"", "/app", "/canvas", "/container", "/data/binding", "/layout", "/theme", "/widget"} //ToDo: Will fetch it dynamically later
-			for i := 0; i < len(packagesList); i++ {
-				packagesList[i] = fmt.Sprintf(`	"fyne.io/fyne/v2%s"`, packagesList[i])
-			}
-			code := fmt.Sprintf(`
-package main
-
-import (
-%s
-)
-
+			packagesList := []string{"", "/app", "/container", "/theme", "/widget"} //ToDo: Will fetch it dynamically later
+			code := exportCode(packagesList, overlay)
+			code += `
 func main() {
 	myApp := app.New()
 	myWindow := myApp.NewWindow("Hello")
 	myWindow.SetContent(makeUI())
 	myWindow.ShowAndRun()
 }
+`
+			path, _ := os.MkdirTemp("", "fynebuilder")
+			path = filepath.Join(path, "main.go")
+			_ = os.WriteFile(path, []byte(code), 0600)
 
-func makeUI() fyne.CanvasObject {
-	return %#v
-}
-`,
-				strings.Join(packagesList, "\n"),
-				overlay)
-			fmt.Println(code)
+			cmd := exec.Command("go", "run", path)
+			cmd.Stderr = os.Stderr
+			cmd.Stdout = os.Stdout
+			cmd.Start()
 		}))
 
 	widType = widget.NewLabelWithStyle("(None Selected)", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
@@ -145,6 +146,25 @@ func choose(o fyne.CanvasObject) {
 	editForm = widget.NewForm(items...)
 	paletteList.Objects = []fyne.CanvasObject{editForm}
 	paletteList.Refresh()
+}
+
+func exportCode(pkgs []string, obj fyne.CanvasObject) string {
+	for i := 0; i < len(pkgs); i++ {
+		pkgs[i] = fmt.Sprintf(`	"fyne.io/fyne/v2%s"`, pkgs[i])
+	}
+	return fmt.Sprintf(`
+package main
+
+import (
+%s
+)
+
+func makeUI() fyne.CanvasObject {
+	return %#v
+}
+`,
+		strings.Join(pkgs, "\n"),
+		obj)
 }
 
 func main() {
