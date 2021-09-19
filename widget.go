@@ -42,6 +42,15 @@ func initWidgets() {
 						b.SetIcon(icons[selected])
 					}))}
 			},
+			gostring:  func(obj fyne.CanvasObject) string {
+				b := obj.(*widget.Button)
+				if b.Icon == nil {
+					return fmt.Sprintf("widget.NewButton(\"%s\", func() {})", b.Text)
+				}
+
+				icon := "theme."+iconReverse[fmt.Sprintf("%p", b.Icon)]+"()"
+				return fmt.Sprintf("widget.NewButtonWithIcon(\"%s\", %s, func() {})", b.Text, icon)
+			},
 		},
 		"*widget.Hyperlink": {
 			name: "Hyperlink",
@@ -125,6 +134,12 @@ func initWidgets() {
 						i.SetResource(icons[selected])
 					}))}
 			},
+			gostring:  func(obj fyne.CanvasObject) string {
+				i := obj.(*widget.Icon)
+
+				res := "theme."+iconReverse[fmt.Sprintf("%p", i.Resource)]+"()"
+				return fmt.Sprintf("widget.NewIcon(%s)", res)
+			},
 		},
 		"*widget.Label": {
 			name: "Label",
@@ -143,7 +158,7 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				l := obj.(*widget.Label)
-				return fmt.Sprintf("NewLabel(\"%s\")", l.Text)
+				return fmt.Sprintf("widget.NewLabel(\"%s\")", l.Text)
 			},
 		},
 		"*widget.Check": {
