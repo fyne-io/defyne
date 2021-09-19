@@ -81,10 +81,10 @@ func initIcons() {
 		"NavigateBackIcon": theme.NavigateBackIcon(),
 		"NavigateNextIcon": theme.NavigateNextIcon(),
 
-		"Menu":         theme.MenuIcon(),
-		"MenuExpand":   theme.MenuExpandIcon(),
-		"MenuDropDown": theme.MenuDropDownIcon(),
-		"MenuDropUp":   theme.MenuDropUpIcon(),
+		"MenuIcon":         theme.MenuIcon(),
+		"MenuExpandIcon":   theme.MenuExpandIcon(),
+		"MenuDropDownIcon": theme.MenuDropDownIcon(),
+		"MenuDropUpIcon":   theme.MenuDropUpIcon(),
 
 		"MailAttachmentIcon": theme.MailAttachmentIcon(),
 		"MailComposeIcon":    theme.MailComposeIcon(),
@@ -93,19 +93,19 @@ func initIcons() {
 		"MailReplyAllIcon":   theme.MailReplyAllIcon(),
 		"MailSendIcon":       theme.MailSendIcon(),
 
-		"MediaFastForward": theme.MediaFastForwardIcon(),
-		"MediaFastRewind":  theme.MediaFastRewindIcon(),
-		"MediaPause":       theme.MediaPauseIcon(),
-		"MediaPlay":        theme.MediaPlayIcon(),
-		// "MediaStop":         theme.MediaStopIcon(),
-		"MediaRecord":       theme.MediaRecordIcon(),
-		"MediaReplay":       theme.MediaReplayIcon(),
-		"MediaSkipNext":     theme.MediaSkipNextIcon(),
-		"MediaSkipPrevious": theme.MediaSkipPreviousIcon(),
+		"MediaFastForwardIcon": theme.MediaFastForwardIcon(),
+		"MediaFastRewindIcon":  theme.MediaFastRewindIcon(),
+		"MediaPauseIcon":       theme.MediaPauseIcon(),
+		"MediaPlayIcon":        theme.MediaPlayIcon(),
+		// "MediaStopIcon":         theme.MediaStopIcon(),
+		"MediaRecordIcon":       theme.MediaRecordIcon(),
+		"MediaReplayIcon":       theme.MediaReplayIcon(),
+		"MediaSkipNextIcon":     theme.MediaSkipNextIcon(),
+		"MediaSkipPreviousIcon": theme.MediaSkipPreviousIcon(),
 
-		"VolumeDown": theme.VolumeDownIcon(),
-		"VolumeMute": theme.VolumeMuteIcon(),
-		"VolumeUp":   theme.VolumeUpIcon(),
+		"VolumeDownIcon": theme.VolumeDownIcon(),
+		"VolumeMuteIcon": theme.VolumeMuteIcon(),
+		"VolumeUpIcon":   theme.VolumeUpIcon(),
 	}
 	iconNames = extractIconNames()
 	iconReverse = reverseIconMap()
