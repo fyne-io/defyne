@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
@@ -132,9 +131,6 @@ func extractIconNames() []string {
 func reverseIconMap() map[string]string {
 	var iconReverseFromData = make(map[string]string, len(icons))
 	for k, v := range icons {
-		if k == "CancelIcon" {
-			cancelAddr, _ = strconv.ParseUint(fmt.Sprintf("%p", v), 0, 64)
-		}
 		s := fmt.Sprintf("%p", v)
 		iconReverseFromData[s] = k
 	}
