@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/format"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -102,9 +103,10 @@ func main() {
 	myWindow.ShowAndRun()
 }
 `
-			path, _ := os.MkdirTemp("", "fynebuilder")
+			path := filepath.Join(os.TempDir(), "fynebuilder")
+			os.MkdirAll(path, 0711)
 			path = filepath.Join(path, "main.go")
-			_ = os.WriteFile(path, []byte(code), 0600)
+			_ = ioutil.WriteFile(path, []byte(code), 0600)
 
 			cmd := exec.Command("go", "run", path)
 			cmd.Stderr = os.Stderr
