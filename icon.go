@@ -104,10 +104,11 @@ func initIcons() {
 		"VolumeMute": theme.VolumeMuteIcon(),
 		"VolumeUp":   theme.VolumeUpIcon(),
 	}
+	iconNames = extractIconNames()
 }
 
 // iconNames is an array with the list of names of all the icons
-var iconNames = extractIconNames()
+var iconNames []string
 
 // extractIconNames returns all the list of names of all the icons from the hashmap `icons`
 func extractIconNames() []string {
