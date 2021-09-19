@@ -534,7 +534,7 @@ func initWidgets() {
 					if _, ok := o.(*overlayContainer); !ok {
 						o = o.(*fyne.Container).Objects[1]
 					}
-					str.WriteString(fmt.Sprintf("\n\t\t\t%#v", o))
+					str.WriteString(fmt.Sprintf("\n\t\t%#v", o))
 					if i < len(c.Objects)-1 {
 						str.WriteRune(',')
 					}

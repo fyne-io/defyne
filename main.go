@@ -97,11 +97,12 @@ import (
 func main() {
 	myApp := app.New()
 	myWindow := myApp.NewWindow("Hello")
-	myWindow.SetContent(
-		%#v,
-	)
-
+	myWindow.SetContent(makeUI())
 	myWindow.ShowAndRun()
+}
+
+func makeUI() fyne.CanvasObject {
+	return %#v
 }
 `,
 				strings.Join(packagesList, "\n"),
