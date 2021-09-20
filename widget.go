@@ -18,6 +18,7 @@ type widgetInfo struct {
 	create   func() fyne.CanvasObject
 	edit     func(fyne.CanvasObject) []*widget.FormItem
 	gostring func(fyne.CanvasObject) string
+	packages func(object fyne.CanvasObject) []string
 }
 
 var widgets map[string]widgetInfo
@@ -50,6 +51,14 @@ func initWidgets() {
 
 				icon := "theme." + iconReverse[fmt.Sprintf("%p", b.Icon)] + "()"
 				return fmt.Sprintf("widget.NewButtonWithIcon(\"%s\", %s, func() {})", encodeDoubleQuote(b.Text), icon)
+			},
+			packages: func(obj fyne.CanvasObject) []string {
+				b := obj.(*widget.Button)
+				if b.Icon == nil {
+					return []string{"widget"}
+				}
+
+				return []string{"widget", "theme"}
 			},
 		},
 		"*widget.Hyperlink": {
@@ -152,6 +161,9 @@ func initWidgets() {
 
 				res := "theme." + iconReverse[fmt.Sprintf("%p", i.Resource)] + "()"
 				return fmt.Sprintf("widget.NewIcon(%s)", res)
+			},
+			packages: func(obj fyne.CanvasObject) []string {
+				return []string{"widget", "theme"}
 			},
 		},
 		"*widget.Label": {
@@ -298,6 +310,9 @@ func initWidgets() {
 				item.(*fyne.Container).Objects[1].(*widget.Label).SetText(myList[id])
 			})`
 			},
+			packages: func(obj fyne.CanvasObject) []string {
+				return []string{"widget", "container"}
+			},
 		},
 		"*widget.Menu": {
 			name: "Menu",
@@ -309,7 +324,7 @@ func initWidgets() {
 				return []*widget.FormItem{}
 			},
 			gostring: func(obj fyne.CanvasObject) string {
-				return "widget.NewMenu(fyne.NewMenu(\"Menu Name\", fyne.NewMenuItem(\"Item 1\", func() { fmt.Println(\"From Item 1\") }), fyne.NewMenuItem(\"Item 2\", func() { fmt.Println(\"From Item 2\") }), fyne.NewMenuItem(\"Item 3\", func() { fmt.Println(\"From Item 3\") })))"
+				return "widget.NewMenu(fyne.NewMenu(\"Menu Name\", fyne.NewMenuItem(\"Item 1\", func() {}), fyne.NewMenuItem(\"Item 2\", func() {}), fyne.NewMenuItem(\"Item 3\", func() {})))"
 			},
 		},
 		"*widget.Form": {
@@ -321,7 +336,7 @@ func initWidgets() {
 				return []*widget.FormItem{}
 			},
 			gostring: func(obj fyne.CanvasObject) string {
-				return "widget.NewForm(widget.NewFormItem(\"Username\", widget.NewEntry()), widget.NewFormItem(\"Password\", widget.NewPasswordEntry()), widget.NewFormItem(\"\", container.NewGridWithColumns(2, widget.NewButton(\"Submit\", func() { fmt.Println(\"Form is submitted\") }), widget.NewButton(\"Cancel\", func() { fmt.Println(\"Form is Cancelled\") }))))"
+				return "widget.NewForm(widget.NewFormItem(\"Username\", widget.NewEntry()), widget.NewFormItem(\"Password\", widget.NewPasswordEntry()), widget.NewFormItem(\"\", container.NewGridWithColumns(2, widget.NewButton(\"Submit\", func() {}), widget.NewButton(\"Cancel\", func() {}))))"
 			},
 		},
 		"*widget.MultiLineEntry": {
@@ -533,18 +548,18 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				return `widget.NewToolbar(
-				widget.NewToolbarAction(theme.FileIcon(), func() { fmt.Println("Clicked on FileIcon") }),
+				widget.NewToolbarAction(theme.FileIcon(), func() {}),
 				widget.NewToolbarSeparator(),
-				widget.NewToolbarAction(theme.HomeIcon(), func() { fmt.Println("Clicked on HomeIcon") }),
+				widget.NewToolbarAction(theme.HomeIcon(), func() {}),
 				widget.NewToolbarSeparator(),
-				widget.NewToolbarAction(theme.DownloadIcon(), func() { fmt.Println("Clicked on DownloadIcon") }),
+				widget.NewToolbarAction(theme.DownloadIcon(), func() {}),
 				widget.NewToolbarSeparator(),
-				widget.NewToolbarAction(theme.ViewRefreshIcon(), func() { fmt.Println("Clicked on ViewRefreshIcon") }),
-				widget.NewToolbarAction(theme.NavigateBackIcon(), func() { fmt.Println("Clicked on NavigateBackIcon") }),
-				widget.NewToolbarAction(theme.NavigateNextIcon(), func() { fmt.Println("Clicked on NavigateNextIcon") }),
-				widget.NewToolbarAction(theme.MailSendIcon(), func() { fmt.Println("Clicked on MailSendIcon") }),
+				widget.NewToolbarAction(theme.ViewRefreshIcon(), func() {}),
+				widget.NewToolbarAction(theme.NavigateBackIcon(), func() {}),
+				widget.NewToolbarAction(theme.NavigateNextIcon(), func() {}),
+				widget.NewToolbarAction(theme.MailSendIcon(), func() {}),
 				widget.NewToolbarSpacer(),
-				widget.NewToolbarAction(theme.HelpIcon(), func() { fmt.Println("Clicked on HelpIcon") }),
+				widget.NewToolbarAction(theme.HelpIcon(), func() {}),
 			)`
 			},
 		},

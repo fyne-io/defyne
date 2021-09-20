@@ -91,6 +91,15 @@ func (w *overlayWidget) Object() fyne.CanvasObject {
 	return w.child
 }
 
+func (w *overlayWidget) Packages() []string {
+	name := reflect.TypeOf(w.child).String()
+	if widgets[name].packages != nil {
+		return widgets[name].packages(w.child)
+	}
+
+	return []string{"widget"}
+}
+
 func (w *overlayWidget) Tapped(e *fyne.PointEvent) {
 	setCurrent(w)
 	choose(w.child)

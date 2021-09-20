@@ -88,12 +88,12 @@ func buildUI() fyne.CanvasObject {
 			log.Println("TODO")
 		}),
 		widget.NewToolbarAction(theme.DownloadIcon(), func() {
-			packagesList := []string{"", "/container", "/theme", "/widget"} //ToDo: Will fetch it dynamically later
+			packagesList := packagesRequired(overlay)
 			code := exportCode(packagesList, overlay)
 			fmt.Println(code)
 		}),
 		widget.NewToolbarAction(theme.MailForwardIcon(), func() {
-			packagesList := []string{"", "/app", "/container", "/theme", "/widget"} //ToDo: Will fetch it dynamically later
+			packagesList := append(packagesRequired(overlay), "app")
 			code := exportCode(packagesList, overlay)
 			code += `
 func main() {
@@ -127,6 +127,36 @@ func main() {
 		split)
 }
 
+func packagesRequired(obj fyne.CanvasObject) []string {
+	if w, ok := obj.(*overlayWidget); ok {
+		return w.Packages()
+	}
+
+	ret := []string{"container"}
+	var objs []fyne.CanvasObject
+	if c, ok := obj.(*fyne.Container); ok {
+		objs = c.Objects
+	} else if c, ok := obj.(*overlayContainer); ok {
+		objs = c.c.Objects
+	}
+	for _, w := range objs {
+		for _, p := range packagesRequired(w) {
+			added := false
+			for _, exists := range ret {
+				if p == exists {
+					added = true
+					break
+				}
+			}
+			if !added {
+				ret = append(ret, p)
+			}
+		}
+		ret = append(ret, )
+	}
+	return ret
+}
+
 func choose(o fyne.CanvasObject) {
 	typeName := reflect.TypeOf(o).Elem().Name()
 	widName := reflect.TypeOf(o).String()
@@ -153,12 +183,13 @@ func choose(o fyne.CanvasObject) {
 
 func exportCode(pkgs []string, obj fyne.CanvasObject) string {
 	for i := 0; i < len(pkgs); i++ {
-		pkgs[i] = fmt.Sprintf(`	"fyne.io/fyne/v2%s"`, pkgs[i])
+		pkgs[i] = fmt.Sprintf(`	"fyne.io/fyne/v2/%s"`, pkgs[i])
 	}
 	code := fmt.Sprintf(`
 package main
 
 import (
+	"fyne.io/fyne/v2"
 %s
 )
 
@@ -173,7 +204,7 @@ func makeUI() fyne.CanvasObject {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return fmt.Sprintf("%s", formatted)
+	return string(formatted)
 }
 
 func main() {
