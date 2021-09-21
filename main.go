@@ -152,7 +152,6 @@ func packagesRequired(obj fyne.CanvasObject) []string {
 				ret = append(ret, p)
 			}
 		}
-		ret = append(ret, )
 	}
 	return ret
 }
