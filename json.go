@@ -98,17 +98,21 @@ func decodeMap(m map[string]interface{}) fyne.CanvasObject {
 				f.Set(reflect.ValueOf(res))
 			}
 		} else {
-			f.Set(reflect.ValueOf(v))
+			if strings.Index(f.Type().String(), "int") == 0 {
+				f.SetInt(int64(reflect.ValueOf(v).Float()))
+			} else {
+				f.Set(reflect.ValueOf(v))
+			}
 		}
 	}
 
 	return obj
 }
 
-func EncodeJSON(obj fyne.CanvasObject, w io.Writer) {
+func EncodeJSON(obj fyne.CanvasObject, w io.Writer) error {
 	tree := encodeObj(obj)
 
 	e := json.NewEncoder(w)
 	e.SetIndent("", "  ")
-	_ = e.Encode(tree)
+	return e.Encode(tree)
 }

@@ -52,6 +52,10 @@ func (o *overlayContainer) Move(p fyne.Position) {
 	o.BaseWidget.Move(p)
 }
 
+func (o *overlayContainer) Refresh() {
+	o.c.Refresh()
+}
+
 func (o *overlayContainer) Resize(s fyne.Size) {
 	o.c.Resize(s)
 	o.BaseWidget.Resize(s)
@@ -98,6 +102,10 @@ func (w *overlayWidget) Packages() []string {
 	}
 
 	return []string{"widget"}
+}
+
+func (w *overlayWidget) Refresh() {
+	w.child.Refresh()
 }
 
 func (w *overlayWidget) Tapped(e *fyne.PointEvent) {

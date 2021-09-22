@@ -112,7 +112,10 @@ func buildUI(win fyne.Window) fyne.CanvasObject {
 					return
 				}
 
-				EncodeJSON(overlay, w)
+				err = EncodeJSON(overlay, w)
+				if err != nil {
+					dialog.ShowError(err, win)
+				}
 				_ = w.Close()
 			}, win)
 			d.SetFilter(storage.NewExtensionFileFilter([]string{".json"}))
