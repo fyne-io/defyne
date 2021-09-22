@@ -16,7 +16,7 @@ type canvObj struct {
 
 type cont struct {
 	canvObj
-	Layout string `json:",omitempty"`
+	Layout  string `json:",omitempty"`
 	Objects []interface{}
 }
 
