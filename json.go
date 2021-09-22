@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"reflect"
 	"strings"
 
@@ -94,7 +93,10 @@ func decodeMap(m map[string]interface{}) fyne.CanvasObject {
 		} else if f.Type().String() == "fyne.TextStyle" {
 			f.Set(reflect.ValueOf(decodeTextStyle(reflect.ValueOf(v).Interface().(map[string]interface{}))))
 		} else if f.Type().String() == "fyne.Resource" {
-			log.Println("TODO load resource type...")
+			res := icons[reflect.ValueOf(v).String()]
+			if res != nil {
+				f.Set(reflect.ValueOf(res))
+			}
 		} else {
 			f.Set(reflect.ValueOf(v))
 		}

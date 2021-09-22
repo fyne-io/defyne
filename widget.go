@@ -40,7 +40,7 @@ func initWidgets() {
 				return []*widget.FormItem{
 					widget.NewFormItem("Text", entry),
 					widget.NewFormItem("Icon", widget.NewSelect(iconNames, func(selected string) {
-						b.SetIcon(icons[selected])
+						b.SetIcon(wrapResource(icons[selected]))
 					}))}
 			},
 			gostring: func(obj fyne.CanvasObject) string {
@@ -153,7 +153,7 @@ func initWidgets() {
 				i := obj.(*widget.Icon)
 				return []*widget.FormItem{
 					widget.NewFormItem("Icon", widget.NewSelect(iconNames, func(selected string) {
-						i.SetResource(icons[selected])
+						i.SetResource(wrapResource(icons[selected]))
 					}))}
 			},
 			gostring: func(obj fyne.CanvasObject) string {

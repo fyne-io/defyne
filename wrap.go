@@ -169,7 +169,28 @@ func wrapContent(o fyne.CanvasObject) fyne.CanvasObject {
 }
 
 func wrapWidget(w fyne.Widget) fyne.CanvasObject {
+	switch t := w.(type) {
+	case *widget.Icon:
+		t.Resource = wrapResource(t.Resource)
+	case *widget.Button:
+		if t.Icon != nil {
+			t.Icon = wrapResource(t.Icon)
+		}
+	}
 	o := &overlayWidget{child: w}
 	o.ExtendBaseWidget(o)
 	return container.NewMax(w, o)
+}
+
+type jsonResource struct {
+	fyne.Resource `json:"-"`
+}
+
+func (r *jsonResource) MarshalJSON() ([]byte, error) {
+	icon := "\"" + iconReverse[fmt.Sprintf("%p", r.Resource)] + "\""
+	return []byte(icon), nil
+}
+
+func wrapResource(r fyne.Resource) fyne.Resource {
+	return &jsonResource{r}
 }
