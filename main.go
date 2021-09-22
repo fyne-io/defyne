@@ -14,7 +14,9 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -76,16 +78,46 @@ func buildLibrary() fyne.CanvasObject {
 	}), nil, nil, list)
 }
 
-func buildUI() fyne.CanvasObject {
+func buildUI(win fyne.Window) fyne.CanvasObject {
 	content := previewUI().(*fyne.Container)
 	overlay := wrapContent(content)
+	wrap := container.NewMax(overlay)
 
 	toolbar := widget.NewToolbar(
 		widget.NewToolbarAction(theme.FolderOpenIcon(), func() {
-			log.Println("TODO")
+			d := dialog.NewFileOpen(func(r fyne.URIReadCloser, err error) {
+				if err != nil {
+					dialog.ShowError(err, win)
+				}
+				if r == nil {
+					return
+				}
+
+				obj := DecodeJSON(r)
+				_ = r.Close()
+
+				overlay = wrapContent(obj)
+				wrap.Objects[0] = overlay
+				wrap.Refresh()
+			}, win)
+			d.SetFilter(storage.NewExtensionFileFilter([]string{".json"}))
+			d.Show()
 		}),
 		widget.NewToolbarAction(theme.DocumentSaveIcon(), func() {
-			log.Println("TODO")
+			d := dialog.NewFileSave(func(w fyne.URIWriteCloser, err error) {
+				if err != nil {
+					dialog.ShowError(err, win)
+				}
+				if w == nil {
+					return
+				}
+
+				EncodeJSON(overlay, w)
+				_ = w.Close()
+			}, win)
+			d.SetFilter(storage.NewExtensionFileFilter([]string{".json"}))
+			d.SetFileName("main.ui.json")
+			d.Show()
 		}),
 		widget.NewToolbarAction(theme.DownloadIcon(), func() {
 			packagesList := packagesRequired(overlay)
@@ -121,7 +153,7 @@ func main() {
 			widget.NewCard("Component List", "", buildLibrary()),
 		))
 
-	split := container.NewHSplit(overlay, palette)
+	split := container.NewHSplit(wrap, palette)
 	split.Offset = 0.8
 	return container.New(layout.NewBorderLayout(toolbar, nil, nil, nil), toolbar,
 		split)
@@ -212,7 +244,7 @@ func main() {
 	initWidgets()
 
 	w := a.NewWindow("Fyne Builder")
-	w.SetContent(buildUI())
+	w.SetContent(buildUI(w))
 	w.Resize(fyne.NewSize(600, 400))
 	w.ShowAndRun()
 }
