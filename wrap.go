@@ -53,6 +53,7 @@ func (o *overlayContainer) Move(p fyne.Position) {
 }
 
 func (o *overlayContainer) Refresh() {
+	o.BaseWidget.Refresh()
 	o.c.Refresh()
 }
 
@@ -105,6 +106,7 @@ func (w *overlayWidget) Packages() []string {
 }
 
 func (w *overlayWidget) Refresh() {
+	w.BaseWidget.Refresh()
 	w.child.Refresh()
 }
 
