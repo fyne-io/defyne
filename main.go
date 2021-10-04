@@ -69,7 +69,7 @@ func buildLibrary() fyne.CanvasObject {
 	return container.NewBorder(searchBox, widget.NewButtonWithIcon("Insert", theme.ContentAddIcon(), func() {
 		if c, ok := current.(*overlayContainer); ok {
 			if selected != nil {
-				c.c.Objects = append(c.c.Objects, wrapContent(selected.create()))
+				c.c.Objects = append(c.c.Objects, wrapContent(selected.create(), c.c))
 				c.c.Refresh()
 			}
 			return
@@ -80,7 +80,7 @@ func buildLibrary() fyne.CanvasObject {
 
 func buildUI(win fyne.Window) fyne.CanvasObject {
 	content := previewUI().(*fyne.Container)
-	overlay := wrapContent(content)
+	overlay := wrapContent(content, nil)
 	wrap := container.NewMax(overlay)
 
 	toolbar := widget.NewToolbar(
@@ -96,7 +96,7 @@ func buildUI(win fyne.Window) fyne.CanvasObject {
 				obj := DecodeJSON(r)
 				_ = r.Close()
 
-				overlay = wrapContent(obj)
+				overlay = wrapContent(obj, nil)
 				wrap.Objects[0] = overlay
 				wrap.Refresh()
 			}, win)
@@ -211,7 +211,30 @@ func choose(o fyne.CanvasObject) {
 	}
 
 	editForm = widget.NewForm(items...)
-	paletteList.Objects = []fyne.CanvasObject{editForm}
+	remove := widget.NewButton("Remove", func() {
+		var parent *fyne.Container
+		var obj fyne.CanvasObject
+		if c, ok := current.(*overlayContainer); ok {
+			parent = c.parent
+			obj = c
+		} else if w, ok := current.(*overlayWidget); ok {
+			parent = w.parent
+			for _, o := range parent.Objects { // match our widget in the container wrapping us
+				if c, ok := o.(*fyne.Container); ok && c.Objects[0] == w.child {
+					obj = c
+					break
+				}
+			}
+		}
+		if parent == nil {
+			log.Println("Nothing to remove")
+			return
+		}
+
+		parent.Remove(obj)
+		parent.Refresh()
+	})
+	paletteList.Objects = []fyne.CanvasObject{editForm, remove}
 	paletteList.Refresh()
 }
 

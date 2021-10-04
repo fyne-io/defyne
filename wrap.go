@@ -25,7 +25,7 @@ func setCurrent(o fyne.CanvasObject) {
 
 type overlayContainer struct {
 	widget.BaseWidget
-	c *fyne.Container
+	c, parent *fyne.Container
 }
 
 func (o *overlayContainer) CreateRenderer() fyne.WidgetRenderer {
@@ -73,7 +73,8 @@ func (o *overlayContainer) Object() fyne.CanvasObject {
 
 type overlayWidget struct {
 	widget.BaseWidget
-	child fyne.Widget
+	child  fyne.Widget
+	parent *fyne.Container
 }
 
 func (w *overlayWidget) CreateRenderer() fyne.WidgetRenderer {
@@ -153,32 +154,33 @@ func (o overRender) Refresh() {
 	o.r.Refresh()
 }
 
-func wrapContent(o fyne.CanvasObject) fyne.CanvasObject {
+func wrapContent(o fyne.CanvasObject, parent *fyne.Container) fyne.CanvasObject {
 	switch obj := o.(type) {
 	case *fyne.Container:
-		items := make([]fyne.CanvasObject, len(obj.Objects))
-		for i, child := range obj.Objects {
-			items[i] = wrapContent(child)
-		}
-
 		var c *fyne.Container
 		if obj.Layout == nil {
-			c = container.NewWithoutLayout(items...)
+			c = container.NewWithoutLayout()
 		} else {
-			c = container.New(obj.Layout, items...)
+			c = container.New(obj.Layout)
 		}
-		o := &overlayContainer{c: c}
+		items := make([]fyne.CanvasObject, len(obj.Objects))
+		for i, child := range obj.Objects {
+			items[i] = wrapContent(child, c)
+		}
+		c.Objects = items
+
+		o := &overlayContainer{c: c, parent: parent}
 		layoutProps[o.c] = map[string]string{"layout": "VBox"}
 		o.ExtendBaseWidget(o)
 		return o
 	case fyne.Widget:
-		return wrapWidget(obj)
+		return wrapWidget(obj, parent)
 	}
 
 	return nil //?
 }
 
-func wrapWidget(w fyne.Widget) fyne.CanvasObject {
+func wrapWidget(w fyne.Widget, parent *fyne.Container) fyne.CanvasObject {
 	switch t := w.(type) {
 	case *widget.Icon:
 		t.Resource = wrapResource(t.Resource)
@@ -187,7 +189,7 @@ func wrapWidget(w fyne.Widget) fyne.CanvasObject {
 			t.Icon = wrapResource(t.Icon)
 		}
 	}
-	o := &overlayWidget{child: w}
+	o := &overlayWidget{child: w, parent: parent}
 	o.ExtendBaseWidget(o)
 	return container.NewMax(w, o)
 }
