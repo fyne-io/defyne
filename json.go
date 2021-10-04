@@ -48,6 +48,7 @@ func encodeWidget(obj fyne.CanvasObject) interface{} {
 	return &canvObj{Type: reflect.TypeOf(obj).String(), Struct: obj}
 }
 
+// DecodeJSON returns a tree of `CanvasObject` elements from the provided JSON `Reader`.
 func DecodeJSON(r io.Reader) fyne.CanvasObject {
 	var data interface{}
 	_ = json.NewDecoder(r).Decode(&data)
@@ -109,6 +110,8 @@ func decodeMap(m map[string]interface{}) fyne.CanvasObject {
 	return obj
 }
 
+// EncodeJSON writes a JSON stream for the tree of `CanvasObject` elements provided.
+// If an error occurs it will be returned, otherwise nil.
 func EncodeJSON(obj fyne.CanvasObject, w io.Writer) error {
 	tree := encodeObj(obj)
 
