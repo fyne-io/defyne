@@ -1,4 +1,4 @@
-package main
+package guibuilder
 
 import (
 	"fmt"
@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"sync"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
@@ -25,7 +25,30 @@ var (
 	editForm    *widget.Form
 	widType     *widget.Label
 	paletteList *fyne.Container
+	once        sync.Once
 )
+
+func ShowBuilder(u fyne.URI, win fyne.Window) fyne.CanvasObject {
+	initOnce()
+	r, err := storage.Reader(u)
+	if err != nil {
+		dialog.ShowError(err, win)
+	}
+
+	var obj fyne.CanvasObject
+	if r == nil {
+		obj = previewUI()
+	} else {
+		obj = DecodeJSON(r)
+		_ = r.Close()
+
+		if obj == nil {
+			obj = previewUI()
+		}
+	}
+
+	return buildUI(obj, win)
+}
 
 func buildLibrary() fyne.CanvasObject {
 	var selected *widgetInfo
@@ -78,31 +101,11 @@ func buildLibrary() fyne.CanvasObject {
 	}), nil, nil, list)
 }
 
-func buildUI(win fyne.Window) fyne.CanvasObject {
-	content := previewUI().(*fyne.Container)
+func buildUI(content fyne.CanvasObject, win fyne.Window) fyne.CanvasObject {
 	overlay := wrapContent(content, nil)
 	wrap := container.NewMax(overlay)
 
 	toolbar := widget.NewToolbar(
-		widget.NewToolbarAction(theme.FolderOpenIcon(), func() {
-			d := dialog.NewFileOpen(func(r fyne.URIReadCloser, err error) {
-				if err != nil {
-					dialog.ShowError(err, win)
-				}
-				if r == nil {
-					return
-				}
-
-				obj := DecodeJSON(r)
-				_ = r.Close()
-
-				overlay = wrapContent(obj, nil)
-				wrap.Objects[0] = overlay
-				wrap.Refresh()
-			}, win)
-			d.SetFilter(storage.NewExtensionFileFilter([]string{".json"}))
-			d.Show()
-		}),
 		widget.NewToolbarAction(theme.DocumentSaveIcon(), func() {
 			d := dialog.NewFileSave(func(w fyne.URIWriteCloser, err error) {
 				if err != nil {
@@ -264,15 +267,11 @@ func makeUI() fyne.CanvasObject {
 	return string(formatted)
 }
 
-func main() {
-	a := app.NewWithID("xyz.andy.fynebuilder")
-	initIcons()
-	initWidgets()
-
-	w := a.NewWindow("Fyne Builder")
-	w.SetContent(buildUI(w))
-	w.Resize(fyne.NewSize(600, 400))
-	w.ShowAndRun()
+func initOnce() {
+	once.Do(func() {
+		initIcons()
+		initWidgets()
+	})
 }
 
 func previewUI() fyne.CanvasObject {

@@ -1,4 +1,4 @@
-package main
+package guibuilder
 
 import "strings"
 

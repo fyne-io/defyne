@@ -1,4 +1,4 @@
-package main
+package guibuilder
 
 import (
 	"encoding/json"
@@ -52,6 +52,9 @@ func encodeWidget(obj fyne.CanvasObject) interface{} {
 func DecodeJSON(r io.Reader) fyne.CanvasObject {
 	var data interface{}
 	_ = json.NewDecoder(r).Decode(&data)
+	if data == nil {
+		return nil
+	}
 
 	return decodeMap(data.(map[string]interface{}))
 }

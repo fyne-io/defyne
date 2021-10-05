@@ -5,6 +5,7 @@ This repo contains the work-in-progress Fyne IDE.
 ## Features
 
 * Embedded terminal
+* GUI Editor
 
 ## TODO
 
