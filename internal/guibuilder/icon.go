@@ -10,7 +10,7 @@ import (
 
 var (
 	// iconNames is an array with the list of names of all the icons
-	iconNames = extractIconNames()
+	iconNames []string
 
 	// iconsReverse Contains the key value pair where the key is the address of the icon and the value is the name
 	iconReverse map[string]string

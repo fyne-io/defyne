@@ -99,7 +99,7 @@ func decodeMap(m map[string]interface{}) fyne.CanvasObject {
 		} else if f.Type().String() == "fyne.Resource" {
 			res := icons[reflect.ValueOf(v).String()]
 			if res != nil {
-				f.Set(reflect.ValueOf(res))
+				f.Set(reflect.ValueOf(wrapResource(res)))
 			}
 		} else {
 			if strings.Index(f.Type().String(), "int") == 0 {
@@ -110,6 +110,7 @@ func decodeMap(m map[string]interface{}) fyne.CanvasObject {
 		}
 	}
 
+	obj.Refresh()
 	return obj
 }
 

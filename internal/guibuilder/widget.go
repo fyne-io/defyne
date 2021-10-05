@@ -55,7 +55,7 @@ func initWidgets() {
 					return fmt.Sprintf("widget.NewButton(\"%s\", func() {})", encodeDoubleQuote(b.Text))
 				}
 
-				icon := "theme." + iconReverse[fmt.Sprintf("%p", b.Icon)] + "()"
+				icon := "theme." + iconReverse[fmt.Sprintf("%p", b.Icon.(*jsonResource).Resource)] + "()"
 				return fmt.Sprintf("widget.NewButtonWithIcon(\"%s\", %s, func() {})", encodeDoubleQuote(b.Text), icon)
 			},
 			packages: func(obj fyne.CanvasObject) []string {
@@ -165,7 +165,7 @@ func initWidgets() {
 			gostring: func(obj fyne.CanvasObject) string {
 				i := obj.(*widget.Icon)
 
-				res := "theme." + iconReverse[fmt.Sprintf("%p", i.Resource)] + "()"
+				res := "theme." + iconReverse[fmt.Sprintf("%p", i.Resource.(*jsonResource).Resource)] + "()"
 				return fmt.Sprintf("widget.NewIcon(%s)", res)
 			},
 			packages: func(obj fyne.CanvasObject) []string {
