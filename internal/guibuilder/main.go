@@ -28,6 +28,8 @@ var (
 	once        sync.Once
 )
 
+// ShowBuilder shows a UI builder interface for the serialised data at the given URI.
+// The window is passed for error dialogs to be presented.
 func ShowBuilder(u fyne.URI, win fyne.Window) fyne.CanvasObject {
 	initOnce()
 	r, err := storage.Reader(u)
