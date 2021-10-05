@@ -28,9 +28,14 @@ var (
 	once        sync.Once
 )
 
-// ShowBuilder shows a UI builder interface for the serialised data at the given URI.
-// The window is passed for error dialogs to be presented.
-func ShowBuilder(u fyne.URI, win fyne.Window) fyne.CanvasObject {
+// Builder is a simple type handle for a GUI builder instance
+type Builder struct {
+	root, wrapped fyne.CanvasObject
+	uri           fyne.URI
+	win           fyne.Window
+}
+
+func NewBuilder(u fyne.URI, win fyne.Window) *Builder {
 	initOnce()
 	r, err := storage.Reader(u)
 	if err != nil {
@@ -49,7 +54,42 @@ func ShowBuilder(u fyne.URI, win fyne.Window) fyne.CanvasObject {
 		}
 	}
 
-	return buildUI(obj, win)
+	return &Builder{root: obj, uri: u, win: win}
+}
+
+// Save will trigger the current state to be written out to the file this was opened from.
+func (b *Builder) Save() error {
+	w, err := storage.Writer(b.uri)
+	if err != nil {
+		return err
+	}
+	return b.save(w)
+}
+
+func (b *Builder) save(w fyne.URIWriteCloser) error {
+	err := EncodeJSON(b.wrapped, w)
+	_ = w.Close()
+	return err
+}
+
+func (b *Builder) saveAs() {
+		d := dialog.NewFileSave(func(w fyne.URIWriteCloser, err error) {
+			if err != nil {
+				dialog.ShowError(err, b.win)
+			}
+			if w == nil {
+				return
+			}
+
+			_ = b.save(w)
+		}, b.win)
+		d.SetFilter(storage.NewExtensionFileFilter([]string{".json"}))
+		d.SetFileName("main.gui.json")
+		d.Show()
+}
+
+func (b *Builder) Show() fyne.CanvasObject {
+	return b.buildUI(b.root, b.win)
 }
 
 func buildLibrary() fyne.CanvasObject {
@@ -103,38 +143,19 @@ func buildLibrary() fyne.CanvasObject {
 	}), nil, nil, list)
 }
 
-func buildUI(content fyne.CanvasObject, win fyne.Window) fyne.CanvasObject {
-	overlay := wrapContent(content, nil)
-	wrap := container.NewMax(overlay)
+func (b *Builder) buildUI(content fyne.CanvasObject, win fyne.Window) fyne.CanvasObject {
+	b.wrapped = wrapContent(content, nil)
+	wrap := container.NewMax(b.wrapped)
 
 	toolbar := widget.NewToolbar(
-		widget.NewToolbarAction(theme.DocumentSaveIcon(), func() {
-			d := dialog.NewFileSave(func(w fyne.URIWriteCloser, err error) {
-				if err != nil {
-					dialog.ShowError(err, win)
-				}
-				if w == nil {
-					return
-				}
-
-				err = EncodeJSON(overlay, w)
-				if err != nil {
-					dialog.ShowError(err, win)
-				}
-				_ = w.Close()
-			}, win)
-			d.SetFilter(storage.NewExtensionFileFilter([]string{".json"}))
-			d.SetFileName("main.ui.json")
-			d.Show()
-		}),
 		widget.NewToolbarAction(theme.DownloadIcon(), func() {
-			packagesList := packagesRequired(overlay)
-			code := exportCode(packagesList, overlay)
+			packagesList := packagesRequired(b.wrapped)
+			code := exportCode(packagesList, b.wrapped)
 			fmt.Println(code)
 		}),
 		widget.NewToolbarAction(theme.MailForwardIcon(), func() {
-			packagesList := append(packagesRequired(overlay), "app")
-			code := exportCode(packagesList, overlay)
+			packagesList := append(packagesRequired(b.wrapped), "app")
+			code := exportCode(packagesList, b.wrapped)
 			code += `
 func main() {
 	myApp := app.New()
@@ -264,7 +285,8 @@ func makeUI() fyne.CanvasObject {
 
 	formatted, err := format.Source([]byte(code))
 	if err != nil {
-		log.Fatal(err)
+		fyne.LogError("Failed to encode GUI code", err)
+		return ""
 	}
 	return string(formatted)
 }
