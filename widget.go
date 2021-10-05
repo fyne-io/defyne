@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -679,5 +680,7 @@ func extractWidgetNames() []string {
 		widgetNamesFromData[i] = k
 		i++
 	}
+
+	sort.Strings(widgetNamesFromData)
 	return widgetNamesFromData
 }

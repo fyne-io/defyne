@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sort"
 	"strconv"
 
 	"fyne.io/fyne/v2"
@@ -191,5 +192,7 @@ func extractLayoutNames() []string {
 		layoutsNamesFromData[i] = k
 		i++
 	}
+
+	sort.Strings(layoutsNamesFromData)
 	return layoutsNamesFromData
 }

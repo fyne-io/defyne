@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
@@ -126,6 +127,8 @@ func extractIconNames() []string {
 		iconNamesFromData[i] = k
 		i++
 	}
+
+	sort.Strings(iconNamesFromData)
 	return iconNamesFromData
 }
 
