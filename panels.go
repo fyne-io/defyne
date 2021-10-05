@@ -27,6 +27,7 @@ func (d *defyne) makeEditorPanel() fyne.CanvasObject {
 		if !ed.changed() {
 			ed.close()
 			d.fileTabs.Remove(t)
+			delete(d.openEditors, t)
 			return
 		}
 		dialog.ShowConfirm("File is unsaved", "Are you sure you wish to close?",
@@ -36,7 +37,8 @@ func (d *defyne) makeEditorPanel() fyne.CanvasObject {
 				}
 
 				ed.close()
-				d.openEditors[t] = nil
+				d.fileTabs.Remove(t)
+				delete(d.openEditors, t)
 			}, d.win)
 	}
 

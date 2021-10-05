@@ -25,6 +25,13 @@ type defyne struct {
 }
 
 func (d *defyne) openEditor(u fyne.URI) {
+	for tab, item := range d.openEditors {
+		if item.uri.String() == u.String() {
+			d.fileTabs.Select(tab)
+			return
+		}
+	}
+
 	var ed editor
 	for name, e := range editorsByFilename {
 		if strings.Index(u.Name(), name) > 0 {
@@ -39,13 +46,6 @@ func (d *defyne) openEditor(u fyne.URI) {
 		}
 
 		ed = editorsByMime[u.MimeType()](u)
-	}
-
-	for tab, item := range d.openEditors {
-		if item.uri.String() == u.String() {
-			d.fileTabs.Select(tab)
-			return
-		}
 	}
 
 	newTab := container.NewTabItemWithIcon(u.Name(), theme.FileTextIcon(), ed.content())
