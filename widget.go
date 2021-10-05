@@ -13,6 +13,13 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+var (
+	// widgetNames is an array with the list of names of all the widgets
+	widgetNames []string
+
+	widgets map[string]widgetInfo
+)
+
 type widgetInfo struct {
 	name     string
 	create   func() fyne.CanvasObject
@@ -20,8 +27,6 @@ type widgetInfo struct {
 	gostring func(fyne.CanvasObject) string
 	packages func(object fyne.CanvasObject) []string
 }
-
-var widgets map[string]widgetInfo
 
 func initWidgets() {
 	widgets = map[string]widgetInfo{
@@ -665,9 +670,6 @@ func initWidgets() {
 
 	widgetNames = extractWidgetNames()
 }
-
-// widgetNames is an array with the list of names of all the widgets
-var widgetNames []string
 
 // extractWidgetNames returns all the list of names of all the widgets from our data
 func extractWidgetNames() []string {

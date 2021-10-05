@@ -14,13 +14,13 @@ import (
 
 var current fyne.CanvasObject
 
-func setCurrent(o fyne.CanvasObject) {
-	old := current
-	current = o
-	if old != nil {
-		old.Refresh()
-	}
-	current.Refresh()
+type jsonResource struct {
+	fyne.Resource `json:"-"`
+}
+
+func (r *jsonResource) MarshalJSON() ([]byte, error) {
+	icon := "\"" + iconReverse[fmt.Sprintf("%p", r.Resource)] + "\""
+	return []byte(icon), nil
 }
 
 type overlayContainer struct {
@@ -154,6 +154,15 @@ func (o overRender) Refresh() {
 	o.r.Refresh()
 }
 
+func setCurrent(o fyne.CanvasObject) {
+	old := current
+	current = o
+	if old != nil {
+		old.Refresh()
+	}
+	current.Refresh()
+}
+
 func wrapContent(o fyne.CanvasObject, parent *fyne.Container) fyne.CanvasObject {
 	switch obj := o.(type) {
 	case *fyne.Container:
@@ -192,15 +201,6 @@ func wrapWidget(w fyne.Widget, parent *fyne.Container) fyne.CanvasObject {
 	o := &overlayWidget{child: w, parent: parent}
 	o.ExtendBaseWidget(o)
 	return container.NewMax(w, o)
-}
-
-type jsonResource struct {
-	fyne.Resource `json:"-"`
-}
-
-func (r *jsonResource) MarshalJSON() ([]byte, error) {
-	icon := "\"" + iconReverse[fmt.Sprintf("%p", r.Resource)] + "\""
-	return []byte(icon), nil
 }
 
 func wrapResource(r fyne.Resource) fyne.Resource {

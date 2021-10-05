@@ -7,9 +7,17 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-// icons Has the hashmap of icons from the standard theme.
-// ToDo: Will have to look for a way to sync the list from `fyne_demo`
-var icons map[string]fyne.Resource
+var (
+	// iconNames is an array with the list of names of all the icons
+	iconNames = extractIconNames()
+
+	// iconsReverse Contains the key value pair where the key is the address of the icon and the value is the name
+	iconReverse map[string]string
+
+	// icons Has the hashmap of icons from the standard theme.
+	// ToDo: Will have to look for a way to sync the list from `fyne_demo`
+	icons map[string]fyne.Resource
+)
 
 func initIcons() {
 	icons = map[string]fyne.Resource{
@@ -109,12 +117,6 @@ func initIcons() {
 	iconNames = extractIconNames()
 	iconReverse = reverseIconMap()
 }
-
-// iconsReverse Contains the key value pair where the key is the address of the icon and the value is the name
-var iconReverse map[string]string
-
-// iconNames is an array with the list of names of all the icons
-var iconNames []string
 
 // extractIconNames returns all the list of names of all the icons from the hashmap `icons`
 func extractIconNames() []string {
