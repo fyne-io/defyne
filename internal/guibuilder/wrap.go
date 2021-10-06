@@ -19,7 +19,7 @@ type jsonResource struct {
 }
 
 func (r *jsonResource) MarshalJSON() ([]byte, error) {
-	icon := "\"" + iconReverse[fmt.Sprintf("%p", r.Resource.(*jsonResource).Resource)] + "\""
+	icon := "\"" + iconReverse[fmt.Sprintf("%p", r.Resource)] + "\""
 	return []byte(icon), nil
 }
 
