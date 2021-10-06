@@ -4,6 +4,7 @@ package main
 
 import (
 	"os"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -38,8 +39,24 @@ func (d *defyne) makeToolbar() *widget.Toolbar {
 	return widget.NewToolbar(
 		widget.NewToolbarAction(theme.FileIcon(), func() {
 			input := widget.NewEntry()
+			typeNames := make([]string, len(templates))
+			for i, t := range templates {
+				typeNames[i] = t.name
+			}
+
+			types := widget.NewSelect(typeNames, func(s string) {
+				name := strings.Split(input.Text, ".")[0]
+				for _, t := range templates {
+					if t.name == s {
+						name += t.ext
+						continue
+					}
+				}
+				input.SetText(name)
+			})
 			dialog.ShowForm("New file name", "Create", "Cancel",
 				[]*widget.FormItem{
+					widget.NewFormItem("File type", types),
 					widget.NewFormItem("File name", input),
 				},
 				func(ok bool) {
