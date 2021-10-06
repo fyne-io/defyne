@@ -12,3 +12,8 @@ This repo contains the work-in-progress Fyne IDE.
 * Various types of editor
 * Syntax highlighting
 * Standard run/test buttons
+
+## Screenshot
+
+![](img/screenshot.png)
+
