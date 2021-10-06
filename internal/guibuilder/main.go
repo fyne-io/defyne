@@ -79,22 +79,6 @@ func (b *Builder) save(w fyne.URIWriteCloser) error {
 	return err
 }
 
-func (b *Builder) saveAs() {
-	d := dialog.NewFileSave(func(w fyne.URIWriteCloser, err error) {
-		if err != nil {
-			dialog.ShowError(err, b.win)
-		}
-		if w == nil {
-			return
-		}
-
-		_ = b.save(w)
-	}, b.win)
-	d.SetFilter(storage.NewExtensionFileFilter([]string{".json"}))
-	d.SetFileName("main.gui.json")
-	d.Show()
-}
-
 func buildLibrary() fyne.CanvasObject {
 	var selected *widgetInfo
 	tempNames := []string{}
