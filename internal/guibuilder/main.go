@@ -28,13 +28,15 @@ var (
 	once        sync.Once
 )
 
-// Builder is a simple type handle for a GUI builder instance
+// Builder is a simple type handle for a GUI builder instance.
 type Builder struct {
 	root, wrapped fyne.CanvasObject
 	uri           fyne.URI
 	win           fyne.Window
 }
 
+// NewBuilder returns an instance of the GUI builder for the specified URI.
+// The Window parameter allows presenting dialogs etc.
 func NewBuilder(u fyne.URI, win fyne.Window) *Builder {
 	initOnce()
 	r, err := storage.Reader(u)
@@ -55,6 +57,11 @@ func NewBuilder(u fyne.URI, win fyne.Window) *Builder {
 	}
 
 	return &Builder{root: obj, uri: u, win: win}
+}
+
+// MakeUI builds the UI for the current GUI builder.
+func (b *Builder) MakeUI() fyne.CanvasObject {
+	return b.buildUI(b.root, b.win)
 }
 
 // Save will trigger the current state to be written out to the file this was opened from.
@@ -86,10 +93,6 @@ func (b *Builder) saveAs() {
 	d.SetFilter(storage.NewExtensionFileFilter([]string{".json"}))
 	d.SetFileName("main.gui.json")
 	d.Show()
-}
-
-func (b *Builder) Show() fyne.CanvasObject {
-	return b.buildUI(b.root, b.win)
 }
 
 func buildLibrary() fyne.CanvasObject {

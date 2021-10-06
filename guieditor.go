@@ -24,7 +24,7 @@ func (g *guiEditor) changed() bool {
 }
 
 func (g *guiEditor) content() fyne.CanvasObject {
-	return g.builder.Show()
+	return g.builder.MakeUI()
 }
 
 func (g *guiEditor) close() {
