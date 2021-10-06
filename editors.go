@@ -20,5 +20,6 @@ type editor interface {
 	changed() bool
 	close()
 	content() fyne.CanvasObject
+	run()
 	save()
 }

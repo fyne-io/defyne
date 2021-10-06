@@ -61,7 +61,30 @@ func NewBuilder(u fyne.URI, win fyne.Window) *Builder {
 
 // MakeUI builds the UI for the current GUI builder.
 func (b *Builder) MakeUI() fyne.CanvasObject {
-	return b.buildUI(b.root, b.win)
+	return b.buildUI(b.root)
+}
+
+// Run generates a go main function and runs it so we can preview the UI in a real app.
+func (b *Builder) Run() {
+	packagesList := append(packagesRequired(b.wrapped), "app")
+	code := exportCode(packagesList, b.wrapped)
+	code += `
+func main() {
+	myApp := app.New()
+	myWindow := myApp.NewWindow("Hello")
+	myWindow.SetContent(makeUI())
+	myWindow.ShowAndRun()
+}
+`
+	path := filepath.Join(os.TempDir(), "fynebuilder")
+	os.MkdirAll(path, 0711)
+	path = filepath.Join(path, "main.go")
+	_ = ioutil.WriteFile(path, []byte(code), 0600)
+
+	cmd := exec.Command("go", "run", path)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	cmd.Start()
 }
 
 // Save will trigger the current state to be written out to the file this was opened from.
@@ -149,32 +172,9 @@ func buildLibrary() fyne.CanvasObject {
 	}), nil, nil, list)
 }
 
-func (b *Builder) buildUI(content fyne.CanvasObject, win fyne.Window) fyne.CanvasObject {
+func (b *Builder) buildUI(content fyne.CanvasObject) fyne.CanvasObject {
 	b.wrapped = wrapContent(content, nil)
 	wrap := container.NewMax(b.wrapped)
-
-	toolbar := widget.NewToolbar(
-		widget.NewToolbarAction(theme.MailForwardIcon(), func() {
-			packagesList := append(packagesRequired(b.wrapped), "app")
-			code := exportCode(packagesList, b.wrapped)
-			code += `
-func main() {
-	myApp := app.New()
-	myWindow := myApp.NewWindow("Hello")
-	myWindow.SetContent(makeUI())
-	myWindow.ShowAndRun()
-}
-`
-			path := filepath.Join(os.TempDir(), "fynebuilder")
-			os.MkdirAll(path, 0711)
-			path = filepath.Join(path, "main.go")
-			_ = ioutil.WriteFile(path, []byte(code), 0600)
-
-			cmd := exec.Command("go", "run", path)
-			cmd.Stderr = os.Stderr
-			cmd.Stdout = os.Stdout
-			cmd.Start()
-		}))
 
 	widType = widget.NewLabelWithStyle("(None Selected)", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 	paletteList = container.NewVBox()
@@ -185,8 +185,7 @@ func main() {
 
 	split := container.NewHSplit(wrap, palette)
 	split.Offset = 0.8
-	return container.New(layout.NewBorderLayout(toolbar, nil, nil, nil), toolbar,
-		split)
+	return split
 }
 
 func packagesRequired(obj fyne.CanvasObject) []string {

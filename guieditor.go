@@ -7,6 +7,9 @@ import (
 	"github.com/fyne-io/defyne/internal/guibuilder"
 )
 
+// Declare conformity with editor interface
+var _ editor = (*guiEditor)(nil)
+
 type guiEditor struct {
 	uri     fyne.URI
 	builder *guibuilder.Builder
@@ -28,6 +31,10 @@ func (g *guiEditor) content() fyne.CanvasObject {
 }
 
 func (g *guiEditor) close() {
+}
+
+func (g *guiEditor) run() {
+	g.builder.Run()
 }
 
 func (g *guiEditor) save() {

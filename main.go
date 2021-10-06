@@ -69,5 +69,10 @@ func (d *defyne) makeToolbar() *widget.Toolbar {
 			if ed, ok := d.openEditors[d.fileTabs.Selected()]; ok {
 				ed.save()
 			}
+		}),
+		widget.NewToolbarAction(theme.MailForwardIcon(), func() {
+			if ed, ok := d.openEditors[d.fileTabs.Selected()]; ok {
+				ed.run()
+			}
 		}))
 }

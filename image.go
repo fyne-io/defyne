@@ -6,6 +6,9 @@ import (
 	"fyne.io/fyne/v2/container"
 )
 
+// Declare conformity with editor interface
+var _ editor = (*imageEditor)(nil)
+
 type imageEditor struct {
 	uri   fyne.URI
 	image *canvas.Image
@@ -37,6 +40,9 @@ func (i *imageEditor) content() fyne.CanvasObject {
 }
 
 func (i *imageEditor) close() {
+}
+
+func (i *imageEditor) run() {
 }
 
 func (i *imageEditor) save() {

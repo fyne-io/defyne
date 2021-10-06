@@ -8,6 +8,9 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// Declare conformity with editor interface
+var _ editor = (*textEditor)(nil)
+
 type textEditor struct {
 	uri    fyne.URI
 	entry  *widget.Entry
@@ -39,6 +42,9 @@ func (t *textEditor) content() fyne.CanvasObject {
 }
 
 func (t *textEditor) close() {
+}
+
+func (t *textEditor) run() {
 }
 
 func (t *textEditor) save() {
