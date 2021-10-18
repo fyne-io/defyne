@@ -193,7 +193,7 @@ func initWidgets() {
 			},
 		},
 		"*widget.Check": {
-			name: "CheckBox",
+			name: "Check",
 			create: func() fyne.CanvasObject {
 				return widget.NewCheck("Tick it or don't", func(b bool) {})
 			},
@@ -213,7 +213,7 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				c := obj.(*widget.Check)
-				return fmt.Sprintf("widget.NewCheck(\"%s\", func(b bool) {}", encodeDoubleQuote(c.Text))
+				return fmt.Sprintf("widget.NewCheck(\"%s\", func(b bool) {})", encodeDoubleQuote(c.Text))
 			},
 		},
 		"*widget.RadioGroup": {
