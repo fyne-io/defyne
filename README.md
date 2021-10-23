@@ -19,9 +19,10 @@ This repo contains the work-in-progress Fyne IDE.
 
 ## Installation
 
-* Can be installed directly using standard go tools:
+Can be installed directly using standard go tools:
 
 	$ go install -v github.com/fyne-io/defyne@latest
+
 
 ## Contribution Setup
 
