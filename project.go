@@ -19,6 +19,7 @@ func (d *defyne) showProjectOpenDialog(w fyne.Window) {
 		}
 
 		d.setProject(u)
+		d.win.Show()
 		w.Close()
 	}, w)
 }

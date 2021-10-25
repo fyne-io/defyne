@@ -28,11 +28,17 @@ func main() {
 	a := app.NewWithID("io.fyne.defyne")
 	a.SetIcon(resourceIconPng)
 	w := a.NewWindow("Defyne")
-
-	pwd, _ := os.Getwd()
-	root := storage.NewFileURI(pwd)
-	ide := &defyne{win: w}
-	ide.setProject(root)
 	w.Resize(fyne.NewSize(1024, 768))
-	w.ShowAndRun()
+
+	ide := &defyne{win: w}
+	if len(os.Args) > 1 {
+		root := storage.NewFileURI(os.Args[1])
+		ide.setProject(root)
+
+		w.Show()
+	} else {
+		ide.showProjectSelect()
+	}
+
+	a.Run()
 }

@@ -42,6 +42,6 @@ Build DEFyne
 
 	$ go build
 
-Run DEFyne
+Run DEFyne, opening the current directory
 
-	$ ./defyne
+	$ ./defyne .
