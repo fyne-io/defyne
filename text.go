@@ -2,8 +2,10 @@ package main
 
 import (
 	"io/ioutil"
+	"runtime"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 )
@@ -11,16 +13,36 @@ import (
 // Declare conformity with editor interface
 var _ editor = (*textEditor)(nil)
 
+type codeEntry struct {
+	widget.Entry
+
+	editor *textEditor
+}
+
+func (e *codeEntry) TypedShortcut(shortcut fyne.Shortcut) {
+	if sh, ok := shortcut.(*desktop.CustomShortcut); ok {
+		ctrlSuper := (runtime.GOOS == "darwin" && sh.Modifier == desktop.SuperModifier) ||
+			(runtime.GOOS != "darwin" && sh.Modifier == desktop.ControlModifier)
+		if sh.KeyName == "S" && ctrlSuper {
+			e.editor.save()
+		}
+	}
+}
+
 type textEditor struct {
 	uri    fyne.URI
-	entry  *widget.Entry
+	entry  *codeEntry
 	edited bool
 }
 
 func newTextEditor(u fyne.URI) editor {
-	text := widget.NewMultiLineEntry()
+	text := &codeEntry{}
+	text.MultiLine = true
 	text.TextStyle.Monospace = true
+	text.Wrapping = fyne.TextTruncate
+	text.ExtendBaseWidget(text)
 	editor := &textEditor{uri: u, entry: text}
+	text.editor = editor
 
 	f, _ := storage.Reader(u)
 	b, _ := ioutil.ReadAll(f)
