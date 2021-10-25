@@ -56,6 +56,11 @@ func (d *defyne) makeFilesPanel() *xWidget.FileTree {
 
 	files.OnSelected = func(uid widget.TreeNodeID) {
 		u, err := storage.ParseURI(uid)
+		isDir, _ := storage.CanList(u)
+		if isDir {
+			return
+		}
+
 		if err != nil {
 			dialog.ShowError(err, d.win)
 		}
