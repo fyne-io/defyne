@@ -1,7 +1,6 @@
 fyne.io/fyne/v2 v2.0.2/go.mod h1:3+FYmLJVgeb8EvTPJ5YzZeo7LkAq4bbuY3Zrir6xHbg=
-fyne.io/fyne/v2 v2.1.1-0.20210924203919-e7794b18c28c/go.mod h1:c1vwI38Ebd0dAdxVa6H1Pj6/+cK1xtDy61+I31g+s14=
-fyne.io/fyne/v2 v2.1.1-0.20211004204655-1e6e32efc443 h1:Sib4cTILmZat68f2eZs8SPRePl1v8KkOxIOTiPjuGw8=
-fyne.io/fyne/v2 v2.1.1-0.20211004204655-1e6e32efc443/go.mod h1:c1vwI38Ebd0dAdxVa6H1Pj6/+cK1xtDy61+I31g+s14=
+fyne.io/fyne/v2 v2.1.1 h1:3p39SwQ/rBiYODVYI4ggTuwMufWYmqaRMJvXTFg7jSw=
+fyne.io/fyne/v2 v2.1.1/go.mod h1:c1vwI38Ebd0dAdxVa6H1Pj6/+cK1xtDy61+I31g+s14=
 fyne.io/x/fyne v0.0.0-20210407180700-b277e3225fbe h1:PWCgvIVWsJeZdPAFwgbtkh0jrHzF1mjOYjte0V652CE=
 fyne.io/x/fyne v0.0.0-20210407180700-b277e3225fbe/go.mod h1:pKz7ChGu4HygnOMAJ4fTBDSxJFAGz144XW28WFsxbPA=
 github.com/ActiveState/termtest/conpty v0.5.0 h1:JLUe6YDs4Jw4xNPCU+8VwTpniYOGeKzQg4SM2YHQNA8=
@@ -23,8 +22,8 @@ github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3/go.mod h1:CzM2G82Q9BDUv
 github.com/fsnotify/fsnotify v1.4.9 h1:hsms1Qyu0jgnwNXIxa+/V/PDsU6CfLf6CNO8H7IWoS4=
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
 github.com/fyne-io/mobile v0.1.3-0.20210318200029-09e9c4e13a8f/go.mod h1:/kOrWrZB6sasLbEy2JIvr4arEzQTXBTZGb3Y96yWbHY=
-github.com/fyne-io/terminal v0.0.0-20211005170428-ee11372c1e7d h1:0txG9ve0RTF7zUWMjMw2+mllGYDSwRXIdW5Y8u8U3Cw=
-github.com/fyne-io/terminal v0.0.0-20211005170428-ee11372c1e7d/go.mod h1:TjE22ldPNIcwFwirXa0e6lcbJAmXJ4fQhkwp7K8y0vA=
+github.com/fyne-io/terminal v0.0.0-20211022214227-ef292b54d29a h1:SMIJM4GyYw8d6pXcD2s08mNvNXQQVcN1L6cupR/6OyU=
+github.com/fyne-io/terminal v0.0.0-20211022214227-ef292b54d29a/go.mod h1:zkqKA2a0sUIR0dxwSE+Pzon9IEuuS1DVo4AyihLROfo=
 github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7/go.mod h1:482civXOzJJCPzJ4ZOX/pwvXBWSnzD4OKMdH4ClKGbk=
 github.com/go-gl/gl v0.0.0-20210813123233-e4099ee2221f h1:s0O46d8fPwk9kU4k1jj76wBquMVETx7uveQD9MCIQoU=
 github.com/go-gl/gl v0.0.0-20210813123233-e4099ee2221f/go.mod h1:wjpnOv6ONl2SuJSxqCPVaPZibGFdSci9HFocT9qtVYM=
