@@ -71,6 +71,8 @@ func (d *defyne) menuActionSave() {
 func (d *defyne) makeMenu() *fyne.MainMenu {
 	return fyne.NewMainMenu(
 		fyne.NewMenu("File",
+			fyne.NewMenuItem("Open Project...", d.showProjectSelect),
+			fyne.NewMenuItemSeparator(),
 			fyne.NewMenuItem("New File...", d.menuActionNew),
 			fyne.NewMenuItemSeparator(),
 			fyne.NewMenuItem("Save", d.menuActionSave),
