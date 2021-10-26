@@ -14,7 +14,7 @@ type imageEditor struct {
 	image *canvas.Image
 }
 
-func newImageEditor(u fyne.URI) editor {
+func newImageEditor(u fyne.URI, _ fyne.Window) editor {
 	img := canvas.NewImageFromURI(u)
 	if u.Extension() == ".svg" {
 		img.FillMode = canvas.ImageFillContain

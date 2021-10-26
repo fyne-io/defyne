@@ -35,7 +35,7 @@ type textEditor struct {
 	edited bool
 }
 
-func newTextEditor(u fyne.URI) editor {
+func newTextEditor(u fyne.URI, _ fyne.Window) editor {
 	text := &codeEntry{}
 	text.MultiLine = true
 	text.TextStyle.Monospace = true

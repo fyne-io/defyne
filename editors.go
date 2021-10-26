@@ -4,9 +4,10 @@ import "fyne.io/fyne/v2"
 
 var editorsByFilename = map[string]func(fyne.URI, fyne.Window) editor{
 	".gui.json": newGuiEditor,
+	"go.mod":    newTextEditor,
 }
 
-var editorsByMime = map[string]func(fyne.URI) editor{
+var editorsByMime = map[string]func(fyne.URI, fyne.Window) editor{
 	"application/xml-tdd": newTextEditor, // Go mime on older systems?
 	"image/jpeg":          newImageEditor,
 	"image/png":           newImageEditor,

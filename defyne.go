@@ -34,7 +34,7 @@ func (d *defyne) openEditor(u fyne.URI) {
 
 	var ed editor
 	for name, e := range editorsByFilename {
-		if strings.Index(u.Name(), name) > 0 {
+		if strings.Index(u.Name(), name) > -1 {
 			ed = e(u, d.win)
 		}
 	}
@@ -45,7 +45,7 @@ func (d *defyne) openEditor(u fyne.URI) {
 			return
 		}
 
-		ed = editorsByMime[u.MimeType()](u)
+		ed = editorsByMime[u.MimeType()](u, d.win)
 	}
 
 	newTab := container.NewTabItemWithIcon(u.Name(), theme.FileTextIcon(), ed.content())
