@@ -4,6 +4,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -32,7 +33,8 @@ func main() {
 
 	ide := &defyne{win: w}
 	if len(os.Args) > 1 {
-		root := storage.NewFileURI(os.Args[1])
+		path, _ := filepath.Abs(os.Args[1])
+		root := storage.NewFileURI(path)
 		ide.setProject(root)
 
 		w.Show()
