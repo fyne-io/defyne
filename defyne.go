@@ -34,7 +34,7 @@ func (d *defyne) openEditor(u fyne.URI) {
 
 	var ed editor
 	for name, e := range editorsByFilename {
-		if strings.Index(u.Name(), name) > -1 {
+		if strings.Contains(u.Name(), name) {
 			ed = e(u, d.win)
 		}
 	}
