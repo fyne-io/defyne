@@ -2,6 +2,7 @@ package main
 
 import (
 	"io"
+	"os"
 	"os/exec"
 
 	"fyne.io/fyne/v2"
@@ -37,6 +38,19 @@ func (d *defyne) showNewProjectDialog(w fyne.Window) {
 	}, func(ok bool) {
 		if !ok {
 			return
+		} else if dir == nil {
+			homeDir, homeDirErr := os.UserHomeDir()
+			if homeDirErr != nil {
+				dialog.ShowError(homeDirErr, w)
+				return
+			}
+			defaultDir := storage.NewFileURI(homeDir)
+			newDir, newDirErr := storage.ListerForURI(defaultDir)
+			if newDirErr != nil {
+				dialog.ShowError(newDirErr, w)
+				return
+			}
+			dir = newDir
 		}
 
 		dir, err := createProject(dir, name.Text)
