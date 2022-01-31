@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
@@ -81,7 +83,15 @@ func (d *defyne) makeTerminalPanel() fyne.CanvasObject {
 type filter struct{}
 
 func (f *filter) Matches(u fyne.URI) bool {
-	return u.Name()[0] != '.'
+	name := u.Name()
+	if name[0] == '.' {
+		return false
+	}
+
+	if name == "go.sum" || (len(name) > 7 && strings.Index(name, ".gui.go") == len(u.Name())-7) {
+		return false
+	}
+	return true
 }
 
 func filterHidden() storage.FileFilter {
