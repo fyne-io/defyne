@@ -13,6 +13,7 @@ import (
 
 const labelJSON = `{
   "Type": "*widget.Label",
+  "Name": "myLabel",
   "Struct": {
     "Hidden": false,
     "Text": "Hi",
@@ -33,19 +34,23 @@ func TestDecodeJSON(t *testing.T) {
 	initWidgets()
 
 	buf := bytes.NewReader([]byte(labelJSON))
-	obj := DecodeJSON(buf)
+	obj, meta := DecodeJSON(buf)
 
 	l, ok := obj.(*widget.Label)
 	require.True(t, ok)
 	assert.Equal(t, "Hi", l.Text)
+	assert.Equal(t, "myLabel", meta.(*fyne.Container).Objects[1].(*overlayWidget).name)
 	assert.Equal(t, fyne.TextAlignCenter, l.Alignment)
 	assert.Equal(t, fyne.TextStyle{Bold: true}, l.TextStyle)
 }
 
 func TestEncodeJSON(t *testing.T) {
 	l := widget.NewLabelWithStyle("Hi", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
+	meta := wrapWidget(l, nil)
+	meta.(*fyne.Container).Objects[1].(*overlayWidget).name = "myLabel"
 
 	var buf bytes.Buffer
-	EncodeJSON(l, &buf)
+	err := EncodeJSON(meta, &buf)
+	assert.Nil(t, err)
 	assert.Equal(t, labelJSON, buf.String())
 }

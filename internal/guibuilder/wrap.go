@@ -25,6 +25,7 @@ func (r *jsonResource) MarshalJSON() ([]byte, error) {
 
 type overlayContainer struct {
 	widget.BaseWidget
+	name      string
 	c, parent *fyne.Container
 }
 
@@ -64,7 +65,7 @@ func (o *overlayContainer) Resize(s fyne.Size) {
 
 func (o *overlayContainer) Tapped(e *fyne.PointEvent) {
 	setCurrent(o)
-	choose(o.c)
+	choose(o)
 }
 
 func (o *overlayContainer) Object() fyne.CanvasObject {
@@ -73,6 +74,8 @@ func (o *overlayContainer) Object() fyne.CanvasObject {
 
 type overlayWidget struct {
 	widget.BaseWidget
+	name string
+
 	child  fyne.Widget
 	parent *fyne.Container
 }
@@ -113,7 +116,7 @@ func (w *overlayWidget) Refresh() {
 
 func (w *overlayWidget) Tapped(e *fyne.PointEvent) {
 	setCurrent(w)
-	choose(w.child)
+	choose(w)
 }
 
 type overRender struct {
@@ -205,4 +208,17 @@ func wrapWidget(w fyne.Widget, parent *fyne.Container) fyne.CanvasObject {
 
 func wrapResource(r fyne.Resource) fyne.Resource {
 	return &jsonResource{r}
+}
+
+// unwrap gets the wrapping container or widget for a passed CanvasObject.
+func unwrap(o fyne.CanvasObject) (*overlayContainer, *overlayWidget) {
+	if c, ok := o.(*fyne.Container); ok { // the content of an overlayWidget container
+		return nil, c.Objects[1].(*overlayWidget)
+	} else if w, ok := o.(*overlayWidget); ok {
+		return nil, w
+	} else if c, ok := o.(*overlayContainer); ok {
+		return c, nil
+	}
+
+	return nil, nil
 }

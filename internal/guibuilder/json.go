@@ -11,23 +11,27 @@ import (
 
 type canvObj struct {
 	Type   string
+	Name   string
 	Struct fyne.CanvasObject `json:",omitempty"`
 }
 
 type cont struct {
 	canvObj
 	Layout  string `json:",omitempty"`
+	Name    string
 	Objects []interface{}
 }
 
 func encodeObj(obj fyne.CanvasObject) interface{} {
-	if c, ok := obj.(*fyne.Container); ok { // the content of an overlayWidget container
-		return encodeObj(c.Objects[0]) // 0 is the widget, 1 is the overlayWidget
-	} else if c, ok := obj.(*overlayContainer); ok {
+	c, w := unwrap(obj)
+	if w != nil {
+		return encodeWidget(w.child, w.name)
+	} else if c != nil {
 		var node cont
 		node.Type = "*fyne.Container"
 		node.Layout = strings.Split(reflect.TypeOf(c.c.Layout).String(), ".")[1]
 		node.Layout = strings.ToTitle(node.Layout[0:1]) + node.Layout[1:]
+		node.Name = c.name
 		p := strings.Index(node.Layout, "Layout")
 		if p > 0 {
 			node.Layout = node.Layout[:p]
@@ -36,27 +40,28 @@ func encodeObj(obj fyne.CanvasObject) interface{} {
 			node.Layout = "VBox" // TODO remove this hack with layoutProps
 		}
 		for _, o := range c.c.Objects {
-			node.Objects = append(node.Objects, encodeObj(o))
+			node.Objects = append(node.Objects, encodeObj(o)) // what are these? TODO
 		}
 		return &node
 	}
 
-	return encodeWidget(obj)
+	return nil
 }
 
-func encodeWidget(obj fyne.CanvasObject) interface{} {
-	return &canvObj{Type: reflect.TypeOf(obj).String(), Struct: obj}
+func encodeWidget(obj fyne.CanvasObject, name string) interface{} {
+	return &canvObj{Type: reflect.TypeOf(obj).String(), Name: name, Struct: obj}
 }
 
-// DecodeJSON returns a tree of `CanvasObject` elements from the provided JSON `Reader`.
-func DecodeJSON(r io.Reader) fyne.CanvasObject {
+// DecodeJSON returns a tree of `CanvasObject` elements from the provided JSON `Reader` and
+// the tree of wrapped elements that describe their metadata.
+func DecodeJSON(r io.Reader) (fyne.CanvasObject, fyne.CanvasObject) {
 	var data interface{}
 	_ = json.NewDecoder(r).Decode(&data)
 	if data == nil {
-		return nil
+		return nil, nil
 	}
 
-	return decodeMap(data.(map[string]interface{}))
+	return decodeMap(data.(map[string]interface{}), nil)
 }
 
 func decodeTextStyle(m map[string]interface{}) (s fyne.TextStyle) {
@@ -76,17 +81,23 @@ func decodeTextStyle(m map[string]interface{}) (s fyne.TextStyle) {
 	return
 }
 
-func decodeMap(m map[string]interface{}) fyne.CanvasObject {
+func decodeMap(m map[string]interface{}, p *fyne.Container) (fyne.CanvasObject, fyne.CanvasObject) {
 	if m["Type"] == "*fyne.Container" {
 		obj := &fyne.Container{}
 		obj.Layout = layouts[m["Layout"].(string)].create(nil)
-		for _, o := range m["Objects"].([]interface{}) {
-			obj.Objects = append(obj.Objects, decodeMap(o.(map[string]interface{})))
+		wrap := wrapContent(obj, p).(*overlayContainer)
+		for _, data := range m["Objects"].([]interface{}) {
+			child, childWrap := decodeMap(data.(map[string]interface{}), obj)
+			obj.Objects = append(obj.Objects, child)
+			wrap.c.Objects = append(wrap.c.Objects, childWrap)
 		}
-		return obj
+		if name, ok := m["Name"]; ok {
+			wrap.name = name.(string)
+		}
+		return obj, wrap
 	}
 
-	obj := widgets[m["Type"].(string)].create()
+	obj := widgets[m["Type"].(string)].create().(fyne.Widget)
 	e := reflect.ValueOf(obj).Elem()
 	for k, v := range m["Struct"].(map[string]interface{}) {
 		f := e.FieldByName(k)
@@ -111,7 +122,11 @@ func decodeMap(m map[string]interface{}) fyne.CanvasObject {
 	}
 
 	obj.Refresh()
-	return obj
+	w := wrapWidget(obj, p)
+	if name, ok := m["Name"]; ok {
+		w.(*fyne.Container).Objects[1].(*overlayWidget).name = name.(string)
+	}
+	return obj, w
 }
 
 // EncodeJSON writes a JSON stream for the tree of `CanvasObject` elements provided.

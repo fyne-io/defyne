@@ -44,19 +44,20 @@ func NewBuilder(u fyne.URI, win fyne.Window) *Builder {
 		dialog.ShowError(err, win)
 	}
 
-	var obj fyne.CanvasObject
+	var obj, w fyne.CanvasObject
 	if r == nil {
 		obj = previewUI()
 	} else {
-		obj = DecodeJSON(r)
+		obj, w = DecodeJSON(r)
 		_ = r.Close()
 
 		if obj == nil {
 			obj = previewUI()
+			w = wrapContent(obj, nil)
 		}
 	}
 
-	return &Builder{root: obj, uri: u, win: win}
+	return &Builder{root: obj, wrapped: w, uri: u, win: win}
 }
 
 // MakeUI builds the UI for the current GUI builder.
@@ -173,7 +174,6 @@ func buildLibrary() fyne.CanvasObject {
 }
 
 func (b *Builder) buildUI(content fyne.CanvasObject) fyne.CanvasObject {
-	b.wrapped = wrapContent(content, nil)
 	wrap := container.NewMax(b.wrapped)
 
 	widType = widget.NewLabelWithStyle("(None Selected)", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
@@ -217,22 +217,31 @@ func packagesRequired(obj fyne.CanvasObject) []string {
 	return ret
 }
 
-func choose(o fyne.CanvasObject) {
-	typeName := reflect.TypeOf(o).Elem().Name()
-	widName := reflect.TypeOf(o).String()
-	l := reflect.ValueOf(o).Elem()
-	if typeName == "Entry" {
-		if l.FieldByName("Password").Bool() {
-			typeName = "PasswordEntry"
-		} else if l.FieldByName("MultiLine").Bool() {
-			typeName = "MultiLineEntry"
-		}
-		widName = "*widget." + typeName
+func choose(ow fyne.CanvasObject) {
+	var o fyne.CanvasObject
+	var name string
+	o1, o2 := unwrap(ow)
+	if o1 != nil {
+		o = o1.c
+		name = o1.name
+	} else {
+		o = o2.child
+		name = o2.name
 	}
+	typeName := getTypeOf(o)
+	class := "*widget." + typeName
 	widType.SetText(typeName)
+	widName.OnChanged = func(s string) {
+		if o1 != nil {
+			o1.name = s
+		} else {
+			o2.name = s
+		}
+	}
+	widName.SetText(name)
 
 	var items []*widget.FormItem
-	if match, ok := widgets[widName]; ok {
+	if match, ok := widgets[class]; ok {
 		items = match.edit(o)
 	}
 
