@@ -239,9 +239,7 @@ func varsRequired(obj fyne.CanvasObject) []string {
 		objs = c.c.Objects
 	}
 	for _, w := range objs {
-		for _, v := range varsRequired(w) {
-			ret = append(ret, v)
-		}
+		ret = append(ret, varsRequired(w)...)
 	}
 	return ret
 }
