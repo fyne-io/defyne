@@ -87,7 +87,7 @@ func decodeMap(m map[string]interface{}, p *fyne.Container) (fyne.CanvasObject, 
 		obj.Layout = layouts[m["Layout"].(string)].create(nil)
 		wrap := wrapContent(obj, p).(*overlayContainer)
 		for _, data := range m["Objects"].([]interface{}) {
-			child, childWrap := decodeMap(data.(map[string]interface{}), obj)
+			child, childWrap := decodeMap(data.(map[string]interface{}), wrap.c)
 			obj.Objects = append(obj.Objects, child)
 			wrap.c.Objects = append(wrap.c.Objects, childWrap)
 		}
