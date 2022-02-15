@@ -223,7 +223,12 @@ func packagesRequired(obj fyne.CanvasObject) []string {
 
 func varsRequired(obj fyne.CanvasObject) []string {
 	if w, ok := obj.(*overlayWidget); ok {
-		return []string{w.name + " *widget." + getTypeOf(w.child)}
+		if w.name == "" {
+			return []string{}
+		}
+
+		_, class := getTypeOf(w.child)
+		return []string{w.name + " " + class}
 	}
 
 	ret := []string{}
@@ -252,8 +257,7 @@ func choose(ow fyne.CanvasObject) {
 		o = o2.child
 		name = o2.name
 	}
-	typeName := getTypeOf(o)
-	class := "*widget." + typeName
+	typeName, class := getTypeOf(o)
 	widType.SetText(typeName)
 	widName.OnChanged = func(s string) {
 		if o1 != nil {
@@ -346,8 +350,9 @@ func (g *gui) makeUI() fyne.CanvasObject {
 	return string(formatted)
 }
 
-func getTypeOf(o fyne.CanvasObject) string {
+func getTypeOf(o fyne.CanvasObject) (string, string) {
 	typeName := reflect.TypeOf(o).Elem().Name()
+	class := reflect.TypeOf(o).String()
 	l := reflect.ValueOf(o).Elem()
 	if typeName == "Entry" {
 		if l.FieldByName("Password").Bool() {
@@ -355,9 +360,10 @@ func getTypeOf(o fyne.CanvasObject) string {
 		} else if l.FieldByName("MultiLine").Bool() {
 			typeName = "MultiLineEntry"
 		}
+		class = "*widget." + typeName
 	}
 
-	return typeName
+	return typeName, class
 }
 
 func initOnce() {
