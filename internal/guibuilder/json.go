@@ -37,7 +37,12 @@ func encodeObj(obj fyne.CanvasObject) interface{} {
 			node.Layout = node.Layout[:p]
 		}
 		if node.Layout == "Box" {
-			node.Layout = "VBox" // TODO remove this hack with layoutProps
+			props := layoutProps[c.c]
+			if props["dir"] == "horizontal" {
+				node.Layout = "HBox"
+			} else {
+				node.Layout = "VBox"
+			}
 		}
 		for _, o := range c.c.Objects {
 			node.Objects = append(node.Objects, encodeObj(o)) // what are these? TODO
@@ -84,7 +89,15 @@ func decodeTextStyle(m map[string]interface{}) (s fyne.TextStyle) {
 func decodeMap(m map[string]interface{}, p *fyne.Container) (fyne.CanvasObject, fyne.CanvasObject) {
 	if m["Type"] == "*fyne.Container" {
 		obj := &fyne.Container{}
-		obj.Layout = layouts[m["Layout"].(string)].create(nil)
+		name := m["Layout"].(string)
+		layoutProps[obj] = map[string]string{"layout": name}
+		if name == "HBox" {
+			layoutProps[obj]["dir"] = "horizontal"
+		} else if name == "VBox" {
+			layoutProps[obj]["dir"] = "vertical"
+		}
+
+		obj.Layout = layouts[name].create(layoutProps[obj])
 		wrap := wrapContent(obj, p).(*overlayContainer)
 		for _, data := range m["Objects"].([]interface{}) {
 			child, childWrap := decodeMap(data.(map[string]interface{}), wrap.c)

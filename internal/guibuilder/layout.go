@@ -159,6 +159,7 @@ var (
 		},
 		"HBox": {
 			func(props map[string]string) fyne.Layout {
+				props["dir"] = "horizontal"
 				return layout.NewHBoxLayout()
 			},
 			nil,
@@ -177,6 +178,7 @@ var (
 		},
 		"VBox": {
 			func(props map[string]string) fyne.Layout {
+				props["dir"] = "vertical"
 				return layout.NewVBoxLayout()
 			},
 			nil,

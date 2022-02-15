@@ -625,10 +625,11 @@ func initWidgets() {
 				c := obj.(*fyne.Container)
 				props := layoutProps[c]
 
-				var items []*widget.FormItem
 				var choose *widget.FormItem
 				// TODO figure out how to work Border...
-				choose = widget.NewFormItem("Layout", widget.NewSelect(layoutNames, func(l string) {
+				choose = widget.NewFormItem("Layout", widget.NewSelect(layoutNames, nil))
+				items := []*widget.FormItem{choose}
+				choose.Widget.(*widget.Select).OnChanged = func(l string) {
 					lay := layouts[l]
 					props["layout"] = l
 					c.Layout = lay.create(props)
@@ -645,7 +646,7 @@ func initWidgets() {
 					paletteList.Objects = []fyne.CanvasObject{editForm}
 					choose.Widget.Show()
 					paletteList.Refresh()
-				}))
+				}
 				choose.Widget.(*widget.Select).SetSelected(props["layout"])
 				return items
 			},
