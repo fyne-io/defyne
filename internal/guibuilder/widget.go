@@ -625,9 +625,8 @@ func initWidgets() {
 				c := obj.(*fyne.Container)
 				props := layoutProps[c]
 
-				var choose *widget.FormItem
 				// TODO figure out how to work Border...
-				choose = widget.NewFormItem("Layout", widget.NewSelect(layoutNames, nil))
+				choose := widget.NewFormItem("Layout", widget.NewSelect(layoutNames, nil))
 				items := []*widget.FormItem{choose}
 				choose.Widget.(*widget.Select).OnChanged = func(l string) {
 					lay := layouts[l]
