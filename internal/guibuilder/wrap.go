@@ -36,7 +36,12 @@ func (o *overlayContainer) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (o *overlayContainer) GoString() string {
-	return widgets["*fyne.Container"].gostring(o.c)
+	code := widgets["*fyne.Container"].gostring(o.c)
+	if o.name != "" {
+		defs[o.name] = code
+		return "g." + o.name
+	}
+	return code
 }
 
 func (o *overlayContainer) MinSize() fyne.Size {
@@ -88,12 +93,19 @@ func (w *overlayWidget) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (w *overlayWidget) GoString() string {
+	var code string
 	name := reflect.TypeOf(w.child).String()
 	if widgets[name].gostring != nil {
-		return widgets[name].gostring(w.child)
+		code = widgets[name].gostring(w.child)
+	} else {
+		code = fmt.Sprintf("%#v", w.child)
 	}
 
-	return fmt.Sprintf("%#v", w.child)
+	if w.name != "" {
+		defs[w.name] = code
+		return "g." + w.name
+	}
+	return code
 }
 
 func (w *overlayWidget) Object() fyne.CanvasObject {
