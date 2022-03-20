@@ -92,7 +92,7 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				link := obj.(*widget.Hyperlink)
-				return fmt.Sprintf("widget.NewHyperLink(\"%s\", \"%s\")", encodeDoubleQuote(link.Text), encodeDoubleQuote(link.URL.String()))
+				return fmt.Sprintf("widget.NewHyperlink(\"%s\", \"%s\")", encodeDoubleQuote(link.Text), encodeDoubleQuote(link.URL.String()))
 			},
 		},
 		"*widget.Card": {
@@ -118,7 +118,7 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				c := obj.(*widget.Card)
-				return fmt.Sprintf("widget.NewCard(\"%s\", \"%s\", widget.NewLabel(\"Content here\")",
+				return fmt.Sprintf("widget.NewCard(\"%s\", \"%s\", widget.NewLabel(\"Content here\"))",
 					encodeDoubleQuote(c.Title), encodeDoubleQuote(c.Subtitle))
 			},
 		},
