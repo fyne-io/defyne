@@ -3,6 +3,7 @@ package guibuilder
 import (
 	"encoding/json"
 	"io"
+	"log"
 	"reflect"
 	"strings"
 
@@ -125,6 +126,8 @@ func decodeMap(m map[string]interface{}, p *fyne.Container) (fyne.CanvasObject, 
 			if res != nil {
 				f.Set(reflect.ValueOf(wrapResource(res)))
 			}
+		} else if f.Type().String() == "fyne.CanvasObject" {
+			log.Println("Unsupported field")
 		} else {
 			if strings.Index(f.Type().String(), "int") == 0 {
 				f.SetInt(int64(reflect.ValueOf(v).Float()))
