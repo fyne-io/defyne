@@ -624,14 +624,17 @@ func initWidgets() {
 			edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 				c := obj.(*fyne.Container)
 				props := layoutProps[c]
+				if props == nil {
+					props = map[string]string{}
+					layoutProps[c] = props
+				}
 
-				// TODO figure out how to work Border...
 				choose := widget.NewFormItem("Layout", widget.NewSelect(layoutNames, nil))
 				items := []*widget.FormItem{choose}
 				choose.Widget.(*widget.Select).OnChanged = func(l string) {
 					lay := layouts[l]
 					props["layout"] = l
-					c.Layout = lay.create(props)
+					c.Layout = lay.create(c, props)
 					c.Refresh()
 					choose.Widget.Hide()
 
@@ -652,6 +655,11 @@ func initWidgets() {
 			gostring: func(obj fyne.CanvasObject) string {
 				c := obj.(*fyne.Container)
 				l := layoutProps[c]["layout"]
+				lay := layouts[l]
+				if lay.goText != nil {
+					return lay.goText(c, layoutProps[c])
+				}
+
 				str := strings.Builder{}
 				str.WriteString(fmt.Sprintf("container.New%s(", l))
 				for i, o := range c.Objects {

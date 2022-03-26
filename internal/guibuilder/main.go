@@ -183,7 +183,8 @@ func (b *Builder) buildUI(content fyne.CanvasObject) fyne.CanvasObject {
 	paletteList = container.NewVBox()
 	palette := container.NewBorder(container.NewVBox(widType,
 		widget.NewForm(widget.NewFormItem("Name", widName))), nil, nil, nil,
-		container.NewGridWithRows(2, widget.NewCard("Properties", "", paletteList),
+		container.NewGridWithRows(2, widget.NewCard("Properties", "",
+			container.NewVScroll(paletteList)),
 			widget.NewCard("Component List", "", buildLibrary()),
 		))
 

@@ -18,9 +18,10 @@ type canvObj struct {
 
 type cont struct {
 	canvObj
-	Layout  string `json:",omitempty"`
-	Name    string
-	Objects []interface{}
+	Layout     string `json:",omitempty"`
+	Name       string
+	Objects    []interface{}
+	Properties map[string]string `json:",omitempty"`
 }
 
 func encodeObj(obj fyne.CanvasObject) interface{} {
@@ -48,6 +49,7 @@ func encodeObj(obj fyne.CanvasObject) interface{} {
 		for _, o := range c.c.Objects {
 			node.Objects = append(node.Objects, encodeObj(o)) // what are these? TODO
 		}
+		node.Properties = layoutProps[c.c]
 		return &node
 	}
 
@@ -91,20 +93,30 @@ func decodeMap(m map[string]interface{}, p *fyne.Container) (fyne.CanvasObject, 
 	if m["Type"] == "*fyne.Container" {
 		obj := &fyne.Container{}
 		name := m["Layout"].(string)
-		layoutProps[obj] = map[string]string{"layout": name}
+
+		props := map[string]string{"layout": name}
+		if m["Properties"] != nil {
+			for k, v := range m["Properties"].(map[string]interface{}) {
+				props[k] = v.(string)
+			}
+		}
+		layoutProps[obj] = props
 		if name == "HBox" {
 			layoutProps[obj]["dir"] = "horizontal"
 		} else if name == "VBox" {
 			layoutProps[obj]["dir"] = "vertical"
 		}
 
-		obj.Layout = layouts[name].create(layoutProps[obj])
 		wrap := wrapContent(obj, p).(*overlayContainer)
-		for _, data := range m["Objects"].([]interface{}) {
-			child, childWrap := decodeMap(data.(map[string]interface{}), wrap.c)
-			obj.Objects = append(obj.Objects, child)
-			wrap.c.Objects = append(wrap.c.Objects, childWrap)
+		if m["Objects"] != nil {
+			for _, data := range m["Objects"].([]interface{}) {
+				child, childWrap := decodeMap(data.(map[string]interface{}), wrap.c)
+				obj.Objects = append(obj.Objects, child)
+				wrap.c.Objects = append(wrap.c.Objects, childWrap)
+			}
 		}
+		obj.Layout = layouts[name].create(wrap.c, layoutProps[obj])
+		wrap.c.Layout = obj.Layout
 		if name, ok := m["Name"]; ok {
 			wrap.name = name.(string)
 		}
