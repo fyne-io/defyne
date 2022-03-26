@@ -168,6 +168,8 @@ func buildLibrary() fyne.CanvasObject {
 			if selected != nil {
 				c.c.Objects = append(c.c.Objects, wrapContent(selected.create(), c.c))
 				c.c.Refresh()
+				// cause property editor to refresh
+				choose(c)
 			}
 			return
 		}
@@ -182,7 +184,7 @@ func (b *Builder) buildUI(content fyne.CanvasObject) fyne.CanvasObject {
 	widName = widget.NewEntry()
 	paletteList = container.NewVBox()
 	palette := container.NewBorder(container.NewVBox(widType,
-		widget.NewForm(widget.NewFormItem("Name", widName))), nil, nil, nil,
+		widget.NewForm(widget.NewFormItem("Variable", widName))), nil, nil, nil,
 		container.NewGridWithRows(2, widget.NewCard("Properties", "",
 			container.NewVScroll(paletteList)),
 			widget.NewCard("Component List", "", buildLibrary()),

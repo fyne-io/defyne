@@ -143,7 +143,7 @@ func decodeMap(m map[string]interface{}, p *fyne.Container) (fyne.CanvasObject, 
 		} else {
 			if strings.Index(f.Type().String(), "int") == 0 {
 				f.SetInt(int64(reflect.ValueOf(v).Float()))
-			} else {
+			} else if v != nil {
 				f.Set(reflect.ValueOf(v))
 			}
 		}

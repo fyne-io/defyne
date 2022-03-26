@@ -671,7 +671,7 @@ func initWidgets() {
 						str.WriteRune(',')
 					}
 				}
-				str.WriteString(")\n")
+				str.WriteString(")")
 				return str.String()
 			},
 		},
