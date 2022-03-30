@@ -1,8 +1,9 @@
 fyne.io/fyne/v2 v2.1.0/go.mod h1:c1vwI38Ebd0dAdxVa6H1Pj6/+cK1xtDy61+I31g+s14=
-fyne.io/fyne/v2 v2.1.1 h1:3p39SwQ/rBiYODVYI4ggTuwMufWYmqaRMJvXTFg7jSw=
 fyne.io/fyne/v2 v2.1.1/go.mod h1:c1vwI38Ebd0dAdxVa6H1Pj6/+cK1xtDy61+I31g+s14=
-fyne.io/fyne/v2 v2.1.4 h1:bt1+28++kAzRzPB0GM2EuSV4cnl8rXNX4cjfd8G06Rc=
-fyne.io/fyne/v2 v2.1.4/go.mod h1:p+E/Dh+wPW8JwR2DVcsZ9iXgR9ZKde80+Y+40Is54AQ=
+fyne.io/fyne/v2 v2.1.4-0.20220330154433-70582dba741c h1:nrqPkkcbnX3AukG76zHlDbZfjY+XhQaYjuVJBoKheJU=
+fyne.io/fyne/v2 v2.1.4-0.20220330154433-70582dba741c/go.mod h1:+oI0wcUu3ZqegKx/MXtHlEsUt09rJcC+l6hMHHCpX/I=
+fyne.io/systray v1.9.1-0.20220318224641-d5779bfb17d1 h1:+WSQpU5D3NIpeWKzbIn0D7+OtVbOz7A2e92ezFWacmc=
+fyne.io/systray v1.9.1-0.20220318224641-d5779bfb17d1/go.mod h1:N4ZU0i34X+n8soFRlBNkmJTunw9wD+9jIP19fSZpjSI=
 fyne.io/x/fyne v0.0.0-20211027195715-357fb402507f h1:kOU+C8BGTYvPeOCssG7QCfm+NuUwBb+Avbbs+jnAEzA=
 fyne.io/x/fyne v0.0.0-20211027195715-357fb402507f/go.mod h1:qlr7n1wfK8YCzocbhxObiNHVsw4G0WKajBsffojdFHE=
 github.com/ActiveState/termtest/conpty v0.5.0 h1:JLUe6YDs4Jw4xNPCU+8VwTpniYOGeKzQg4SM2YHQNA8=
