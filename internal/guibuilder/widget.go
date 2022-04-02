@@ -663,17 +663,9 @@ func initWidgets() {
 					return lay.goText(c, layoutProps[c])
 				}
 
-				str := strings.Builder{}
+				str := &strings.Builder{}
 				str.WriteString(fmt.Sprintf("container.New%s(", l))
-				for i, o := range c.Objects {
-					if _, ok := o.(*overlayContainer); !ok {
-						o = o.(*fyne.Container).Objects[1]
-					}
-					str.WriteString(fmt.Sprintf("\n\t\t%#v", o))
-					if i < len(c.Objects)-1 {
-						str.WriteRune(',')
-					}
-				}
+				writeGoString(str, nil, c.Objects...)
 				str.WriteString(")")
 				return str.String()
 			},

@@ -205,7 +205,6 @@ func decodeWidget(m map[string]interface{}) fyne.Widget {
 		case "[]*widget.FormItem":
 			var items []*widget.FormItem
 			for _, item := range reflect.ValueOf(v).Interface().([]interface{}) {
-				log.Println("ite", item)
 				items = append(items, decodeFormItem(item.(map[string]interface{})))
 			}
 			f.Set(reflect.ValueOf(items))

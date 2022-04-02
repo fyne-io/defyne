@@ -176,22 +176,12 @@ var (
 					}
 				}
 
-				str := strings.Builder{}
+				str := &strings.Builder{}
 				str.WriteString(fmt.Sprintf("container.NewBorder(\n\t\t%s, \n\t\t%s, \n\t\t%s, \n\t\t%s, ",
 					goStringOrNil(t), goStringOrNil(b), goStringOrNil(l), goStringOrNil(r)))
-				for i, o := range c.Objects {
-					if _, ok := o.(*overlayContainer); !ok {
-						o = o.(*fyne.Container).Objects[1]
-					}
-					if o == t || o == b || o == l || o == r {
-						continue
-					}
-
-					str.WriteString(fmt.Sprintf("\n\t\t%#v", o))
-					if i < len(c.Objects)-1 {
-						str.WriteRune(',')
-					}
-				}
+				writeGoString(str, func(o fyne.CanvasObject) bool {
+					return o == t || o == b || o == l || o == r
+				}, c.Objects...)
 				str.WriteString(")")
 				return str.String()
 			},
@@ -270,7 +260,31 @@ var (
 					widget.NewFormItem("Arrange in", vert),
 				}
 			},
-			nil,
+			func(c *fyne.Container, props map[string]string) string {
+				rowCol := props["grid_type"]
+				if rowCol == "" {
+					rowCol = "Columns"
+				}
+				count := props["count"]
+				if count == "" {
+					count = "2"
+				}
+
+				num, err := strconv.ParseInt(count, 0, 0)
+				if err != nil {
+					num = 2
+				}
+
+				str := &strings.Builder{}
+				if rowCol == "Rows" {
+					str.WriteString(fmt.Sprintf("container.NewGridWithRows(%d, ", num))
+				} else {
+					str.WriteString(fmt.Sprintf("container.NewGridWithColumns(%d, ", num))
+				}
+				writeGoString(str, nil, c.Objects...)
+				str.WriteString(")")
+				return str.String()
+			},
 		},
 		"GridWrap": {
 			func(c *fyne.Container, props map[string]string) fyne.Layout {
@@ -389,4 +403,19 @@ func goStringOrNil(o fyne.CanvasObject) string {
 	}
 
 	return fmt.Sprintf("%#v", o)
+}
+
+func writeGoString(str *strings.Builder, skip func(object fyne.CanvasObject) bool, objs ...fyne.CanvasObject) {
+	for i, o := range objs {
+		if _, ok := o.(*overlayContainer); !ok {
+			o = o.(*fyne.Container).Objects[1]
+		}
+		if skip != nil && skip(o) {
+			continue
+		}
+		str.WriteString(fmt.Sprintf("\n\t\t%#v", o))
+		if i < len(objs)-1 {
+			str.WriteRune(',')
+		}
+	}
 }
