@@ -336,7 +336,10 @@ func initWidgets() {
 		"*widget.Form": {
 			name: "Form",
 			create: func() fyne.CanvasObject {
-				return widget.NewForm(widget.NewFormItem("Username", widget.NewEntry()), widget.NewFormItem("Password", widget.NewPasswordEntry()), widget.NewFormItem("", container.NewGridWithColumns(2, widget.NewButton("Submit", func() { fmt.Println("Form is submitted") }), widget.NewButton("Cancel", func() { fmt.Println("Form is Cancelled") }))))
+				f := widget.NewForm(widget.NewFormItem("Username", widget.NewEntry()), widget.NewFormItem("Password", widget.NewPasswordEntry()))
+				f.OnSubmit = func() {}
+				f.OnCancel = func() {}
+				return f
 			},
 			edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 				return []*widget.FormItem{}
