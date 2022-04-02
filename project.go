@@ -120,7 +120,8 @@ func main() {
 	a := app.New()
 	w := a.NewWindow("`+name+`")
 
-	w.SetContent(makeUI())
+	g := newGUI()
+	w.SetContent(g.makeUI())
 	w.ShowAndRun()
 }
 `)
@@ -139,7 +140,13 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func makeUI() fyne.CanvasObject {
+type gui struct {}
+
+func newGUI() *gui {
+	return &gui{}
+}
+
+func (g *gui) makeUI() fyne.CanvasObject {
 	return container.NewVBox(
 		widget.NewLabel("Hello `+name+`!"))
 
@@ -152,6 +159,7 @@ func makeUI() fyne.CanvasObject {
 	err = writeFile(dir, "main.gui.json", `{
   "Type": "*fyne.Container",
   "Layout": "VBox",
+  "Name": "",
   "Objects": [
     {
       "Type": "*widget.Label",
@@ -164,11 +172,16 @@ func makeUI() fyne.CanvasObject {
           "Bold": false,
           "Italic": false,
           "Monospace": false,
+          "Symbol": false,
           "TabWidth": 0
         }
       }
     }
-  ]
+  ],
+  "Properties": {
+    "dir": "vertical",
+    "layout": "VBox"
+  }
 }
 `)
 	if err != nil {
