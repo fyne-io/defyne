@@ -131,7 +131,7 @@ func decodeFromMap(m map[string]interface{}, in interface{}) {
 	t := reflect.ValueOf(in).Elem()
 	for k, v := range m {
 		val := t.FieldByName(k)
-		if val.Type().Kind() == reflect.Pointer {
+		if val.Type().Kind() == reflect.Ptr {
 			continue
 		}
 		val.Set(reflect.ValueOf(v))
