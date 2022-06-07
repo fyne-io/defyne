@@ -14,8 +14,11 @@ import (
 )
 
 func (d *defyne) showNewProjectDialog(w fyne.Window) {
-	var dir fyne.ListableURI
 	parent := widget.NewButton("Choose directory", nil)
+	dir := defaultDir()
+	if dir != nil {
+		parent.SetText(dir.Name())
+	}
 	parent.OnTapped = func() {
 		dialog.ShowFolderOpen(func(u fyne.ListableURI, err error) {
 			if err != nil {
@@ -38,19 +41,6 @@ func (d *defyne) showNewProjectDialog(w fyne.Window) {
 	}, func(ok bool) {
 		if !ok {
 			return
-		} else if dir == nil {
-			homeDir, homeDirErr := os.UserHomeDir()
-			if homeDirErr != nil {
-				dialog.ShowError(homeDirErr, w)
-				return
-			}
-			defaultDir := storage.NewFileURI(homeDir)
-			newDir, newDirErr := storage.ListerForURI(defaultDir)
-			if newDirErr != nil {
-				dialog.ShowError(newDirErr, w)
-				return
-			}
-			dir = newDir
 		}
 
 		dir, err := createProject(dir, name.Text)
@@ -219,6 +209,21 @@ require fyne.io/fyne/v2 v2.2.0
 		fyne.LogError("Could not run go mod tidy", err)
 	}
 	return dir, nil
+}
+
+func defaultDir() fyne.ListableURI {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		fyne.LogError("Failed to get user home directory", err)
+		return nil
+	}
+	defaultDir := storage.NewFileURI(homeDir)
+	newDir, err := storage.ListerForURI(defaultDir)
+	if err != nil {
+		fyne.LogError("Failed to list home directory", err)
+		return nil
+	}
+	return newDir
 }
 
 func writeFile(dir fyne.URI, name, content string) error {
