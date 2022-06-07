@@ -126,7 +126,6 @@ func decodeFormItem(m map[string]interface{}) *widget.FormItem {
 	return f
 }
 
-
 func decodeFromMap(m map[string]interface{}, in interface{}) {
 	t := reflect.ValueOf(in).Elem()
 	for k, v := range m {
