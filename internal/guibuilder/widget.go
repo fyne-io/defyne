@@ -348,7 +348,7 @@ func initWidgets() {
 				return []*widget.FormItem{}
 			},
 			gostring: func(obj fyne.CanvasObject) string {
-				return "widget.NewForm(widget.NewFormItem(\"Username\", widget.NewEntry()), widget.NewFormItem(\"Password\", widget.NewPasswordEntry()), widget.NewFormItem(\"\", container.NewGridWithColumns(2, widget.NewButton(\"Submit\", func() {}), widget.NewButton(\"Cancel\", func() {}))))"
+				return "&widget.Form{Items: []*widget.FormItem{widget.NewFormItem(\"Username\", widget.NewEntry()), widget.NewFormItem(\"Password\", widget.NewPasswordEntry())}, OnSubmit: func() {}, OnCancel: func() {}}"
 			},
 		},
 		"*widget.MultiLineEntry": {
