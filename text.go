@@ -21,8 +21,8 @@ type codeEntry struct {
 
 func (e *codeEntry) TypedShortcut(shortcut fyne.Shortcut) {
 	if sh, ok := shortcut.(*desktop.CustomShortcut); ok {
-		ctrlSuper := (runtime.GOOS == "darwin" && sh.Modifier == desktop.SuperModifier) ||
-			(runtime.GOOS != "darwin" && sh.Modifier == desktop.ControlModifier)
+		ctrlSuper := (runtime.GOOS == "darwin" && sh.Modifier == fyne.KeyModifierSuper) ||
+			(runtime.GOOS != "darwin" && sh.Modifier == fyne.KeyModifierControl)
 		if sh.KeyName == "S" && ctrlSuper {
 			e.editor.save()
 		}
