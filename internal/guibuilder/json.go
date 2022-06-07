@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"net/url"
 	"reflect"
 	"strings"
 
@@ -125,6 +126,18 @@ func decodeFormItem(m map[string]interface{}) *widget.FormItem {
 	return f
 }
 
+
+func decodeFromMap(m map[string]interface{}, in interface{}) {
+	t := reflect.ValueOf(in).Elem()
+	for k, v := range m {
+		val := t.FieldByName(k)
+		if val.Type().Kind() == reflect.Pointer {
+			continue
+		}
+		val.Set(reflect.ValueOf(v))
+	}
+}
+
 func decodeTextStyle(m map[string]interface{}) (s fyne.TextStyle) {
 	if m["Bold"] == true {
 		s.Bold = true
@@ -210,6 +223,10 @@ func decodeWidget(m map[string]interface{}) fyne.Widget {
 			f.Set(reflect.ValueOf(items))
 		case "fyne.CanvasObject":
 			log.Println("Unsupported field")
+		case "*url.URL":
+			u := &url.URL{}
+			decodeFromMap(reflect.ValueOf(v).Interface().(map[string]interface{}), u)
+			f.Set(reflect.ValueOf(u))
 		default:
 			if strings.Index(typeName, "int") == 0 {
 				f.SetInt(int64(reflect.ValueOf(v).Float()))

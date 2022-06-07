@@ -92,7 +92,10 @@ func initWidgets() {
 			},
 			gostring: func(obj fyne.CanvasObject) string {
 				link := obj.(*widget.Hyperlink)
-				return fmt.Sprintf("widget.NewHyperlink(\"%s\", \"%s\")", encodeDoubleQuote(link.Text), encodeDoubleQuote(link.URL.String()))
+				return fmt.Sprintf(`widget.NewHyperlink("%s", %#v)`, encodeDoubleQuote(link.Text), link.URL)
+			},
+			packages: func(_ fyne.CanvasObject) []string {
+				return []string{"net/url"}
 			},
 		},
 		"*widget.Card": {

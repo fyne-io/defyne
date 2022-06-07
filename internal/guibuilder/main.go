@@ -306,7 +306,11 @@ var defs map[string]string // TODO find a better (non-global, non-race) way...
 
 func exportCode(pkgs, vars []string, obj fyne.CanvasObject) string {
 	for i := 0; i < len(pkgs); i++ {
-		pkgs[i] = fmt.Sprintf(`	"fyne.io/fyne/v2/%s"`, pkgs[i])
+		if pkgs[i] != "net/url" {
+			pkgs[i] = "fyne.io/fyne/v2/" + pkgs[i]
+		}
+
+		pkgs[i] = fmt.Sprintf(`	"%s"`, pkgs[i])
 	}
 
 	defs = make(map[string]string)
@@ -345,6 +349,7 @@ func (g *gui) makeUI() fyne.CanvasObject {
 
 	formatted, err := format.Source([]byte(code))
 	if err != nil {
+		log.Println(code)
 		fyne.LogError("Failed to encode GUI code", err)
 		return ""
 	}
