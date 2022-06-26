@@ -3,7 +3,6 @@ package envcheck
 import (
 	"errors"
 	"os"
-	"os/exec"
 	"strings"
 
 	"golang.org/x/sys/execabs"
@@ -16,7 +15,7 @@ type task struct {
 
 var tasks = []*task{
 	{"Go compiler", "Checking Go is installed and up to date", func() (string, error) {
-		path, err := exec.LookPath("go")
+		path, err := execabs.LookPath("go")
 		if err != nil {
 			return "", err
 		}
@@ -29,12 +28,12 @@ var tasks = []*task{
 		return strings.TrimSpace(string(ret)), nil
 	}},
 	{"C compiler", "Checking C is installed for system code", func() (string, error) {
-		_, err := exec.LookPath("gcc")
+		_, err := execabs.LookPath("gcc")
 		if err == nil {
 			return "gcc found", nil
 		}
 
-		_, err = exec.LookPath("clang")
+		_, err = execabs.LookPath("clang")
 		if err == nil {
 			return "clang found", nil
 		}
@@ -59,7 +58,7 @@ var tasks = []*task{
 	//	return "", errors.New("no dependencies found")
 	//}},
 	{"Fyne helper", "Checking Fyne tool is installed for packaging", func() (string, error) {
-		path, err := exec.LookPath("fyne")
+		path, err := execabs.LookPath("fyne")
 		if err != nil {
 			return "", err
 		}
