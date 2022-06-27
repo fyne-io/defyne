@@ -27,7 +27,7 @@ var tasks = []*task{
 		}
 		return strings.TrimSpace(string(ret)), nil
 	}},
-	{"C compiler", "Checking C is installed for system code", func() (string, error) {
+	{"C compiler", "Checking a C compiler is installed", func() (string, error) {
 		_, err := execabs.LookPath("gcc")
 		if err == nil {
 			return "gcc found", nil
