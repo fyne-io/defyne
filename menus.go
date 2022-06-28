@@ -1,7 +1,10 @@
 package main
 
 import (
+	"net/url"
 	"strings"
+
+	"github.com/fyne-io/defyne/internal/envcheck"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
@@ -77,7 +80,27 @@ func (d *defyne) makeMenu() *fyne.MainMenu {
 			fyne.NewMenuItemSeparator(),
 			fyne.NewMenuItem("Save", d.menuActionSave),
 			fyne.NewMenuItem("Run", d.menuActionRun),
-		))
+		),
+		fyne.NewMenu("Help",
+			fyne.NewMenuItem("Documentation", func() {
+				u, _ := url.Parse("https://fyne.io/defyne")
+				_ = fyne.CurrentApp().OpenURL(u)
+			}),
+			fyne.NewMenuItem("Support", func() {
+				u, _ := url.Parse("https://fyne.io/support")
+				_ = fyne.CurrentApp().OpenURL(u)
+			}),
+			fyne.NewMenuItemSeparator(),
+			fyne.NewMenuItem("Check Environment...", func() {
+				envcheck.ShowEnvCheckDialog(d.win)
+			}),
+			fyne.NewMenuItemSeparator(),
+			fyne.NewMenuItem("Sponsor", func() {
+				u, _ := url.Parse("https://fyne.io/sponsor")
+				_ = fyne.CurrentApp().OpenURL(u)
+			}),
+		),
+	)
 }
 
 func (d *defyne) makeToolbar() *widget.Toolbar {
