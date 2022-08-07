@@ -6,12 +6,13 @@ This repo contains the work-in-progress Fyne IDE.
 
 * Embedded terminal
 * GUI Editor
+* Image preview
 
 ## TODO
 
 * Various types of editor
 * Syntax highlighting
-* Standard run/test buttons
+* Standard test/debug launchers
 
 ## Screenshot
 
