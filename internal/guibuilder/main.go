@@ -234,12 +234,16 @@ func varsRequired(obj fyne.CanvasObject) []string {
 		return []string{w.name + " " + class}
 	}
 
-	ret := []string{}
+	var ret []string
 	var objs []fyne.CanvasObject
 	if c, ok := obj.(*fyne.Container); ok {
 		objs = c.Objects
 	} else if c, ok := obj.(*overlayContainer); ok {
 		objs = c.c.Objects
+
+		if c.name != "" {
+			ret = append(ret, c.name+" "+"*fyne.Container")
+		}
 	}
 	for _, w := range objs {
 		ret = append(ret, varsRequired(w)...)
