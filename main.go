@@ -1,4 +1,5 @@
-//go:generate fyne bundle -o bundled.go Icon.png
+//go:generate fyne bundle -o bundled.go assets
+//go:generate fyne bundle -a -o bundled.go Icon.png
 
 package main
 

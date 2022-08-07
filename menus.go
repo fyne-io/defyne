@@ -2,6 +2,8 @@ package main
 
 import (
 	"net/url"
+	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/fyne-io/defyne/internal/envcheck"
@@ -59,6 +61,14 @@ func (d *defyne) menuActionNew() {
 		}, d.win)
 }
 
+func (d *defyne) menuActionRunProject() {
+	cmd := exec.Command("go", "run", ".")
+	cmd.Dir = d.projectRoot.Path()
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	cmd.Start()
+}
+
 func (d *defyne) menuActionRun() {
 	if ed, ok := d.openEditors[d.fileTabs.Selected()]; ok {
 		ed.run()
@@ -79,7 +89,9 @@ func (d *defyne) makeMenu() *fyne.MainMenu {
 			fyne.NewMenuItem("New File...", d.menuActionNew),
 			fyne.NewMenuItemSeparator(),
 			fyne.NewMenuItem("Save", d.menuActionSave),
+			fyne.NewMenuItemSeparator(),
 			fyne.NewMenuItem("Run", d.menuActionRun),
+			fyne.NewMenuItem("Run Project", d.menuActionRunProject),
 		),
 		fyne.NewMenu("Help",
 			fyne.NewMenuItem("Documentation", func() {
@@ -107,5 +119,7 @@ func (d *defyne) makeToolbar() *widget.Toolbar {
 	return widget.NewToolbar(
 		widget.NewToolbarAction(theme.FileIcon(), d.menuActionNew),
 		widget.NewToolbarAction(theme.DocumentSaveIcon(), d.menuActionSave),
-		widget.NewToolbarAction(theme.MailForwardIcon(), d.menuActionRun))
+		widget.NewToolbarSeparator(),
+		widget.NewToolbarAction(theme.MediaPlayIcon(), d.menuActionRun),
+		widget.NewToolbarAction(theme.NewThemedResource(resourceFolderPlaySvg), d.menuActionRunProject))
 }
