@@ -3,7 +3,6 @@ package main
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
 )
 
 // Declare conformity with editor interface
@@ -16,11 +15,7 @@ type imageEditor struct {
 
 func newImageEditor(u fyne.URI, _ fyne.Window) editor {
 	img := canvas.NewImageFromURI(u)
-	if u.Extension() == ".svg" {
-		img.FillMode = canvas.ImageFillContain
-	} else {
-		img.FillMode = canvas.ImageFillOriginal
-	}
+	img.FillMode = canvas.ImageFillContain
 	editor := &imageEditor{uri: u, image: img}
 
 	return editor
@@ -31,12 +26,7 @@ func (i *imageEditor) changed() bool {
 }
 
 func (i *imageEditor) content() fyne.CanvasObject {
-	content := fyne.CanvasObject(i.image)
-	if i.uri.Extension() != ".svg" {
-		content = container.NewCenter(content)
-	}
-
-	return container.NewScroll(content)
+	return i.image
 }
 
 func (i *imageEditor) close() {
