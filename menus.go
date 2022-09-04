@@ -81,6 +81,10 @@ func (d *defyne) menuActionSave() {
 	}
 }
 
+func (d *defyne) menuActionFullScreenToggle(){
+	d.win.SetFullScreen(!d.win.FullScreen())
+}
+
 func (d *defyne) makeMenu() *fyne.MainMenu {
 	return fyne.NewMainMenu(
 		fyne.NewMenu("File",
@@ -92,6 +96,9 @@ func (d *defyne) makeMenu() *fyne.MainMenu {
 			fyne.NewMenuItemSeparator(),
 			fyne.NewMenuItem("Run", d.menuActionRun),
 			fyne.NewMenuItem("Run Project", d.menuActionRunProject),
+		),
+		fyne.NewMenu("Window", 
+			fyne.NewMenuItem("Full Screen", d.menuActionFullScreenToggle),
 		),
 		fyne.NewMenu("Help",
 			fyne.NewMenuItem("Documentation", func() {
