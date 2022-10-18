@@ -14,6 +14,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/storage"
@@ -182,6 +183,7 @@ func (b *Builder) buildUI(content fyne.CanvasObject) fyne.CanvasObject {
 
 	widType = widget.NewLabelWithStyle("(None Selected)", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 	widName = widget.NewEntry()
+	widName.Validator = validation.NewRegexp("^[a-zA-Z_][a-zA-Z0-9_]*$", "Invalid variable name")
 	paletteList = container.NewVBox()
 	palette := container.NewBorder(container.NewVBox(widType,
 		widget.NewForm(widget.NewFormItem("Variable", widName))), nil, nil, nil,
@@ -234,12 +236,16 @@ func varsRequired(obj fyne.CanvasObject) []string {
 		return []string{w.name + " " + class}
 	}
 
-	ret := []string{}
+	var ret []string
 	var objs []fyne.CanvasObject
 	if c, ok := obj.(*fyne.Container); ok {
 		objs = c.Objects
 	} else if c, ok := obj.(*overlayContainer); ok {
 		objs = c.c.Objects
+
+		if c.name != "" {
+			ret = append(ret, c.name+" "+"*fyne.Container")
+		}
 	}
 	for _, w := range objs {
 		ret = append(ret, varsRequired(w)...)
