@@ -77,6 +77,12 @@ func (d *defyne) showOpenProjectDialog(w fyne.Window) {
 func (d *defyne) showProjectSelect() {
 	a := fyne.CurrentApp()
 	w := a.NewWindow("Defyne : Open Project")
+	w.SetMainMenu(fyne.NewMainMenu(
+		fyne.NewMenu("File",
+			fyne.NewMenuItem("Open Project...", w.Show),
+		),
+		d.makeHelpMenu(),
+	))
 
 	img := canvas.NewImageFromResource(resourceIconPng)
 	img.FillMode = canvas.ImageFillContain

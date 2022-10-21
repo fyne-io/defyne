@@ -85,6 +85,28 @@ func (d *defyne) menuActionFullScreenToggle() {
 	d.win.SetFullScreen(!d.win.FullScreen())
 }
 
+func (d *defyne) makeHelpMenu() *fyne.Menu {
+	return fyne.NewMenu("Help",
+		fyne.NewMenuItem("Documentation", func() {
+			u, _ := url.Parse("https://fyne.io/defyne")
+			_ = fyne.CurrentApp().OpenURL(u)
+		}),
+		fyne.NewMenuItem("Support", func() {
+			u, _ := url.Parse("https://fyne.io/support")
+			_ = fyne.CurrentApp().OpenURL(u)
+		}),
+		fyne.NewMenuItemSeparator(),
+		fyne.NewMenuItem("Check Environment...", func() {
+			envcheck.ShowEnvCheckDialog(d.win)
+		}),
+		fyne.NewMenuItemSeparator(),
+		fyne.NewMenuItem("Sponsor", func() {
+			u, _ := url.Parse("https://fyne.io/sponsor")
+			_ = fyne.CurrentApp().OpenURL(u)
+		}),
+	)
+}
+
 func (d *defyne) makeMenu() *fyne.MainMenu {
 	return fyne.NewMainMenu(
 		fyne.NewMenu("File",
@@ -100,25 +122,7 @@ func (d *defyne) makeMenu() *fyne.MainMenu {
 		fyne.NewMenu("Window",
 			fyne.NewMenuItem("Full Screen", d.menuActionFullScreenToggle),
 		),
-		fyne.NewMenu("Help",
-			fyne.NewMenuItem("Documentation", func() {
-				u, _ := url.Parse("https://fyne.io/defyne")
-				_ = fyne.CurrentApp().OpenURL(u)
-			}),
-			fyne.NewMenuItem("Support", func() {
-				u, _ := url.Parse("https://fyne.io/support")
-				_ = fyne.CurrentApp().OpenURL(u)
-			}),
-			fyne.NewMenuItemSeparator(),
-			fyne.NewMenuItem("Check Environment...", func() {
-				envcheck.ShowEnvCheckDialog(d.win)
-			}),
-			fyne.NewMenuItemSeparator(),
-			fyne.NewMenuItem("Sponsor", func() {
-				u, _ := url.Parse("https://fyne.io/sponsor")
-				_ = fyne.CurrentApp().OpenURL(u)
-			}),
-		),
+		d.makeHelpMenu(),
 	)
 }
 
