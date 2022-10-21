@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/fyne-io/defyne/internal/envcheck"
@@ -108,7 +109,7 @@ func (d *defyne) makeHelpMenu() *fyne.Menu {
 }
 
 func (d *defyne) makeMenu() *fyne.MainMenu {
-	return fyne.NewMainMenu(
+	menu := fyne.NewMainMenu(
 		fyne.NewMenu("File",
 			fyne.NewMenuItem("Open Project...", d.showProjectSelect),
 			fyne.NewMenuItemSeparator(),
@@ -118,12 +119,17 @@ func (d *defyne) makeMenu() *fyne.MainMenu {
 			fyne.NewMenuItemSeparator(),
 			fyne.NewMenuItem("Run", d.menuActionRun),
 			fyne.NewMenuItem("Run Project", d.menuActionRunProject),
-		),
-		fyne.NewMenu("Window",
-			fyne.NewMenuItem("Full Screen", d.menuActionFullScreenToggle),
-		),
+		))
+	if runtime.GOOS != "darwin" {
+		menu.Items = append(menu.Items,
+			fyne.NewMenu("Window",
+				fyne.NewMenuItem("Full Screen", d.menuActionFullScreenToggle),
+			))
+	}
+	menu.Items = append(menu.Items,
 		d.makeHelpMenu(),
 	)
+	return menu
 }
 
 func (d *defyne) makeToolbar() *widget.Toolbar {
