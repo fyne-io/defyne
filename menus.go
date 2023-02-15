@@ -7,13 +7,13 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/fyne-io/defyne/internal/envcheck"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+
+	setup "fyne.io/setup/pkg"
 )
 
 func (d *defyne) menuActionNew() {
@@ -99,9 +99,9 @@ func (d *defyne) makeHelpMenu(w fyne.Window) *fyne.Menu {
 		fyne.NewMenuItemSeparator(),
 		fyne.NewMenuItem("Check Environment...", func() {
 			if w != nil {
-				envcheck.ShowSummaryDialog(w)
+				setup.ShowSummaryDialog(w)
 			} else {
-				envcheck.ShowSummaryWindow(fyne.CurrentApp())
+				setup.ShowSummaryWindow(fyne.CurrentApp())
 			}
 		}),
 		fyne.NewMenuItemSeparator(),
