@@ -82,7 +82,7 @@ func (d *defyne) showProjectSelect() {
 			fyne.NewMenu("File",
 				fyne.NewMenuItem("Open Project...", w.Show),
 			),
-			d.makeHelpMenu(),
+			d.makeHelpMenu(w),
 		))
 	}
 

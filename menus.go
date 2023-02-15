@@ -86,7 +86,7 @@ func (d *defyne) menuActionFullScreenToggle() {
 	d.win.SetFullScreen(!d.win.FullScreen())
 }
 
-func (d *defyne) makeHelpMenu() *fyne.Menu {
+func (d *defyne) makeHelpMenu(w fyne.Window) *fyne.Menu {
 	return fyne.NewMenu("Help",
 		fyne.NewMenuItem("Documentation", func() {
 			u, _ := url.Parse("https://fyne.io/defyne")
@@ -98,7 +98,11 @@ func (d *defyne) makeHelpMenu() *fyne.Menu {
 		}),
 		fyne.NewMenuItemSeparator(),
 		fyne.NewMenuItem("Check Environment...", func() {
-			envcheck.ShowEnvCheckDialog(d.win)
+			if w != nil {
+				envcheck.ShowSummaryDialog(w)
+			} else {
+				envcheck.ShowSummaryWindow(fyne.CurrentApp())
+			}
 		}),
 		fyne.NewMenuItemSeparator(),
 		fyne.NewMenuItem("Sponsor", func() {
@@ -127,7 +131,7 @@ func (d *defyne) makeMenu() *fyne.MainMenu {
 			))
 	}
 	menu.Items = append(menu.Items,
-		d.makeHelpMenu(),
+		d.makeHelpMenu(d.win),
 	)
 	return menu
 }

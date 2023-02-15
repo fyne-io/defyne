@@ -10,12 +10,27 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-// ShowEnvCheckDialog shows a new dialog in the specified window that runs an environment check
+// ShowSummaryDialog shows a new dialog in the specified window and runs the environment checks.
 // After displaying the process will start and the UI will update as it progresses.
-func ShowEnvCheckDialog(w fyne.Window) {
+func ShowSummaryDialog(w fyne.Window) {
 	content := makeEnvcheckForm()
 	d := dialog.NewCustom("Checking Development Environment", "Cancel", content, w)
 	d.Show()
+	go content.runChecks(func() {
+		d.SetDismissText("Done")
+	})
+}
+
+// ShowSummaryWindow shows a new window for the specified app and runs the environment checks.
+// After displaying the process will start and the UI will update as it progresses.
+func ShowSummaryWindow(a fyne.App) {
+	w := a.NewWindow("Environment Check")
+	content := makeEnvcheckForm()
+	d := dialog.NewCustom("Checking Development Environment", "Cancel", content, w)
+	d.SetOnClosed(w.Close)
+	d.Show()
+	w.Resize(d.MinSize().AddWidthHeight(theme.Padding()*4, theme.Padding()*4))
+	w.Show()
 	go content.runChecks(func() {
 		d.SetDismissText("Done")
 	})
