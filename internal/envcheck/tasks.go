@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"golang.org/x/mod/semver"
 	"golang.org/x/sys/execabs"
 )
 
@@ -25,7 +26,12 @@ var tasks = []*task{
 		if err != nil {
 			return "", err
 		}
-		return strings.TrimSpace(string(ret)), nil
+		ver := parseGoVersion(strings.TrimSpace(string(ret)))
+		before114 := semver.Compare("v"+ver, "v1.14.0") < 0
+		if before114 {
+			return "go" + ver, errors.New("go version is too old, must be 1.14 or newer")
+		}
+		return "go" + ver, nil
 	}},
 	{"C compiler", "Checking a C compiler is installed", func() (string, error) {
 		_, err := execabs.LookPath("gcc")
