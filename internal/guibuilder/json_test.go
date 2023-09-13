@@ -25,7 +25,9 @@ const labelJSON = `{
       "Monospace": false,
       "Symbol": false,
       "TabWidth": 0
-    }
+    },
+    "Truncation": 0,
+    "Importance": 0
   }
 }
 `
