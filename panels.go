@@ -44,7 +44,7 @@ func (d *defyne) makeEditorPanel() fyne.CanvasObject {
 			}, d.win)
 	}
 
-	return container.NewMax(d.fileTabs)
+	return container.NewStack(d.fileTabs)
 }
 
 func (d *defyne) makeFilesPanel() *xWidget.FileTree {

@@ -625,7 +625,7 @@ func initWidgets() {
 		"*fyne.Container": {
 			name: "Container",
 			create: func() fyne.CanvasObject {
-				return container.NewMax()
+				return container.NewStack()
 			},
 			edit: func(obj fyne.CanvasObject) []*widget.FormItem {
 				c := obj.(*fyne.Container)

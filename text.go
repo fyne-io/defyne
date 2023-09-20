@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"runtime"
 
 	"fyne.io/fyne/v2"
@@ -39,13 +39,12 @@ func newTextEditor(u fyne.URI, _ fyne.Window) editor {
 	text := &codeEntry{}
 	text.MultiLine = true
 	text.TextStyle.Monospace = true
-	text.Wrapping = fyne.TextTruncate
 	text.ExtendBaseWidget(text)
 	editor := &textEditor{uri: u, entry: text}
 	text.editor = editor
 
 	f, _ := storage.Reader(u)
-	b, _ := ioutil.ReadAll(f)
+	b, _ := io.ReadAll(f)
 	text.SetText(string(b))
 	_ = f.Close()
 

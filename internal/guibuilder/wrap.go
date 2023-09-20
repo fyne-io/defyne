@@ -68,7 +68,7 @@ func (o *overlayContainer) Resize(s fyne.Size) {
 	o.BaseWidget.Resize(s)
 }
 
-func (o *overlayContainer) Tapped(e *fyne.PointEvent) {
+func (o *overlayContainer) Tapped(*fyne.PointEvent) {
 	setCurrent(o)
 	choose(o)
 }
@@ -126,7 +126,7 @@ func (w *overlayWidget) Refresh() {
 	w.child.Refresh()
 }
 
-func (w *overlayWidget) Tapped(e *fyne.PointEvent) {
+func (w *overlayWidget) Tapped(*fyne.PointEvent) {
 	setCurrent(w)
 	choose(w)
 }
@@ -215,7 +215,7 @@ func wrapWidget(w fyne.Widget, parent *fyne.Container) fyne.CanvasObject {
 	}
 	o := &overlayWidget{child: w, parent: parent}
 	o.ExtendBaseWidget(o)
-	return container.NewMax(w, o)
+	return container.NewStack(w, o)
 }
 
 func wrapResource(r fyne.Resource) fyne.Resource {

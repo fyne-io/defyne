@@ -361,7 +361,7 @@ var (
 		},
 		"Max": {
 			func(c *fyne.Container, props map[string]string) fyne.Layout {
-				return layout.NewMaxLayout()
+				return layout.NewStackLayout()
 			},
 			nil,
 			nil,
