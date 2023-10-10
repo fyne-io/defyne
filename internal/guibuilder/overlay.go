@@ -40,7 +40,7 @@ func (o *overlay) Tapped(pe *fyne.PointEvent) {
 	pos := pe.AbsolutePosition.Subtract(rootPos)
 	obj := findObject(o.b.root, pos)
 
-	// TODO update when an item is removed, or if the UI resizes
+	// TODO update when an item is removed, inserted, or if the UI resizes
 	o.indicator.StrokeColor = theme.PrimaryColor()
 	objAbsPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(obj)
 	objPos := objAbsPos.Subtract(rootPos)
@@ -58,7 +58,7 @@ func findObject(o fyne.CanvasObject, p fyne.Position) fyne.CanvasObject {
 				continue
 			}
 
-			match := findObject(child, p)
+			match := findObject(child, p.Subtract(child.Position()))
 			if match != nil && isContainerOrWidget(match) {
 				return match
 			}
@@ -67,22 +67,6 @@ func findObject(o fyne.CanvasObject, p fyne.Position) fyne.CanvasObject {
 			}
 		}
 		return w
-		//case fyne.Widget:
-		//	objs := test.WidgetRenderer(w).Objects()
-		//	for _, child := range objs {
-		//		if !insideObject(child, p) {
-		//			continue
-		//		}
-		//
-		//		match := findObject(child, p)
-		//		if match != nil && isContainerOrWidget(match) {
-		//			return match
-		//		}
-		//		if isContainerOrWidget(child) {
-		//			return child
-		//		}
-		//	}
-		//	return w
 	}
 
 	return nil
