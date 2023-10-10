@@ -1,4 +1,4 @@
-package guibuilder
+package guidefs
 
 import "strings"
 

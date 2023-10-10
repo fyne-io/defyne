@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
-	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -20,6 +19,9 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+
+	"github.com/fyne-io/defyne/internal/guidefs"
+	"github.com/fyne-io/defyne/pkg/gui"
 )
 
 var (
@@ -27,39 +29,39 @@ var (
 	widType     *widget.Label
 	widName     *widget.Entry
 	paletteList *fyne.Container
-	once        sync.Once
 )
 
 // Builder is a simple type handle for a GUI builder instance.
 type Builder struct {
-	root, wrapped fyne.CanvasObject
+	root, current fyne.CanvasObject
 	uri           fyne.URI
 	win           fyne.Window
+	meta          map[fyne.CanvasObject]map[string]string
 }
 
 // NewBuilder returns an instance of the GUI builder for the specified URI.
 // The Window parameter allows presenting dialogs etc.
 func NewBuilder(u fyne.URI, win fyne.Window) *Builder {
-	initOnce()
+	guidefs.InitOnce()
 	r, err := storage.Reader(u)
 	if err != nil {
 		dialog.ShowError(err, win)
 	}
 
-	var obj, w fyne.CanvasObject
+	meta := make(map[fyne.CanvasObject]map[string]string)
+	var obj fyne.CanvasObject
 	if r == nil {
 		obj = previewUI()
 	} else {
-		obj, w = DecodeJSON(r)
+		obj, meta = gui.DecodeJSON(r)
 		_ = r.Close()
 
 		if obj == nil {
 			obj = previewUI()
-			w = wrapContent(obj, nil)
 		}
 	}
 
-	return &Builder{root: obj, wrapped: w, uri: u, win: win}
+	return &Builder{root: obj, uri: u, win: win, meta: meta}
 }
 
 // MakeUI builds the UI for the current GUI builder.
@@ -69,8 +71,8 @@ func (b *Builder) MakeUI() fyne.CanvasObject {
 
 // Run generates a go main function and runs it so we can preview the UI in a real app.
 func (b *Builder) Run() {
-	packagesList := append(packagesRequired(b.wrapped), "app")
-	code := exportCode(packagesList, varsRequired(b.wrapped), b.wrapped)
+	packagesList := append(packagesRequired(b.root), "app")
+	code := exportCode(packagesList, varsRequired(b.root, b.meta[b.root]), b.root)
 	code += `
 func main() {
 	myApp := app.New()
@@ -108,8 +110,8 @@ func (b *Builder) Save() error {
 	if err != nil {
 		return err
 	}
-	packagesList := packagesRequired(b.wrapped)
-	code := exportCode(packagesList, varsRequired(b.wrapped), b.wrapped)
+	packagesList := packagesRequired(b.root)
+	code := exportCode(packagesList, varsRequired(b.root, b.meta[b.root]), b.root)
 	w, err = storage.Writer(goURI)
 	if err != nil {
 		return err
@@ -120,16 +122,16 @@ func (b *Builder) Save() error {
 }
 
 func (b *Builder) save(w fyne.URIWriteCloser) error {
-	err := EncodeJSON(b.wrapped, w)
+	err := gui.EncodeJSON(b.root, b.meta, w)
 	_ = w.Close()
 	return err
 }
 
-func buildLibrary() fyne.CanvasObject {
-	var selected *widgetInfo
+func (b *Builder) buildLibrary() fyne.CanvasObject {
+	var selected *guidefs.WidgetInfo
 	tempNames := []string{}
 	widgetLowerNames := []string{}
-	for _, name := range widgetNames {
+	for _, name := range guidefs.WidgetNames {
 		widgetLowerNames = append(widgetLowerNames, strings.ToLower(name))
 		tempNames = append(tempNames, name)
 	}
@@ -138,10 +140,10 @@ func buildLibrary() fyne.CanvasObject {
 	}, func() fyne.CanvasObject {
 		return widget.NewLabel("")
 	}, func(i widget.ListItemID, obj fyne.CanvasObject) {
-		obj.(*widget.Label).SetText(widgets[tempNames[i]].name)
+		obj.(*widget.Label).SetText(guidefs.Widgets[tempNames[i]].Name)
 	})
 	list.OnSelected = func(i widget.ListItemID) {
-		if match, ok := widgets[tempNames[i]]; ok {
+		if match, ok := guidefs.Widgets[tempNames[i]]; ok {
 			selected = &match
 		}
 	}
@@ -156,7 +158,7 @@ func buildLibrary() fyne.CanvasObject {
 		tempNames = []string{}
 		for i := 0; i < len(widgetLowerNames); i++ {
 			if strings.Contains(widgetLowerNames[i], s) {
-				tempNames = append(tempNames, widgetNames[i])
+				tempNames = append(tempNames, guidefs.WidgetNames[i])
 			}
 		}
 		list.Refresh()
@@ -165,12 +167,12 @@ func buildLibrary() fyne.CanvasObject {
 	}
 
 	return container.NewBorder(searchBox, widget.NewButtonWithIcon("Insert", theme.ContentAddIcon(), func() {
-		if c, ok := current.(*overlayContainer); ok {
+		if c, ok := b.current.(*fyne.Container); ok {
 			if selected != nil {
-				c.c.Objects = append(c.c.Objects, wrapContent(selected.create(), c.c))
-				c.c.Refresh()
+				c.Objects = append(c.Objects, selected.Create())
+				c.Refresh()
 				// cause property editor to refresh
-				choose(c)
+				b.choose(c)
 			}
 			return
 		}
@@ -179,17 +181,17 @@ func buildLibrary() fyne.CanvasObject {
 }
 
 func (b *Builder) buildUI(content fyne.CanvasObject) fyne.CanvasObject {
-	wrap := container.NewMax(b.wrapped)
+	wrap := container.NewMax(b.root, newOverlay(b))
 
 	widType = widget.NewLabelWithStyle("(None Selected)", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 	widName = widget.NewEntry()
-	widName.Validator = validation.NewRegexp("^[a-zA-Z_][a-zA-Z0-9_]*$", "Invalid variable name")
+	widName.Validator = validation.NewRegexp("^$|^[a-zA-Z_][a-zA-Z0-9_]*$", "Invalid variable name")
 	paletteList = container.NewVBox()
 	palette := container.NewBorder(container.NewVBox(widType,
 		widget.NewForm(widget.NewFormItem("Variable", widName))), nil, nil, nil,
 		container.NewGridWithRows(2, widget.NewCard("Properties", "",
 			container.NewVScroll(paletteList)),
-			widget.NewCard("Component List", "", buildLibrary()),
+			widget.NewCard("Component List", "", b.buildLibrary()),
 		))
 
 	split := container.NewHSplit(wrap, palette)
@@ -198,16 +200,16 @@ func (b *Builder) buildUI(content fyne.CanvasObject) fyne.CanvasObject {
 }
 
 func packagesRequired(obj fyne.CanvasObject) []string {
-	if w, ok := obj.(*overlayWidget); ok {
-		return w.Packages()
+	if w, ok := obj.(fyne.Widget); ok {
+		return packagesRequiredForWidget(w)
 	}
 
 	ret := []string{"container"}
 	var objs []fyne.CanvasObject
 	if c, ok := obj.(*fyne.Container); ok {
 		objs = c.Objects
-	} else if c, ok := obj.(*overlayContainer); ok {
-		objs = c.c.Objects
+	} else if c, ok := obj.(*fyne.Container); ok {
+		objs = c.Objects
 	}
 	for _, w := range objs {
 		for _, p := range packagesRequired(w) {
@@ -226,83 +228,81 @@ func packagesRequired(obj fyne.CanvasObject) []string {
 	return ret
 }
 
-func varsRequired(obj fyne.CanvasObject) []string {
-	if w, ok := obj.(*overlayWidget); ok {
-		if w.name == "" {
+func packagesRequiredForWidget(w fyne.Widget) []string {
+	name := reflect.TypeOf(w).String()
+	if guidefs.Widgets[name].Packages != nil {
+		return guidefs.Widgets[name].Packages(w)
+	}
+
+	return []string{"widget"}
+}
+
+func varsRequired(obj fyne.CanvasObject, props map[string]string) []string {
+	name := props["name"]
+	if w, ok := obj.(fyne.Widget); ok {
+		if name == "" {
 			return []string{}
 		}
 
-		_, class := getTypeOf(w.child)
-		return []string{w.name + " " + class}
+		_, class := getTypeOf(w)
+		return []string{name + " " + class}
 	}
 
 	var ret []string
 	var objs []fyne.CanvasObject
 	if c, ok := obj.(*fyne.Container); ok {
 		objs = c.Objects
-	} else if c, ok := obj.(*overlayContainer); ok {
-		objs = c.c.Objects
+	} else if c, ok := obj.(*fyne.Container); ok {
+		objs = c.Objects
 
-		if c.name != "" {
-			ret = append(ret, c.name+" "+"*fyne.Container")
+		if name != "" {
+			ret = append(ret, name+" "+"*fyne.Container")
 		}
 	}
 	for _, w := range objs {
-		ret = append(ret, varsRequired(w)...)
+		ret = append(ret, varsRequired(w, props)...)
 	}
 	return ret
 }
 
-func choose(ow fyne.CanvasObject) {
-	var o fyne.CanvasObject
-	var name string
-	o1, o2 := unwrap(ow)
-	if o1 != nil {
-		o = o1.c
-		name = o1.name
-	} else {
-		o = o2.child
-		name = o2.name
-	}
+func (b *Builder) choose(o fyne.CanvasObject) {
+	b.current = o
+
+	name := b.meta[o]["name"]
 	typeName, class := getTypeOf(o)
 	widType.SetText(typeName)
 	widName.OnChanged = func(s string) {
-		if o1 != nil {
-			o1.name = s
-		} else {
-			o2.name = s
+		props := b.meta[o]
+		if props == nil {
+			b.meta[o] = make(map[string]string)
 		}
+		b.meta[o]["name"] = s
 	}
 	widName.SetText(name)
 
 	var items []*widget.FormItem
-	if match, ok := widgets[class]; ok {
-		items = match.edit(o)
+	if match, ok := guidefs.Widgets[class]; ok {
+		props := b.meta[o]
+		items = match.Edit(o, props)
+		b.meta[o] = props
 	}
 
 	editForm = widget.NewForm(items...)
 	remove := widget.NewButton("Remove", func() {
 		var parent *fyne.Container
-		var obj fyne.CanvasObject
-		if c, ok := current.(*overlayContainer); ok {
-			parent = c.parent
-			obj = c
-		} else if w, ok := current.(*overlayWidget); ok {
-			parent = w.parent
-			for _, o := range parent.Objects { // match our widget in the container wrapping us
-				if c, ok := o.(*fyne.Container); ok && c.Objects[0] == w.child {
-					obj = c
-					break
-				}
-			}
+		if c, ok := b.current.(*fyne.Container); ok {
+			parent = findParent(c, b.root)
+		} else if w, ok := b.current.(fyne.Widget); ok {
+			parent = findParent(w, b.root)
 		}
 		if parent == nil {
 			log.Println("Nothing to remove")
 			return
 		}
 
-		parent.Remove(obj)
+		parent.Remove(b.current)
 		parent.Refresh()
+		b.choose(parent)
 	})
 	paletteList.Objects = []fyne.CanvasObject{editForm, remove}
 	paletteList.Refresh()
@@ -362,6 +362,23 @@ func (g *gui) makeUI() fyne.CanvasObject {
 	return string(formatted)
 }
 
+func findParent(o fyne.CanvasObject, parent fyne.CanvasObject) *fyne.Container {
+	switch w := parent.(type) {
+	case *fyne.Container:
+		for _, child := range w.Objects {
+			if child == o {
+				return w
+			}
+			if found := findParent(o, child); found != nil {
+				return found
+			}
+		}
+		return nil
+	}
+
+	return nil
+}
+
 func getTypeOf(o fyne.CanvasObject) (string, string) {
 	typeName := reflect.TypeOf(o).Elem().Name()
 	class := reflect.TypeOf(o).String()
@@ -376,13 +393,6 @@ func getTypeOf(o fyne.CanvasObject) (string, string) {
 	}
 
 	return typeName, class
-}
-
-func initOnce() {
-	once.Do(func() {
-		initIcons()
-		initWidgets()
-	})
 }
 
 func previewUI() fyne.CanvasObject {

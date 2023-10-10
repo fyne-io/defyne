@@ -1,4 +1,4 @@
-package guibuilder
+package gui
 
 import (
 	"bytes"
@@ -7,6 +7,8 @@ import (
 	"fyne.io/fyne/v2"
 	_ "fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
+
+	"github.com/fyne-io/defyne/internal/guidefs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -33,8 +35,7 @@ const labelJSON = `{
 `
 
 func TestDecodeJSON(t *testing.T) {
-	initIcons()
-	initWidgets()
+	guidefs.InitOnce()
 
 	buf := bytes.NewReader([]byte(labelJSON))
 	obj, meta := DecodeJSON(buf)
@@ -42,18 +43,19 @@ func TestDecodeJSON(t *testing.T) {
 	l, ok := obj.(*widget.Label)
 	require.True(t, ok)
 	assert.Equal(t, "Hi", l.Text)
-	assert.Equal(t, "myLabel", meta.(*fyne.Container).Objects[1].(*overlayWidget).name)
+	assert.Equal(t, "myLabel", meta[l]["name"])
 	assert.Equal(t, fyne.TextAlignCenter, l.Alignment)
 	assert.Equal(t, fyne.TextStyle{Bold: true}, l.TextStyle)
 }
 
 func TestEncodeJSON(t *testing.T) {
 	l := widget.NewLabelWithStyle("Hi", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
-	meta := wrapWidget(l, nil)
-	meta.(*fyne.Container).Objects[1].(*overlayWidget).name = "myLabel"
+
+	props := map[string]string{"name": "myLabel"}
+	meta := map[fyne.CanvasObject]map[string]string{l: props}
 
 	var buf bytes.Buffer
-	err := EncodeJSON(meta, &buf)
+	err := EncodeJSON(l, meta, &buf)
 	assert.Nil(t, err)
 	assert.Equal(t, labelJSON, buf.String())
 }

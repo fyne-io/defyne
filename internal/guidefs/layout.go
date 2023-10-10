@@ -1,4 +1,4 @@
-package guibuilder
+package guidefs
 
 import (
 	"fmt"
@@ -13,17 +13,16 @@ import (
 )
 
 type layoutInfo struct {
-	create func(*fyne.Container, map[string]string) fyne.Layout
-	edit   func(*fyne.Container, map[string]string) []*widget.FormItem
+	Create func(*fyne.Container, map[string]string) fyne.Layout
+	Edit   func(*fyne.Container, map[string]string) []*widget.FormItem
 	goText func(*fyne.Container, map[string]string) string
 }
 
 var (
-	// layoutNames is an array with the list of names of all the layouts
+	// layoutNames is an array with the list of names of all the Layouts
 	layoutNames = extractLayoutNames()
-	layoutProps = make(map[*fyne.Container]map[string]string)
 
-	layouts = map[string]layoutInfo{
+	Layouts = map[string]layoutInfo{
 		"Border": {
 			func(c *fyne.Container, props map[string]string) fyne.Layout {
 				topNum := props["top"]
@@ -65,15 +64,15 @@ var (
 				list := []string{"(Empty)"}
 				for _, w := range c.Objects {
 					label := ""
-					if c, ok := w.(*overlayContainer); ok {
-						name := c.name
+					if c, ok := w.(*fyne.Container); ok {
+						name := props["name"]
 						if name == "" {
-							name = fmt.Sprintf("%p", c.c)
+							name = fmt.Sprintf("%p", c)
 						}
 						label = fmt.Sprintf("Container (%s)", name)
 					} else {
 						wid := w.(*fyne.Container).Objects[0]
-						name := w.(*fyne.Container).Objects[1].(*overlayWidget).name
+						name := props["name"]
 						if name == "" {
 							name = fmt.Sprintf("%p", wid)
 						}
@@ -153,25 +152,25 @@ var (
 				var t, b, l, r fyne.CanvasObject
 				if topNum != "" && topID < len(c.Objects) {
 					t = c.Objects[topID]
-					if _, ok := t.(*overlayContainer); !ok {
+					if _, ok := t.(*fyne.Container); !ok {
 						t = t.(*fyne.Container).Objects[1]
 					}
 				}
 				if bottomNum != "" && bottomID < len(c.Objects) {
 					b = c.Objects[bottomID]
-					if _, ok := b.(*overlayContainer); !ok {
+					if _, ok := b.(*fyne.Container); !ok {
 						b = b.(*fyne.Container).Objects[1]
 					}
 				}
 				if leftNum != "" && leftID < len(c.Objects) {
 					l = c.Objects[leftID]
-					if _, ok := l.(*overlayContainer); !ok {
+					if _, ok := l.(*fyne.Container); !ok {
 						l = l.(*fyne.Container).Objects[1]
 					}
 				}
 				if rightNum != "" && rightID < len(c.Objects) {
 					r = c.Objects[rightID]
-					if _, ok := r.(*overlayContainer); !ok {
+					if _, ok := r.(*fyne.Container); !ok {
 						r = r.(*fyne.Container).Objects[1]
 					}
 				}
@@ -384,11 +383,11 @@ var (
 	}
 )
 
-// extractLayoutNames returns all the list of names of all the layouts known
+// extractLayoutNames returns all the list of names of all the Layouts known
 func extractLayoutNames() []string {
-	var layoutsNamesFromData = make([]string, len(layouts))
+	var layoutsNamesFromData = make([]string, len(Layouts))
 	i := 0
-	for k := range layouts {
+	for k := range Layouts {
 		layoutsNamesFromData[i] = k
 		i++
 	}
@@ -407,7 +406,7 @@ func goStringOrNil(o fyne.CanvasObject) string {
 
 func writeGoString(str *strings.Builder, skip func(object fyne.CanvasObject) bool, objs ...fyne.CanvasObject) {
 	for i, o := range objs {
-		if _, ok := o.(*overlayContainer); !ok {
+		if _, ok := o.(*fyne.Container); !ok {
 			o = o.(*fyne.Container).Objects[1]
 		}
 		if skip != nil && skip(o) {
