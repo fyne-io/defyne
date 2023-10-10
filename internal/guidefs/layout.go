@@ -372,6 +372,13 @@ var (
 			nil,
 			nil,
 		},
+		"Stack": {
+			func(c *fyne.Container, props map[string]string) fyne.Layout {
+				return layout.NewStackLayout()
+			},
+			nil,
+			nil,
+		},
 		"VBox": {
 			func(c *fyne.Container, props map[string]string) fyne.Layout {
 				props["dir"] = "vertical"

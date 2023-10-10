@@ -181,7 +181,7 @@ func (b *Builder) buildLibrary() fyne.CanvasObject {
 }
 
 func (b *Builder) buildUI(content fyne.CanvasObject) fyne.CanvasObject {
-	wrap := container.NewMax(b.root, newOverlay(b))
+	wrap := container.NewStack(b.root, newOverlay(b))
 
 	widType = widget.NewLabelWithStyle("(None Selected)", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 	widName = widget.NewEntry()
