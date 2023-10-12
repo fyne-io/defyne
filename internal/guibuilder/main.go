@@ -53,7 +53,10 @@ func NewBuilder(u fyne.URI, win fyne.Window) *Builder {
 	if r == nil {
 		obj = previewUI()
 	} else {
-		obj, meta = gui.DecodeJSON(r)
+		obj, meta, err = gui.DecodeJSON(r)
+		if err != nil {
+			dialog.ShowError(err, win)
+		}
 		_ = r.Close()
 
 		if obj == nil {
