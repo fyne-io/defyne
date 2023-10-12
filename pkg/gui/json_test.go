@@ -14,22 +14,24 @@ import (
 )
 
 const labelJSON = `{
-  "Type": "*widget.Label",
-  "Name": "myLabel",
-  "Struct": {
-    "Hidden": false,
-    "Text": "Hi",
-    "Alignment": 1,
-    "Wrapping": 0,
-    "TextStyle": {
-      "Bold": true,
-      "Italic": false,
-      "Monospace": false,
-      "Symbol": false,
-      "TabWidth": 0
-    },
-    "Truncation": 0,
-    "Importance": 0
+  "Object": {
+    "Type": "*widget.Label",
+    "Name": "myLabel",
+    "Struct": {
+      "Hidden": false,
+      "Text": "Hi",
+      "Alignment": 1,
+      "Wrapping": 0,
+      "TextStyle": {
+        "Bold": true,
+        "Italic": false,
+        "Monospace": false,
+        "Symbol": false,
+        "TabWidth": 0
+      },
+      "Truncation": 0,
+      "Importance": 0
+    }
   }
 }
 `
@@ -38,7 +40,8 @@ func TestDecodeJSON(t *testing.T) {
 	guidefs.InitOnce()
 
 	buf := bytes.NewReader([]byte(labelJSON))
-	obj, meta := DecodeJSON(buf)
+	obj, meta, err := DecodeJSON(buf)
+	assert.Nil(t, err)
 
 	l, ok := obj.(*widget.Label)
 	require.True(t, ok)

@@ -2,6 +2,7 @@ package gui
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"net/url"
@@ -12,6 +13,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/fyne-io/defyne/internal/guidefs"
 )
+
+const jsonKeyObject = "Object"
 
 type canvObj struct {
 	Type   string
@@ -50,7 +53,12 @@ func DecodeJSON(r io.Reader) (fyne.CanvasObject, map[fyne.CanvasObject]map[strin
 	}
 
 	meta := make(map[fyne.CanvasObject]map[string]string)
-	obj := decodeMap(data.(map[string]interface{}), nil, meta)
+	root := data.(map[string]interface{})
+	node, ok := root[jsonKeyObject]
+	if !ok {
+		return nil, nil, errors.New("cannot parse old format of .gui.json file")
+	}
+	obj := decodeMap(node.(map[string]interface{}), nil, meta)
 	return obj, meta, nil
 }
 
@@ -66,7 +74,7 @@ func EncodeJSON(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]str
 
 	e := json.NewEncoder(w)
 	e.SetIndent("", "  ")
-	return e.Encode(tree)
+	return e.Encode(map[string]interface{}{jsonKeyObject: tree})
 }
 
 func encodeForm(obj *widget.Form, name string) interface{} {
