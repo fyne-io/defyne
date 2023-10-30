@@ -79,10 +79,21 @@ func (b *Builder) Run() {
 	w, err := storage.Writer(goURI)
 	err = gui.ExportGoPreview(b.root, b.meta, w)
 
-	cmd := exec.Command("go", "run", path)
+	pwd, _ := os.Getwd()
+	os.Chdir(path)
+	cmd := exec.Command("go", "mod", "init", "temp")
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	cmd.Run()
+	cmd = exec.Command("go", "mod", "tidy")
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	cmd.Run()
+	cmd = exec.Command("go", "run", ".")
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	cmd.Start()
+	os.Chdir(pwd)
 }
 
 // Save will trigger the current state to be written out to the file this was opened from.
