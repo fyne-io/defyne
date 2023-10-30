@@ -15,7 +15,7 @@ import (
 type layoutInfo struct {
 	Create func(*fyne.Container, map[string]string) fyne.Layout
 	Edit   func(*fyne.Container, map[string]string) []*widget.FormItem
-	goText func(*fyne.Container, map[string]string) string
+	goText func(*fyne.Container, map[fyne.CanvasObject]map[string]string) string
 }
 
 var (
@@ -139,14 +139,14 @@ var (
 					widget.NewFormItem("Right", right),
 				}
 			},
-			func(c *fyne.Container, props map[string]string) string {
-				topNum := props["top"]
+			func(c *fyne.Container, props map[fyne.CanvasObject]map[string]string) string {
+				topNum := props[c]["top"]
 				topID, _ := strconv.Atoi(topNum)
-				bottomNum := props["bottom"]
+				bottomNum := props[c]["bottom"]
 				bottomID, _ := strconv.Atoi(bottomNum)
-				leftNum := props["left"]
+				leftNum := props[c]["left"]
 				leftID, _ := strconv.Atoi(leftNum)
-				rightNum := props["right"]
+				rightNum := props[c]["right"]
 				rightID, _ := strconv.Atoi(rightNum)
 
 				var t, b, l, r fyne.CanvasObject
@@ -180,7 +180,7 @@ var (
 					goStringOrNil(t), goStringOrNil(b), goStringOrNil(l), goStringOrNil(r)))
 				writeGoString(str, func(o fyne.CanvasObject) bool {
 					return o == t || o == b || o == l || o == r
-				}, c.Objects...)
+				}, props, c.Objects...)
 				str.WriteString(")")
 				return str.String()
 			},
@@ -259,12 +259,12 @@ var (
 					widget.NewFormItem("Arrange in", vert),
 				}
 			},
-			func(c *fyne.Container, props map[string]string) string {
-				rowCol := props["grid_type"]
+			func(c *fyne.Container, props map[fyne.CanvasObject]map[string]string) string {
+				rowCol := props[c]["grid_type"]
 				if rowCol == "" {
 					rowCol = "Columns"
 				}
-				count := props["count"]
+				count := props[c]["count"]
 				if count == "" {
 					count = "2"
 				}
@@ -280,7 +280,7 @@ var (
 				} else {
 					str.WriteString(fmt.Sprintf("container.NewGridWithColumns(%d, ", num))
 				}
-				writeGoString(str, nil, c.Objects...)
+				writeGoString(str, nil, props, c.Objects...)
 				str.WriteString(")")
 				return str.String()
 			},
@@ -411,17 +411,22 @@ func goStringOrNil(o fyne.CanvasObject) string {
 	return fmt.Sprintf("%#v", o)
 }
 
-func writeGoString(str *strings.Builder, skip func(object fyne.CanvasObject) bool, objs ...fyne.CanvasObject) {
+func writeGoString(str *strings.Builder, skip func(object fyne.CanvasObject) bool, props map[fyne.CanvasObject]map[string]string, objs ...fyne.CanvasObject) {
 	for i, o := range objs {
-		if _, ok := o.(*fyne.Container); !ok {
-			o = o.(*fyne.Container).Objects[1]
-		}
 		if skip != nil && skip(o) {
 			continue
 		}
-		str.WriteString(fmt.Sprintf("\n\t\t%#v", o))
-		if i < len(objs)-1 {
-			str.WriteRune(',')
+
+		clazz := reflect.TypeOf(o).String()
+
+		if match, ok := Widgets[clazz]; ok {
+			code := match.Gostring(o, props)
+			str.WriteString(fmt.Sprintf("\n\t\t%s", code))
+			if i < len(objs)-1 {
+				str.WriteRune(',')
+			}
+		} else {
+			fyne.LogError("Failed to find go string for type"+clazz, nil)
 		}
 	}
 }

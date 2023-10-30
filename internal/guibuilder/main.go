@@ -1,14 +1,10 @@
 package guibuilder
 
 import (
-	"fmt"
-	"go/format"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"reflect"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -26,7 +22,6 @@ import (
 
 var (
 	editForm    *widget.Form
-	widType     *widget.Label
 	widName     *widget.Entry
 	paletteList *fyne.Container
 )
@@ -74,21 +69,15 @@ func (b *Builder) MakeUI() fyne.CanvasObject {
 
 // Run generates a go main function and runs it so we can preview the UI in a real app.
 func (b *Builder) Run() {
-	packagesList := append(packagesRequired(b.root), "app")
-	code := exportCode(packagesList, varsRequired(b.root, b.meta[b.root]), b.root)
-	code += `
-func main() {
-	myApp := app.New()
-	myWindow := myApp.NewWindow("Hello")
-	gui := newGUI()
-	myWindow.SetContent(gui.makeUI())
-	myWindow.ShowAndRun()
-}
-`
 	path := filepath.Join(os.TempDir(), "fynebuilder")
-	os.MkdirAll(path, 0711)
-	path = filepath.Join(path, "main.go")
-	_ = ioutil.WriteFile(path, []byte(code), 0600)
+	goURI, err := storage.Child(storage.NewFileURI(path), "main.go")
+	if err != nil {
+		fyne.LogError("Failed to write temporary code", err)
+		return
+	}
+
+	w, err := storage.Writer(goURI)
+	err = gui.ExportGoPreview(b.root, b.meta, w)
 
 	cmd := exec.Command("go", "run", path)
 	cmd.Stderr = os.Stderr
@@ -113,13 +102,13 @@ func (b *Builder) Save() error {
 	if err != nil {
 		return err
 	}
-	packagesList := packagesRequired(b.root)
-	code := exportCode(packagesList, varsRequired(b.root, b.meta[b.root]), b.root)
+
 	w, err = storage.Writer(goURI)
 	if err != nil {
 		return err
 	}
-	_, err = w.Write([]byte(code))
+	err = gui.ExportGo(b.root, b.meta, w)
+
 	_ = w.Close()
 	return err
 }
@@ -186,12 +175,11 @@ func (b *Builder) buildLibrary() fyne.CanvasObject {
 func (b *Builder) buildUI(content fyne.CanvasObject) fyne.CanvasObject {
 	wrap := container.NewStack(b.root, newOverlay(b))
 
-	widType = widget.NewLabelWithStyle("(None Selected)", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 	widName = widget.NewEntry()
 	widName.Validator = validation.NewRegexp("^$|^[a-zA-Z_][a-zA-Z0-9_]*$", "Invalid variable name")
 	paletteList = container.NewVBox()
-	palette := container.NewBorder(container.NewVBox(widType,
-		widget.NewForm(widget.NewFormItem("Variable", widName))), nil, nil, nil,
+	palette := container.NewBorder(
+		widget.NewForm(widget.NewFormItem("Variable", widName)), nil, nil, nil,
 		container.NewGridWithRows(2, widget.NewCard("Properties", "",
 			container.NewVScroll(paletteList)),
 			widget.NewCard("Component List", "", b.buildLibrary()),
@@ -202,78 +190,10 @@ func (b *Builder) buildUI(content fyne.CanvasObject) fyne.CanvasObject {
 	return split
 }
 
-func packagesRequired(obj fyne.CanvasObject) []string {
-	if w, ok := obj.(fyne.Widget); ok {
-		return packagesRequiredForWidget(w)
-	}
-
-	ret := []string{"container"}
-	var objs []fyne.CanvasObject
-	if c, ok := obj.(*fyne.Container); ok {
-		objs = c.Objects
-	} else if c, ok := obj.(*fyne.Container); ok {
-		objs = c.Objects
-	}
-	for _, w := range objs {
-		for _, p := range packagesRequired(w) {
-			added := false
-			for _, exists := range ret {
-				if p == exists {
-					added = true
-					break
-				}
-			}
-			if !added {
-				ret = append(ret, p)
-			}
-		}
-	}
-	return ret
-}
-
-func packagesRequiredForWidget(w fyne.Widget) []string {
-	name := reflect.TypeOf(w).String()
-	if guidefs.Widgets[name].Packages != nil {
-		return guidefs.Widgets[name].Packages(w)
-	}
-
-	return []string{"widget"}
-}
-
-func varsRequired(obj fyne.CanvasObject, props map[string]string) []string {
-	name := props["name"]
-	if w, ok := obj.(fyne.Widget); ok {
-		if name == "" {
-			return []string{}
-		}
-
-		_, class := getTypeOf(w)
-		return []string{name + " " + class}
-	}
-
-	var ret []string
-	var objs []fyne.CanvasObject
-	if c, ok := obj.(*fyne.Container); ok {
-		objs = c.Objects
-	} else if c, ok := obj.(*fyne.Container); ok {
-		objs = c.Objects
-
-		if name != "" {
-			ret = append(ret, name+" "+"*fyne.Container")
-		}
-	}
-	for _, w := range objs {
-		ret = append(ret, varsRequired(w, props)...)
-	}
-	return ret
-}
-
 func (b *Builder) choose(o fyne.CanvasObject) {
 	b.current = o
 
 	name := b.meta[o]["name"]
-	typeName, class := getTypeOf(o)
-	widType.SetText(typeName)
 	widName.OnChanged = func(s string) {
 		props := b.meta[o]
 		if props == nil {
@@ -283,12 +203,9 @@ func (b *Builder) choose(o fyne.CanvasObject) {
 	}
 	widName.SetText(name)
 
-	var items []*widget.FormItem
-	if match, ok := guidefs.Widgets[class]; ok {
-		props := b.meta[o]
-		items = match.Edit(o, props)
-		b.meta[o] = props
-	}
+	props := b.meta[o]
+	items := gui.EditorFor(o, b.meta[o])
+	b.meta[o] = props
 
 	editForm = widget.NewForm(items...)
 	remove := widget.NewButton("Remove", func() {
@@ -311,60 +228,6 @@ func (b *Builder) choose(o fyne.CanvasObject) {
 	paletteList.Refresh()
 }
 
-var defs map[string]string // TODO find a better (non-global, non-race) way...
-
-func exportCode(pkgs, vars []string, obj fyne.CanvasObject) string {
-	for i := 0; i < len(pkgs); i++ {
-		if pkgs[i] != "net/url" {
-			pkgs[i] = "fyne.io/fyne/v2/" + pkgs[i]
-		}
-
-		pkgs[i] = fmt.Sprintf(`	"%s"`, pkgs[i])
-	}
-
-	defs = make(map[string]string)
-	main := fmt.Sprintf("%#v", obj) // start GoString conversion
-	setup := ""
-	for k, v := range defs {
-		setup += "g." + k + " = " + v + "\n"
-	}
-
-	code := fmt.Sprintf(`// auto-generated
-// Code generated by Defyne GUI builder.
-
-package main
-
-import (
-	"fyne.io/fyne/v2"
-%s
-)
-
-type gui struct {
-%s
-}
-
-func newGUI() *gui {
-	return &gui{}
-}
-
-func (g *gui) makeUI() fyne.CanvasObject {
-	%s
-
-	return %s}
-`,
-		strings.Join(pkgs, "\n"),
-		strings.Join(vars, "\n"),
-		setup, main)
-
-	formatted, err := format.Source([]byte(code))
-	if err != nil {
-		log.Println(code)
-		fyne.LogError("Failed to encode GUI code", err)
-		return ""
-	}
-	return string(formatted)
-}
-
 func findParent(o fyne.CanvasObject, parent fyne.CanvasObject) *fyne.Container {
 	switch w := parent.(type) {
 	case *fyne.Container:
@@ -380,22 +243,6 @@ func findParent(o fyne.CanvasObject, parent fyne.CanvasObject) *fyne.Container {
 	}
 
 	return nil
-}
-
-func getTypeOf(o fyne.CanvasObject) (string, string) {
-	typeName := reflect.TypeOf(o).Elem().Name()
-	class := reflect.TypeOf(o).String()
-	l := reflect.ValueOf(o).Elem()
-	if typeName == "Entry" {
-		if l.FieldByName("Password").Bool() {
-			typeName = "PasswordEntry"
-		} else if l.FieldByName("MultiLine").Bool() {
-			typeName = "MultiLineEntry"
-		}
-		class = "*widget." + typeName
-	}
-
-	return typeName, class
 }
 
 func previewUI() fyne.CanvasObject {
