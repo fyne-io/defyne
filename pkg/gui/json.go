@@ -112,6 +112,26 @@ func encodeObj(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 	}
 
 	switch c := obj.(type) {
+	case *widget.Button:
+		if c.Icon == nil {
+			return encodeWidget(c, name)
+		}
+
+		ic := c.Icon
+		c.Icon = guidefs.WrapResource(c.Icon)
+		err := encodeWidget(c, name)
+		c.Icon = ic
+		return err
+	case *widget.Icon:
+		if c.Resource == nil {
+			return encodeWidget(c, name)
+		}
+
+		ic := c.Resource
+		c.Resource = guidefs.WrapResource(c.Resource)
+		err := encodeWidget(c, name)
+		c.Resource = ic
+		return err
 	case fyne.Widget:
 		if form, ok := c.(*widget.Form); ok {
 			return encodeForm(form, name)
@@ -208,6 +228,10 @@ func decodeMap(m map[string]interface{}, p *fyne.Container, meta map[fyne.Canvas
 
 		if m["Objects"] != nil {
 			for _, data := range m["Objects"].([]interface{}) {
+				if data == nil {
+					// Nil object?
+					continue
+				}
 				child := decodeMap(data.(map[string]interface{}), obj, meta)
 				obj.Objects = append(obj.Objects, child)
 			}
