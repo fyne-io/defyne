@@ -21,6 +21,8 @@ var (
 
 	Widgets map[string]WidgetInfo
 	once    sync.Once
+
+	importances = []string{"Medium", "High", "Low", "Danger", "Warning", "Success"}
 )
 
 type WidgetInfo struct {
@@ -45,11 +47,35 @@ func initWidgets() {
 				entry.OnChanged = func(text string) {
 					b.SetText(text)
 				}
+
+				icon := widget.NewSelect(append([]string{"(No Icon)"}, IconNames...), func(selected string) {
+					b.SetIcon(Icons[selected])
+				})
+				if b.Icon != nil {
+					name := IconReverse[fmt.Sprintf("%p", b.Icon)]
+					for _, n := range IconNames {
+						if n == name {
+							icon.SetSelected(n)
+							break
+						}
+					}
+				}
+				importance := widget.NewSelect(importances, func(s string) {
+					var i widget.Importance
+					for ii, imp := range importances {
+						if imp == s {
+							i = widget.Importance(ii)
+						}
+					}
+					b.Importance = i
+					b.Refresh()
+				})
+				importance.SetSelectedIndex(int(b.Importance))
 				return []*widget.FormItem{
 					widget.NewFormItem("Text", entry),
-					widget.NewFormItem("Icon", widget.NewSelect(IconNames, func(selected string) {
-						b.SetIcon(WrapResource(Icons[selected]))
-					}))}
+					widget.NewFormItem("Icon", icon),
+					widget.NewFormItem("Importance", importance),
+				}
 			},
 			Gostring: func(obj fyne.CanvasObject, _ map[fyne.CanvasObject]map[string]string) string {
 				b := obj.(*widget.Button)
