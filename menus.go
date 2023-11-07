@@ -63,11 +63,20 @@ func (d *defyne) menuActionNew() {
 }
 
 func (d *defyne) menuActionRunProject() {
-	cmd := exec.Command("go", "run", ".")
+	pwd, _ := os.Getwd()
+	os.Chdir(d.projectRoot.Path())
+	cmd := exec.Command("go", "mod", "tidy")
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	cmd.Run()
+
+	cmd = exec.Command("go", "run", ".")
 	cmd.Dir = d.projectRoot.Path()
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	cmd.Start()
+
+	os.Chdir(pwd)
 }
 
 func (d *defyne) menuActionRun() {
