@@ -16,7 +16,7 @@ func ExportGo(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]strin
 	guidefs.InitOnce()
 
 	packagesList := packagesRequired(obj)
-	varList := varsRequired(obj, meta[obj])
+	varList := varsRequired(obj, meta)
 	code := exportCode(packagesList, varList, obj, meta)
 
 	_, err := w.Write([]byte(code))
@@ -28,7 +28,7 @@ func ExportGoPreview(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[strin
 
 	packagesList := packagesRequired(obj)
 	packagesList = append(packagesList, "app")
-	varList := varsRequired(obj, meta[obj])
+	varList := varsRequired(obj, meta)
 	code := exportCode(packagesList, varList, obj, meta)
 
 	code += `
@@ -57,7 +57,7 @@ func exportCode(pkgs, vars []string, obj fyne.CanvasObject, meta map[fyne.Canvas
 	defs := make(map[string]string)
 
 	_, clazz := getTypeOf(obj)
-	main := guidefs.Widgets[clazz].Gostring(obj, meta) // TODO pass meta all through
+	main := guidefs.Widgets[clazz].Gostring(obj, meta, defs)
 	setup := ""
 	for k, v := range defs {
 		setup += "g." + k + " = " + v + "\n"
@@ -137,8 +137,8 @@ func packagesRequiredForWidget(w fyne.Widget) []string {
 	return []string{"widget"}
 }
 
-func varsRequired(obj fyne.CanvasObject, props map[string]string) []string {
-	name := props["name"]
+func varsRequired(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string) []string {
+	name := props[obj]["name"]
 	if w, ok := obj.(fyne.Widget); ok {
 		if name == "" {
 			return []string{}

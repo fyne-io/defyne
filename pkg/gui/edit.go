@@ -2,6 +2,7 @@ package gui
 
 import (
 	"reflect"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
@@ -29,13 +30,14 @@ func EditorFor(o fyne.CanvasObject, props map[string]string) []*widget.FormItem 
 
 	return nil
 }
-func GoStringFor(o fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string) string {
+
+func GoStringFor(o fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 	guidefs.InitOnce()
 
 	name := reflect.TypeOf(o).String()
 
 	if match, ok := guidefs.Widgets[name]; ok {
-		return match.Gostring(o, props)
+		return match.Gostring(o, props, defs)
 	}
 
 	return ""

@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"reflect"
 	"strings"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
@@ -119,9 +120,12 @@ func encodeObj(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 
 		ic := c.Icon
 		c.Icon = guidefs.WrapResource(c.Icon)
-		err := encodeWidget(c, name)
-		c.Icon = ic
-		return err
+		wid := encodeWidget(c, name)
+		go func() { // TODO find a better way to reset this after encoding
+			time.Sleep(time.Millisecond * 100)
+			c.Icon = ic
+		}()
+		return wid
 	case *widget.Icon:
 		if c.Resource == nil {
 			return encodeWidget(c, name)
@@ -129,9 +133,12 @@ func encodeObj(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 
 		ic := c.Resource
 		c.Resource = guidefs.WrapResource(c.Resource)
-		err := encodeWidget(c, name)
-		c.Resource = ic
-		return err
+		wid := encodeWidget(c, name)
+		go func() { // TODO find a better way to reset this after encoding
+			time.Sleep(time.Millisecond * 100)
+			c.Resource = ic
+		}()
+		return wid
 	case fyne.Widget:
 		if form, ok := c.(*widget.Form); ok {
 			return encodeForm(form, name)
@@ -157,6 +164,7 @@ func encodeObj(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 		for _, o := range c.Objects {
 			node.Objects = append(node.Objects, encodeObj(o, meta))
 		}
+		node.Properties = meta[c]
 		return &node
 	}
 
@@ -271,7 +279,7 @@ func decodeWidget(m map[string]interface{}) fyne.Widget {
 		case "fyne.Resource":
 			res := guidefs.Icons[reflect.ValueOf(v).String()]
 			if res != nil {
-				f.Set(reflect.ValueOf(guidefs.WrapResource(res)))
+				f.Set(reflect.ValueOf(res))
 			}
 		case "[]*widget.FormItem":
 			var items []*widget.FormItem

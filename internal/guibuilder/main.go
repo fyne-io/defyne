@@ -101,7 +101,23 @@ func (b *Builder) Run() {
 
 // Save will trigger the current state to be written out to the file this was opened from.
 func (b *Builder) Save() error {
-	w, err := storage.Writer(b.uri)
+	goFile := strings.ReplaceAll(b.uri.Name(), ".gui.json", ".gui.go")
+	dir, _ := storage.Parent(b.uri)
+
+	goURI, err := storage.Child(dir, goFile)
+	if err != nil {
+		return err
+	}
+
+	w, err := storage.Writer(goURI)
+	if err != nil {
+		return err
+	}
+	err = gui.ExportGo(b.root, b.meta, w)
+
+	_ = w.Close()
+
+	w, err = storage.Writer(b.uri)
 	if err != nil {
 		return err
 	}
@@ -110,20 +126,6 @@ func (b *Builder) Save() error {
 		return err
 	}
 
-	goFile := strings.ReplaceAll(w.URI().Name(), ".gui.json", ".gui.go")
-	dir, _ := storage.Parent(w.URI())
-	goURI, err := storage.Child(dir, goFile)
-	if err != nil {
-		return err
-	}
-
-	w, err = storage.Writer(goURI)
-	if err != nil {
-		return err
-	}
-	err = gui.ExportGo(b.root, b.meta, w)
-
-	_ = w.Close()
 	return err
 }
 
