@@ -42,8 +42,17 @@ func GoStringFor(o fyne.CanvasObject, props map[fyne.CanvasObject]map[string]str
 }
 
 func getTypeOf(o fyne.CanvasObject) (string, string) {
-	typeName := reflect.TypeOf(o).Elem().Name()
 	class := reflect.TypeOf(o).String()
+	name := NameOf(o)
+
+	if strings.Contains(name, "Entry") {
+		class = "*widget." + name
+	}
+	return name, class
+}
+
+func NameOf(o fyne.CanvasObject) string {
+	typeName := reflect.TypeOf(o).Elem().Name()
 	l := reflect.ValueOf(o).Elem()
 	if typeName == "Entry" {
 		if l.FieldByName("Password").Bool() {
@@ -51,8 +60,7 @@ func getTypeOf(o fyne.CanvasObject) (string, string) {
 		} else if l.FieldByName("MultiLine").Bool() {
 			typeName = "MultiLineEntry"
 		}
-		class = "*widget." + typeName
 	}
 
-	return typeName, class
+	return typeName
 }
