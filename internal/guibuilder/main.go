@@ -57,6 +57,9 @@ func NewBuilder(u fyne.URI, win fyne.Window) *Builder {
 		if obj == nil {
 			obj = previewUI()
 		}
+		if meta == nil {
+			meta = make(map[fyne.CanvasObject]map[string]string)
+		}
 	}
 
 	return &Builder{root: obj, uri: u, win: win, meta: meta}
@@ -215,7 +218,13 @@ func (b *Builder) choose(o fyne.CanvasObject) {
 	widName.SetText(name)
 
 	props := b.meta[o]
-	items := gui.EditorFor(o, b.meta[o])
+	if props == nil {
+		props = make(map[string]string)
+	}
+	items := gui.EditorFor(o, props)
+
+	nameItem := widget.NewFormItem("Type", widget.NewLabel(gui.NameOf(o)))
+	items = append([]*widget.FormItem{nameItem}, items...)
 	b.meta[o] = props
 
 	editForm = widget.NewForm(items...)

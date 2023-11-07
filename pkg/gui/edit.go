@@ -21,14 +21,10 @@ func CreateNew(name string) fyne.CanvasObject {
 func EditorFor(o fyne.CanvasObject, props map[string]string) []*widget.FormItem {
 	guidefs.InitOnce()
 
-	typeName, clazz := getTypeOf(o)
-
-	ret := []*widget.FormItem{
-		widget.NewFormItem("Type", widget.NewLabel(typeName)),
-	}
+	_, clazz := getTypeOf(o)
 
 	if match, ok := guidefs.Widgets[clazz]; ok {
-		return append(ret, match.Edit(o, props)...)
+		return match.Edit(o, props)
 	}
 
 	return nil
