@@ -82,20 +82,19 @@ func (b *Builder) Run() {
 	w, err := storage.Writer(goURI)
 	err = gui.ExportGoPreview(b.root, b.meta, w)
 
+	exec_cmd := func(command string) *exec.Cmd {
+		command_fields := strings.Fields(command)
+		cmd := exec.Command(command_fields[0], command_fields[1:]...)
+		cmd.Stderr = os.Stderr
+		cmd.Stdout = os.Stdout
+		return cmd
+	}
+
 	pwd, _ := os.Getwd()
 	os.Chdir(path)
-	cmd := exec.Command("go", "mod", "init", "temp")
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	cmd.Run()
-	cmd = exec.Command("go", "mod", "tidy")
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	cmd.Run()
-	cmd = exec.Command("go", "run", ".")
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	cmd.Start()
+	exec_cmd("go mod init temp").Run()
+	exec_cmd("go mod tidy").Run()
+	exec_cmd("go run .").Start()
 	os.Chdir(pwd)
 }
 
