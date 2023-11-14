@@ -2,7 +2,6 @@ package gui
 
 import (
 	"reflect"
-	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
@@ -47,9 +46,6 @@ func getTypeOf(o fyne.CanvasObject) (string, string) {
 	class := reflect.TypeOf(o).String()
 	name := NameOf(o)
 
-	if strings.Contains(name, "Entry") {
-		class = "*widget." + name
-	}
 	return name, class
 }
 

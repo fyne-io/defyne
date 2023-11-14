@@ -81,19 +81,19 @@ func initWidgets() {
 				b := obj.(*widget.Button)
 				if b.Icon == nil {
 					if b.Importance == widget.MediumImportance {
-						return widgetRef(props[obj], defs, fmt.Sprintf("widget.NewButton(\"%s\", func() {})", encodeDoubleQuote(b.Text)))
+						return widgetRef(props[obj], defs, fmt.Sprintf("widget.NewButton(\"%s\", func() {})", escapeLabel(b.Text)))
 					} else {
 						return widgetRef(props[obj], defs, fmt.Sprintf("&widget.Button{Text: \"%s\", Importance: %d, OnTapped: func() {}}",
-							encodeDoubleQuote(b.Text), b.Importance))
+							escapeLabel(b.Text), b.Importance))
 					}
 				}
 
 				icon := "theme." + IconReverse[fmt.Sprintf("%p", b.Icon)] + "()"
 				if b.Importance == widget.MediumImportance {
-					return widgetRef(props[obj], defs, fmt.Sprintf("widget.NewButtonWithIcon(\"%s\", %s, func() {})", encodeDoubleQuote(b.Text), icon))
+					return widgetRef(props[obj], defs, fmt.Sprintf("widget.NewButtonWithIcon(\"%s\", %s, func() {})", escapeLabel(b.Text), icon))
 				} else {
 					return widgetRef(props[obj], defs, fmt.Sprintf("&widget.Button{Text: \"%s\", Importance: %d, Icon: %s, OnTapped: func() {}}",
-						encodeDoubleQuote(b.Text), b.Importance, icon))
+						escapeLabel(b.Text), b.Importance, icon))
 				}
 			},
 			Packages: func(obj fyne.CanvasObject) []string {
@@ -130,7 +130,7 @@ func initWidgets() {
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 				link := obj.(*widget.Hyperlink)
-				return widgetRef(props[obj], defs, fmt.Sprintf(`widget.NewHyperlink("%s", %#v)`, encodeDoubleQuote(link.Text), link.URL))
+				return widgetRef(props[obj], defs, fmt.Sprintf(`widget.NewHyperlink("%s", %#v)`, escapeLabel(link.Text), link.URL))
 			},
 			Packages: func(_ fyne.CanvasObject) []string {
 				return []string{"net/url"}
@@ -160,7 +160,7 @@ func initWidgets() {
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 				c := obj.(*widget.Card)
 				return widgetRef(props[obj], defs, fmt.Sprintf("widget.NewCard(\"%s\", \"%s\", widget.NewLabel(\"Content here\"))",
-					encodeDoubleQuote(c.Title), encodeDoubleQuote(c.Subtitle)))
+					escapeLabel(c.Title), escapeLabel(c.Subtitle)))
 			},
 		},
 		"*widget.Entry": {
@@ -189,7 +189,8 @@ func initWidgets() {
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 				l := obj.(*widget.Entry)
 				return widgetRef(props[obj], defs,
-					fmt.Sprintf("&widget.Entry{Text: \"%s\", PlaceHolder: \"%s\"}", encodeDoubleQuote(l.Text), encodeDoubleQuote(l.PlaceHolder)))
+					fmt.Sprintf("&widget.Entry{Text: \"%s\", PlaceHolder: \"%s\", MultiLine: %t, Password: %t}",
+						escapeLabel(l.Text), escapeLabel(l.PlaceHolder), l.MultiLine, l.Password))
 			},
 		},
 		"*widget.Icon": {
@@ -232,7 +233,7 @@ func initWidgets() {
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 				l := obj.(*widget.Label)
 				return widgetRef(props[obj], defs,
-					fmt.Sprintf("widget.NewLabel(\"%s\")", encodeDoubleQuote(l.Text)))
+					fmt.Sprintf("widget.NewLabel(\"%s\")", escapeLabel(l.Text)))
 			},
 		},
 		"*widget.Check": {
@@ -257,7 +258,7 @@ func initWidgets() {
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 				c := obj.(*widget.Check)
 				return widgetRef(props[obj], defs,
-					fmt.Sprintf("widget.NewCheck(\"%s\", func(b bool) {})", encodeDoubleQuote(c.Text)))
+					fmt.Sprintf("widget.NewCheck(\"%s\", func(b bool) {})", escapeLabel(c.Text)))
 			},
 		},
 		"*widget.RadioGroup": {
@@ -285,7 +286,7 @@ func initWidgets() {
 				r := obj.(*widget.RadioGroup)
 				var opts []string
 				for _, v := range r.Options {
-					opts = append(opts, encodeDoubleQuote(v))
+					opts = append(opts, escapeLabel(v))
 				}
 				return widgetRef(props[obj], defs,
 					fmt.Sprintf("widget.NewRadioGroup([]string{%s}, func(s string) {})", "\""+strings.Join(opts, "\", \"")+"\""))
@@ -321,7 +322,7 @@ func initWidgets() {
 				s := obj.(*widget.Select)
 				var opts []string
 				for _, v := range s.Options {
-					opts = append(opts, encodeDoubleQuote(v))
+					opts = append(opts, escapeLabel(v))
 				}
 				return widgetRef(props[obj], defs,
 					fmt.Sprintf("widget.NewSelect([]string{%s}, func(s string) {})", "\""+strings.Join(opts, "\", \"")+"\""))
@@ -406,29 +407,7 @@ func initWidgets() {
 				mle.Wrapping = fyne.TextWrapWord
 				return mle
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
-				mle := obj.(*widget.Entry)
-				placeholder := widget.NewMultiLineEntry()
-				placeholder.Wrapping = fyne.TextWrapWord
-				placeholder.SetText(mle.PlaceHolder)
-				placeholder.OnChanged = func(s string) {
-					mle.SetPlaceHolder(s)
-				}
-				value := widget.NewMultiLineEntry()
-				value.Wrapping = fyne.TextWrapWord
-				value.SetText(mle.Text)
-				value.OnChanged = func(s string) {
-					mle.SetText(s)
-				}
-				return []*widget.FormItem{
-					widget.NewFormItem("Placeholder", placeholder),
-					widget.NewFormItem("Value", value)}
-			},
-			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
-				mle := obj.(*widget.Entry)
-				return widgetRef(props[obj], defs,
-					fmt.Sprintf("&widget.MultiLineEntry{Text: \"%s\", PlaceHolder: \"%s\"}", encodeDoubleQuote(mle.Text), encodeDoubleQuote(mle.PlaceHolder)))
-			},
+			// The rest inherits from Entry
 		},
 		"*widget.PasswordEntry": {
 			Name: "Password Entry",
@@ -437,33 +416,7 @@ func initWidgets() {
 				e.SetPlaceHolder("Password Entry")
 				return e
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
-				l := obj.(*widget.Entry)
-				text := widget.NewPasswordEntry()
-				text.SetText(l.Text)
-				text.OnChanged = func(text string) {
-					l.SetText(text)
-				}
-				placeholder := widget.NewEntry()
-				placeholder.SetText(l.PlaceHolder)
-				placeholder.OnChanged = func(text string) {
-					l.SetPlaceHolder(text)
-				}
-				// hidePassword := widget.NewCheck("Hide Password", func(b bool) {})
-				// hidePassword.SetChecked(l.Hidden)
-				// hidePassword.OnChanged = func(b bool) {
-				// 	l.Hidden = b
-				// }
-				return []*widget.FormItem{
-					widget.NewFormItem("Text", text),
-					// widget.NewFormItem("Hide password", placeholder),
-					widget.NewFormItem("PlaceHolder", placeholder)}
-			},
-			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
-				l := obj.(*widget.Entry)
-				return widgetRef(props[obj], defs,
-					fmt.Sprintf("&widget.MultiLineEntry{Text: \"%s\", PlaceHolder: \"%s\"}", encodeDoubleQuote(l.Text), encodeDoubleQuote(l.PlaceHolder)))
-			},
+			// The rest inherits from Entry
 		},
 		"*widget.ProgressBar": {
 			Name: "Progress Bar",
@@ -586,7 +539,7 @@ func initWidgets() {
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 				to := obj.(*widget.TextGrid)
 				return widgetRef(props[obj], defs,
-					fmt.Sprintf("widget.NewTextGrid(\"%s\")", encodeDoubleQuote(to.Text())))
+					fmt.Sprintf("widget.NewTextGrid(\"%s\")", escapeLabel(to.Text())))
 			},
 		},
 		"*widget.Toolbar": {
