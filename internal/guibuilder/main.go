@@ -1,7 +1,6 @@
 package guibuilder
 
 import (
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -184,7 +183,6 @@ func (b *Builder) buildLibrary() fyne.CanvasObject {
 			}
 			return
 		}
-		log.Println("Please select a container")
 	}), nil, nil, list)
 }
 
@@ -238,7 +236,6 @@ func (b *Builder) choose(o fyne.CanvasObject) {
 			parent = findParent(w, b.root)
 		}
 		if parent == nil {
-			log.Println("Nothing to remove")
 			return
 		}
 

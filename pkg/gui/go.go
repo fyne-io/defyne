@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"go/format"
 	"io"
-	"log"
 	"reflect"
 	"strings"
 
@@ -92,7 +91,6 @@ func (g *gui) makeUI() fyne.CanvasObject {
 
 	formatted, err := format.Source([]byte(code))
 	if err != nil {
-		log.Println(code)
 		fyne.LogError("Failed to encode GUI code", err)
 		return ""
 	}
@@ -149,18 +147,14 @@ func varsRequired(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]
 	}
 
 	var ret []string
-	var objs []fyne.CanvasObject
 	if c, ok := obj.(*fyne.Container); ok {
-		objs = c.Objects
-	} else if c, ok := obj.(*fyne.Container); ok {
-		objs = c.Objects
-
 		if name != "" {
 			ret = append(ret, name+" "+"*fyne.Container")
 		}
-	}
-	for _, w := range objs {
-		ret = append(ret, varsRequired(w, props)...)
+
+		for _, w := range c.Objects {
+			ret = append(ret, varsRequired(w, props)...)
+		}
 	}
 	return ret
 }

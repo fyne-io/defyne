@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
 	"net/url"
 	"reflect"
 	"strings"
@@ -265,7 +264,8 @@ func decodeMap(m map[string]interface{}, p *fyne.Container, meta map[fyne.Canvas
 }
 
 func decodeWidget(m map[string]interface{}) fyne.Widget {
-	obj := guidefs.Widgets[m["Type"].(string)].Create().(fyne.Widget)
+	class := m["Type"].(string)
+	obj := guidefs.Widgets[class].Create().(fyne.Widget)
 	e := reflect.ValueOf(obj).Elem()
 	for k, v := range m["Struct"].(map[string]interface{}) {
 		f := e.FieldByName(k)
@@ -288,7 +288,7 @@ func decodeWidget(m map[string]interface{}) fyne.Widget {
 			}
 			f.Set(reflect.ValueOf(items))
 		case "fyne.CanvasObject":
-			log.Println("Unsupported field")
+			fyne.LogError("Unsupported object type: "+class, nil)
 		case "*url.URL":
 			u := &url.URL{}
 			decodeFromMap(reflect.ValueOf(v).Interface().(map[string]interface{}), u)
