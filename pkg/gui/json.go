@@ -9,9 +9,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fyne-io/defyne/internal/guidefs"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
-	"github.com/fyne-io/defyne/internal/guidefs"
 )
 
 const jsonKeyObject = "Object"

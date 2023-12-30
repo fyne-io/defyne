@@ -14,24 +14,22 @@ import (
 )
 
 const labelJSON = `{
-  "Object": {
-    "Type": "*widget.Label",
-    "Name": "myLabel",
-    "Struct": {
-      "Hidden": false,
-      "Text": "Hi",
-      "Alignment": 1,
-      "Wrapping": 0,
-      "TextStyle": {
-        "Bold": true,
-        "Italic": false,
-        "Monospace": false,
-        "Symbol": false,
-        "TabWidth": 0
-      },
-      "Truncation": 0,
-      "Importance": 0
-    }
+  "Type": "*widget.Label",
+  "Name": "myLabel",
+  "Struct": {
+    "Hidden": false,
+    "Text": "Hi",
+    "Alignment": 1,
+    "Wrapping": 0,
+    "TextStyle": {
+      "Bold": true,
+      "Italic": false,
+      "Monospace": false,
+      "Symbol": false,
+      "TabWidth": 0
+    },
+    "Truncation": 0,
+    "Importance": 0
   }
 }
 `
