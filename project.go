@@ -169,32 +169,30 @@ func (g *gui) makeUI() fyne.CanvasObject {
 		return dir, nil
 	}
 	err = writeFile(dir, "main.gui.json", `{
-  "Object": {
-    "Type": "*fyne.Container",
-    "Layout": "VBox",
-    "Name": "",
-    "Objects": [
-      {
-        "Type": "*widget.Label",
-        "Name": "",
-        "Struct": {
-          "Hidden": false,
-          "Text": "Hello `+name+`!",
-          "Alignment": 0,
-          "Wrapping": 0,
-          "TextStyle": {
-            "Bold": false,
-            "Italic": false,
-            "Monospace": false,
-            "Symbol": false,
-            "TabWidth": 0
-          },
-          "Truncation": 0,
-          "Importance": 0
-        }
+  "Type": "*fyne.Container",
+  "Layout": "VBox",
+  "Name": "",
+  "Objects": [
+    {
+      "Type": "*widget.Label",
+      "Name": "",
+      "Struct": {
+        "Hidden": false,
+        "Text": "Hello `+name+`!",
+        "Alignment": 0,
+        "Wrapping": 0,
+        "TextStyle": {
+          "Bold": false,
+          "Italic": false,
+          "Monospace": false,
+          "Symbol": false,
+          "TabWidth": 0
+        },
+        "Truncation": 0,
+        "Importance": 0
       }
-    ]
-  }
+    }
+  ]
 }
 `)
 	if err != nil {
