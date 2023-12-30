@@ -2,7 +2,6 @@ package gui
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"net/url"
 	"reflect"
@@ -43,7 +42,7 @@ type cont struct {
 }
 
 // DecodeJSON returns a tree of `CanvasObject` elements from the provided JSON `Reader` and
-// the tree of wrapped elements that describe their metadata.
+// updates the metadata map to include any additional information.
 func DecodeJSON(r io.Reader) (fyne.CanvasObject, map[fyne.CanvasObject]map[string]string, error) {
 	guidefs.InitOnce()
 
@@ -55,12 +54,60 @@ func DecodeJSON(r io.Reader) (fyne.CanvasObject, map[fyne.CanvasObject]map[strin
 
 	meta := make(map[fyne.CanvasObject]map[string]string)
 	root := data.(map[string]interface{})
-	node, ok := root[jsonKeyObject]
-	if !ok {
-		return nil, nil, errors.New("cannot parse old format of .gui.json file")
+
+	obj, err := DecodeMap(root, meta)
+	return obj, meta, err
+}
+
+// DecodeMap returns a tree of `CanvasObject` elements from the provided JSON map and
+// updates the metadata map to include any additional information.
+func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]string) (fyne.CanvasObject, error) {
+	guidefs.InitOnce()
+
+	if m["Type"] == "*fyne.Container" {
+		obj := &fyne.Container{}
+		name := m["Layout"].(string)
+
+		props := map[string]string{"layout": name}
+		if m["Properties"] != nil {
+			for k, v := range m["Properties"].(map[string]interface{}) {
+				props[k] = v.(string)
+			}
+		}
+		if name == "HBox" {
+			props["dir"] = "horizontal"
+		} else if name == "VBox" {
+			props["dir"] = "vertical"
+		}
+
+		if m["Objects"] != nil {
+			for _, data := range m["Objects"].([]interface{}) {
+				if data == nil {
+					// Nil object?
+					continue
+				}
+				child, _ := DecodeMap(data.(map[string]interface{}), meta)
+				obj.Objects = append(obj.Objects, child)
+			}
+		}
+		obj.Layout = guidefs.Layouts[name].Create(obj, props)
+		if name, ok := m["Name"]; ok {
+			props["name"] = name.(string)
+		}
+
+		meta[obj] = props
+		return obj, nil
 	}
-	obj := decodeMap(node.(map[string]interface{}), nil, meta)
-	return obj, meta, nil
+
+	obj := decodeWidget(m)
+	obj.Refresh()
+	props := map[string]string{}
+	if name, ok := m["Name"]; ok {
+		props["name"] = name.(string)
+	}
+
+	meta[obj] = props
+	return obj, nil
 }
 
 // EncodeJSON writes a JSON stream for the tree of `CanvasObject` elements provided.
@@ -71,11 +118,85 @@ func EncodeJSON(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]str
 	if meta == nil {
 		meta = make(map[fyne.CanvasObject]map[string]string)
 	}
-	tree := encodeObj(obj, meta)
+	tree, _ := EncodeMap(obj, meta)
 
 	e := json.NewEncoder(w)
 	e.SetIndent("", "  ")
-	return e.Encode(map[string]interface{}{jsonKeyObject: tree})
+	return e.Encode(tree)
+}
+
+// EncodeMap returns a JSON map for the tree of `CanvasObject` elements provided, using additional metadata if required.
+// If an error occurs it will be returned, otherwise nil.
+func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string) (interface{}, error) {
+	guidefs.InitOnce()
+
+	props := meta[obj]
+	name := ""
+	if props == nil {
+		props = make(map[string]string)
+		meta[obj] = props
+	} else if props["name"] != "" {
+		name = props["name"]
+	}
+
+	switch c := obj.(type) {
+	case *widget.Button:
+		if c.Icon == nil {
+			return encodeWidget(c, name), nil
+		}
+
+		ic := c.Icon
+		c.Icon = guidefs.WrapResource(c.Icon)
+		wid := encodeWidget(c, name)
+		go func() { // TODO find a better way to reset this after encoding
+			time.Sleep(time.Millisecond * 100)
+			c.Icon = ic
+		}()
+		return wid, nil
+	case *widget.Icon:
+		if c.Resource == nil {
+			return encodeWidget(c, name), nil
+		}
+
+		ic := c.Resource
+		c.Resource = guidefs.WrapResource(c.Resource)
+		wid := encodeWidget(c, name)
+		go func() { // TODO find a better way to reset this after encoding
+			time.Sleep(time.Millisecond * 100)
+			c.Resource = ic
+		}()
+		return wid, nil
+	case fyne.Widget:
+		if form, ok := c.(*widget.Form); ok {
+			return encodeForm(form, name), nil
+		}
+		return encodeWidget(c, name), nil
+	case *fyne.Container:
+		var node cont
+		node.Type = "*fyne.Container"
+		node.Layout = strings.Split(reflect.TypeOf(c.Layout).String(), ".")[1]
+		node.Layout = strings.ToTitle(node.Layout[0:1]) + node.Layout[1:]
+		node.Name = name
+		p := strings.Index(node.Layout, "Layout")
+		if p > 0 {
+			node.Layout = node.Layout[:p]
+		}
+		if node.Layout == "Box" {
+			if props["dir"] == "horizontal" {
+				node.Layout = "HBox"
+			} else {
+				node.Layout = "VBox"
+			}
+		}
+		for _, o := range c.Objects {
+			enc, _ := EncodeMap(o, meta)
+			node.Objects = append(node.Objects, enc)
+		}
+		node.Properties = meta[c]
+		return &node, nil
+	}
+
+	return nil, nil
 }
 
 func encodeForm(obj *widget.Form, name string) interface{} {
@@ -100,75 +221,6 @@ func encodeForm(obj *widget.Form, name string) interface{} {
 	}
 
 	return &node
-}
-
-func encodeObj(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string) interface{} {
-	props := meta[obj]
-	name := ""
-	if props == nil {
-		props = make(map[string]string)
-		meta[obj] = props
-	} else if props["name"] != "" {
-		name = props["name"]
-	}
-
-	switch c := obj.(type) {
-	case *widget.Button:
-		if c.Icon == nil {
-			return encodeWidget(c, name)
-		}
-
-		ic := c.Icon
-		c.Icon = guidefs.WrapResource(c.Icon)
-		wid := encodeWidget(c, name)
-		go func() { // TODO find a better way to reset this after encoding
-			time.Sleep(time.Millisecond * 100)
-			c.Icon = ic
-		}()
-		return wid
-	case *widget.Icon:
-		if c.Resource == nil {
-			return encodeWidget(c, name)
-		}
-
-		ic := c.Resource
-		c.Resource = guidefs.WrapResource(c.Resource)
-		wid := encodeWidget(c, name)
-		go func() { // TODO find a better way to reset this after encoding
-			time.Sleep(time.Millisecond * 100)
-			c.Resource = ic
-		}()
-		return wid
-	case fyne.Widget:
-		if form, ok := c.(*widget.Form); ok {
-			return encodeForm(form, name)
-		}
-		return encodeWidget(c, name)
-	case *fyne.Container:
-		var node cont
-		node.Type = "*fyne.Container"
-		node.Layout = strings.Split(reflect.TypeOf(c.Layout).String(), ".")[1]
-		node.Layout = strings.ToTitle(node.Layout[0:1]) + node.Layout[1:]
-		node.Name = name
-		p := strings.Index(node.Layout, "Layout")
-		if p > 0 {
-			node.Layout = node.Layout[:p]
-		}
-		if node.Layout == "Box" {
-			if props["dir"] == "horizontal" {
-				node.Layout = "HBox"
-			} else {
-				node.Layout = "VBox"
-			}
-		}
-		for _, o := range c.Objects {
-			node.Objects = append(node.Objects, encodeObj(o, meta))
-		}
-		node.Properties = meta[c]
-		return &node
-	}
-
-	return nil
 }
 
 func encodeWidget(obj fyne.CanvasObject, name string) *canvObj {
@@ -215,53 +267,6 @@ func decodeTextStyle(m map[string]interface{}) (s fyne.TextStyle) {
 		s.TabWidth = int(m["TabWidth"].(float64))
 	}
 	return
-}
-
-func decodeMap(m map[string]interface{}, p *fyne.Container, meta map[fyne.CanvasObject]map[string]string) fyne.CanvasObject {
-	if m["Type"] == "*fyne.Container" {
-		obj := &fyne.Container{}
-		name := m["Layout"].(string)
-
-		props := map[string]string{"layout": name}
-		if m["Properties"] != nil {
-			for k, v := range m["Properties"].(map[string]interface{}) {
-				props[k] = v.(string)
-			}
-		}
-		if name == "HBox" {
-			props["dir"] = "horizontal"
-		} else if name == "VBox" {
-			props["dir"] = "vertical"
-		}
-
-		if m["Objects"] != nil {
-			for _, data := range m["Objects"].([]interface{}) {
-				if data == nil {
-					// Nil object?
-					continue
-				}
-				child := decodeMap(data.(map[string]interface{}), obj, meta)
-				obj.Objects = append(obj.Objects, child)
-			}
-		}
-		obj.Layout = guidefs.Layouts[name].Create(obj, props)
-		if name, ok := m["Name"]; ok {
-			props["name"] = name.(string)
-		}
-
-		meta[obj] = props
-		return obj
-	}
-
-	obj := decodeWidget(m)
-	obj.Refresh()
-	props := map[string]string{}
-	if name, ok := m["Name"]; ok {
-		props["name"] = name.(string)
-	}
-
-	meta[obj] = props
-	return obj
 }
 
 func decodeWidget(m map[string]interface{}) fyne.Widget {
