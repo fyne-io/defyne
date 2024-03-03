@@ -166,6 +166,24 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 			c.Resource = ic
 		}()
 		return wid, nil
+	case *widget.Toolbar:
+		for id, i := range c.Items {
+			switch t := i.(type) {
+			case *widget.ToolbarAction:
+				ic := t.Icon
+				t.Icon = guidefs.WrapResource(t.Icon)
+				go func() { // TODO find a better way to reset this after encoding
+					time.Sleep(time.Millisecond * 100)
+					t.Icon = ic
+				}()
+			case *widget.ToolbarSeparator:
+				c.Items[id] = toolbarItem{Type: "Separator"}
+			case *widget.ToolbarSpacer:
+				c.Items[id] = toolbarItem{Type: "Spacer"}
+			}
+		}
+
+		return encodeWidget(c, name), nil
 	case fyne.Widget:
 		if form, ok := c.(*widget.Form); ok {
 			return encodeForm(form, name), nil
@@ -269,6 +287,19 @@ func decodeTextStyle(m map[string]interface{}) (s fyne.TextStyle) {
 	return
 }
 
+func decodeToolbarItem(m map[string]interface{}) widget.ToolbarItem {
+	if v, ok := m["Type"]; ok {
+		switch v {
+		case "Separator":
+			return widget.NewToolbarSeparator()
+		default:
+			return widget.NewToolbarSpacer()
+		}
+	}
+
+	return widget.NewToolbarAction(guidefs.Icons[m["Icon"].(string)], nil)
+}
+
 func decodeWidget(m map[string]interface{}) fyne.Widget {
 	class := m["Type"].(string)
 	obj := guidefs.Widgets[class].Create().(fyne.Widget)
@@ -310,3 +341,9 @@ func decodeWidget(m map[string]interface{}) fyne.Widget {
 
 	return obj
 }
+
+type toolbarItem struct {
+	Type string
+}
+
+func (toolbarItem) ToolbarObject() fyne.CanvasObject { return nil }

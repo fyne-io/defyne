@@ -548,14 +548,9 @@ func initWidgets() {
 				return widget.NewToolbar(
 					widget.NewToolbarAction(Icons["FileIcon"], func() { fmt.Println("Clicked on FileIcon") }),
 					widget.NewToolbarSeparator(),
-					widget.NewToolbarAction(Icons["HomeIcon"], func() { fmt.Println("Clicked on HomeIcon") }),
-					widget.NewToolbarSeparator(),
-					widget.NewToolbarAction(Icons["DownloadIcon"], func() { fmt.Println("Clicked on DownloadIcon") }),
-					widget.NewToolbarSeparator(),
 					widget.NewToolbarAction(Icons["ViewRefreshIcon"], func() { fmt.Println("Clicked on ViewRefreshIcon") }),
 					widget.NewToolbarAction(Icons["NavigateBackIcon"], func() { fmt.Println("Clicked on NavigateBackIcon") }),
 					widget.NewToolbarAction(Icons["NavigateNextIcon"], func() { fmt.Println("Clicked on NavigateNextIcon") }),
-					widget.NewToolbarAction(Icons["MailSendIcon"], func() { fmt.Println("Clicked on MailSendIcon") }),
 					widget.NewToolbarSpacer(),
 					widget.NewToolbarAction(Icons["HelpIcon"], func() { fmt.Println("Clicked on HelpIcon") }),
 				)
@@ -567,14 +562,9 @@ func initWidgets() {
 				return widgetRef(props[obj], defs, `widget.NewToolbar(
 				widget.NewToolbarAction(theme.FileIcon(), func() {}),
 				widget.NewToolbarSeparator(),
-				widget.NewToolbarAction(theme.HomeIcon(), func() {}),
-				widget.NewToolbarSeparator(),
-				widget.NewToolbarAction(theme.DownloadIcon(), func() {}),
-				widget.NewToolbarSeparator(),
 				widget.NewToolbarAction(theme.ViewRefreshIcon(), func() {}),
 				widget.NewToolbarAction(theme.NavigateBackIcon(), func() {}),
 				widget.NewToolbarAction(theme.NavigateNextIcon(), func() {}),
-				widget.NewToolbarAction(theme.MailSendIcon(), func() {}),
 				widget.NewToolbarSpacer(),
 				widget.NewToolbarAction(theme.HelpIcon(), func() {}),
 			)`)
