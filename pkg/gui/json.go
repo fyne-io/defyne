@@ -324,6 +324,12 @@ func decodeWidget(m map[string]interface{}) fyne.Widget {
 				items = append(items, decodeFormItem(item.(map[string]interface{})))
 			}
 			f.Set(reflect.ValueOf(items))
+		case "[]widget.ToolbarItem":
+			var items []widget.ToolbarItem
+			for _, item := range reflect.ValueOf(v).Interface().([]interface{}) {
+				items = append(items, decodeToolbarItem(item.(map[string]interface{})))
+			}
+			f.Set(reflect.ValueOf(items))
 		case "fyne.CanvasObject":
 			fyne.LogError("Unsupported object type: "+class, nil)
 		case "*url.URL":
