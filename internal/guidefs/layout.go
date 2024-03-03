@@ -71,7 +71,7 @@ var (
 						}
 						label = fmt.Sprintf("Container (%s)", name)
 					} else {
-						wid := w.(*fyne.Container).Objects[0]
+						wid := w.(fyne.Widget)
 						name := props["name"]
 						if name == "" {
 							name = fmt.Sprintf("%p", wid)
@@ -152,27 +152,15 @@ var (
 				var t, b, l, r fyne.CanvasObject
 				if topNum != "" && topID < len(c.Objects) {
 					t = c.Objects[topID]
-					if _, ok := t.(*fyne.Container); !ok {
-						t = t.(*fyne.Container).Objects[1]
-					}
 				}
 				if bottomNum != "" && bottomID < len(c.Objects) {
 					b = c.Objects[bottomID]
-					if _, ok := b.(*fyne.Container); !ok {
-						b = b.(*fyne.Container).Objects[1]
-					}
 				}
 				if leftNum != "" && leftID < len(c.Objects) {
 					l = c.Objects[leftID]
-					if _, ok := l.(*fyne.Container); !ok {
-						l = l.(*fyne.Container).Objects[1]
-					}
 				}
 				if rightNum != "" && rightID < len(c.Objects) {
 					r = c.Objects[rightID]
-					if _, ok := r.(*fyne.Container); !ok {
-						r = r.(*fyne.Container).Objects[1]
-					}
 				}
 
 				str := &strings.Builder{}
