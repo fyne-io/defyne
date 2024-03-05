@@ -664,8 +664,28 @@ func initWidgets() {
 				return widgetRef(props[obj], defs, str.String())
 			},
 		},
+		"*container.Scroll": {
+			Name: "Scroll",
+			Create: func() fyne.CanvasObject {
+				s := container.NewScroll(nil)
+				s.Content = container.NewStack()
+				return s
+			},
+			Edit: func(obj fyne.CanvasObject, props map[string]string) []*widget.FormItem {
+				return []*widget.FormItem{}
+			},
+			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+				s := obj.(*container.Scroll)
+				str := &strings.Builder{}
+				str.WriteString("container.NewScroll(")
+				writeGoString(str, nil, props, defs, s.Content)
+				str.WriteString(")")
+				return str.String()
+			},
+		},
 	}
 
+	Widgets["*widget.Scroll"] = Widgets["*container.Scroll"]
 	WidgetNames = extractWidgetNames()
 }
 

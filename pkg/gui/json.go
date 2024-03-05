@@ -287,6 +287,13 @@ func decodeTextStyle(m map[string]interface{}) (s fyne.TextStyle) {
 	return
 }
 
+func decodePosition(m map[string]interface{}) fyne.Position {
+	x := m["X"].(float64)
+	y := m["Y"].(float64)
+
+	return fyne.NewPos(float32(x), float32(y))
+}
+
 func decodeToolbarItem(m map[string]interface{}) widget.ToolbarItem {
 	if v, ok := m["Type"]; ok {
 		switch v {
@@ -313,6 +320,8 @@ func decodeWidget(m map[string]interface{}) fyne.Widget {
 			f.SetInt(int64(reflect.ValueOf(v).Float()))
 		case "fyne.TextStyle":
 			f.Set(reflect.ValueOf(decodeTextStyle(reflect.ValueOf(v).Interface().(map[string]interface{}))))
+		case "fyne.Position":
+			f.Set(reflect.ValueOf(decodePosition(reflect.ValueOf(v).Interface().(map[string]interface{}))))
 		case "fyne.Resource":
 			res := guidefs.Icons[reflect.ValueOf(v).String()]
 			if res != nil {
