@@ -30,8 +30,10 @@ func initIcons() {
 
 		"CheckButtonIcon":        theme.CheckButtonIcon(),
 		"CheckButtonCheckedIcon": theme.CheckButtonCheckedIcon(),
+		"CheckButtonFillIcon":    theme.CheckButtonFillIcon(),
 		"RadioButtonIcon":        theme.RadioButtonIcon(),
 		"RadioButtonCheckedIcon": theme.RadioButtonCheckedIcon(),
+		"RadioButtonFillIcon":    theme.RadioButtonFillIcon(),
 
 		"ColorAchromaticIcon": theme.ColorAchromaticIcon(),
 		"ColorChromaticIcon":  theme.ColorChromaticIcon(),
@@ -50,6 +52,8 @@ func initIcons() {
 		"ErrorIcon":    theme.ErrorIcon(),
 		"QuestionIcon": theme.QuestionIcon(),
 		"WarningIcon":  theme.WarningIcon(),
+
+		"BrokenImageIcon": theme.BrokenImageIcon(),
 
 		"DocumentIcon":       theme.DocumentIcon(),
 		"DocumentCreateIcon": theme.DocumentCreateIcon(),
@@ -72,7 +76,7 @@ func initIcons() {
 		"SettingsIcon":        theme.SettingsIcon(),
 		"StorageIcon":         theme.StorageIcon(),
 		"DownloadIcon":        theme.DownloadIcon(),
-		// "UploadIcon":          theme.UploadIcon(),
+		"UploadIcon":          theme.UploadIcon(),
 
 		"ViewFullScreenIcon": theme.ViewFullScreenIcon(),
 		"ViewRestoreIcon":    theme.ViewRestoreIcon(),
@@ -82,6 +86,9 @@ func initIcons() {
 		"ZoomFitIcon":        theme.ZoomFitIcon(),
 		"ZoomInIcon":         theme.ZoomInIcon(),
 		"ZoomOutIcon":        theme.ZoomOutIcon(),
+
+		"MoreHorizontalIcon": theme.MoreHorizontalIcon(),
+		"MoreVerticalIcon":   theme.MoreVerticalIcon(),
 
 		"MoveDownIcon": theme.MoveDownIcon(),
 		"MoveUpIcon":   theme.MoveUpIcon(),
@@ -101,11 +108,11 @@ func initIcons() {
 		"MailReplyAllIcon":   theme.MailReplyAllIcon(),
 		"MailSendIcon":       theme.MailSendIcon(),
 
-		"MediaFastForwardIcon": theme.MediaFastForwardIcon(),
-		"MediaFastRewindIcon":  theme.MediaFastRewindIcon(),
-		"MediaPauseIcon":       theme.MediaPauseIcon(),
-		"MediaPlayIcon":        theme.MediaPlayIcon(),
-		// "MediaStopIcon":         theme.MediaStopIcon(),
+		"MediaFastForwardIcon":  theme.MediaFastForwardIcon(),
+		"MediaFastRewindIcon":   theme.MediaFastRewindIcon(),
+		"MediaPauseIcon":        theme.MediaPauseIcon(),
+		"MediaPlayIcon":         theme.MediaPlayIcon(),
+		"MediaStopIcon":         theme.MediaStopIcon(),
 		"MediaRecordIcon":       theme.MediaRecordIcon(),
 		"MediaReplayIcon":       theme.MediaReplayIcon(),
 		"MediaSkipNextIcon":     theme.MediaSkipNextIcon(),
@@ -114,6 +121,13 @@ func initIcons() {
 		"VolumeDownIcon": theme.VolumeDownIcon(),
 		"VolumeMuteIcon": theme.VolumeMuteIcon(),
 		"VolumeUpIcon":   theme.VolumeUpIcon(),
+
+		"AccountIcon": theme.AccountIcon(),
+		"LoginIcon":   theme.LoginIcon(),
+		"LogoutIcon":  theme.LogoutIcon(),
+
+		"ListIcon": theme.ListIcon(),
+		"GridIcon": theme.GridIcon(),
 	}
 	IconNames = extractIconNames()
 	IconReverse = reverseIconMap()
