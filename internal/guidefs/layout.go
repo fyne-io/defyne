@@ -1,6 +1,7 @@
 package guidefs
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"sort"
@@ -149,26 +150,40 @@ var (
 				rightNum := props[c]["right"]
 				rightID, _ := strconv.Atoi(rightNum)
 
+				ignored := 0
 				var t, b, l, r fyne.CanvasObject
 				if topNum != "" && topID < len(c.Objects) {
 					t = c.Objects[topID]
+					ignored++
 				}
 				if bottomNum != "" && bottomID < len(c.Objects) {
 					b = c.Objects[bottomID]
+					ignored++
 				}
 				if leftNum != "" && leftID < len(c.Objects) {
 					l = c.Objects[leftID]
+					ignored++
 				}
 				if rightNum != "" && rightID < len(c.Objects) {
 					r = c.Objects[rightID]
+					ignored++
 				}
 
 				str := &strings.Builder{}
-				str.WriteString(fmt.Sprintf("container.NewBorder(\n\t\t%s, \n\t\t%s, \n\t\t%s, \n\t\t%s, ",
-					goStringOrNil(t), goStringOrNil(b), goStringOrNil(l), goStringOrNil(r)))
-				writeGoString(str, func(o fyne.CanvasObject) bool {
-					return o == t || o == b || o == l || o == r
-				}, props, defs, c.Objects...)
+				str.WriteString("container.NewBorder(\n\t\t")
+				writeGoStringOrNil(str, props, defs, t)
+				str.WriteString(", \n\t\t")
+				writeGoStringOrNil(str, props, defs, b)
+				str.WriteString(", \n\t\t")
+				writeGoStringOrNil(str, props, defs, l)
+				str.WriteString(", \n\t\t")
+				writeGoStringOrNil(str, props, defs, r)
+				if len(c.Objects) > ignored {
+					str.WriteString(", ")
+					writeGoStringExcluding(str, func(o fyne.CanvasObject) bool {
+						return o == t || o == b || o == l || o == r
+					}, props, defs, c.Objects...)
+				}
 				str.WriteString(")")
 				return str.String()
 			},
@@ -268,7 +283,7 @@ var (
 				} else {
 					str.WriteString(fmt.Sprintf("container.NewGridWithColumns(%d, ", num))
 				}
-				writeGoString(str, nil, props, defs, c.Objects...)
+				writeGoStringExcluding(str, nil, props, defs, c.Objects...)
 				str.WriteString(")")
 				return str.String()
 			},
@@ -391,31 +406,42 @@ func extractLayoutNames() []string {
 	return layoutsNamesFromData
 }
 
-func goStringOrNil(o fyne.CanvasObject) string {
-	if o == nil {
-		return "nil"
+func writeGoString(str *strings.Builder, props map[fyne.CanvasObject]map[string]string,
+	defs map[string]string, o fyne.CanvasObject) error {
+	clazz := reflect.TypeOf(o).String()
+
+	if match, ok := Widgets[clazz]; ok {
+		code := match.Gostring(o, props, defs)
+		str.WriteString(fmt.Sprintf("\n\t\t%s", code))
+	} else {
+		return errors.New("failed to find go string for type" + clazz)
 	}
 
-	return fmt.Sprintf("%#v", o)
+	return nil
 }
 
-func writeGoString(str *strings.Builder, skip func(object fyne.CanvasObject) bool, props map[fyne.CanvasObject]map[string]string,
+func writeGoStringOrNil(str *strings.Builder, props map[fyne.CanvasObject]map[string]string,
+	defs map[string]string, o fyne.CanvasObject) {
+	if o == nil {
+		str.WriteString("nil")
+		return
+	}
+
+	_ = writeGoString(str, props, defs, o)
+}
+
+func writeGoStringExcluding(str *strings.Builder, skip func(object fyne.CanvasObject) bool, props map[fyne.CanvasObject]map[string]string,
 	defs map[string]string, objs ...fyne.CanvasObject) {
 	for i, o := range objs {
 		if skip != nil && skip(o) {
 			continue
 		}
 
-		clazz := reflect.TypeOf(o).String()
-
-		if match, ok := Widgets[clazz]; ok {
-			code := match.Gostring(o, props, defs)
-			str.WriteString(fmt.Sprintf("\n\t\t%s", code))
-			if i < len(objs)-1 {
-				str.WriteRune(',')
-			}
-		} else {
-			fyne.LogError("Failed to find go string for type"+clazz, nil)
+		err := writeGoString(str, props, defs, o)
+		if err != nil {
+			fyne.LogError("Error writing Go string", err)
+		} else if i < len(objs)-1 {
+			str.WriteString(", ")
 		}
 	}
 }
