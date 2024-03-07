@@ -92,8 +92,8 @@ func (g *gui) makeUI() fyne.CanvasObject {
 
 	formatted, err := format.Source([]byte(code))
 	if err != nil {
-		fyne.LogError("Failed to encode GUI code", err)
-		return ""
+		fyne.LogError("Failed to format GUI code", err)
+		return code
 	}
 	return string(formatted)
 }
