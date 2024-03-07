@@ -7,14 +7,15 @@ import (
 	"reflect"
 	"strings"
 
-	"fyne.io/fyne/v2"
 	"github.com/fyne-io/defyne/internal/guidefs"
+
+	"fyne.io/fyne/v2"
 )
 
 func ExportGo(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string, w io.Writer) error {
 	guidefs.InitOnce()
 
-	packagesList := packagesRequired(obj)
+	packagesList := packagesRequired(obj, meta)
 	varList := varsRequired(obj, meta)
 	code := exportCode(packagesList, varList, obj, meta)
 
@@ -25,7 +26,7 @@ func ExportGo(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]strin
 func ExportGoPreview(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string, w io.Writer) error {
 	guidefs.InitOnce()
 
-	packagesList := packagesRequired(obj)
+	packagesList := packagesRequired(obj, meta)
 	packagesList = append(packagesList, "app")
 	varList := varsRequired(obj, meta)
 	code := exportCode(packagesList, varList, obj, meta)
@@ -97,7 +98,7 @@ func (g *gui) makeUI() fyne.CanvasObject {
 	return string(formatted)
 }
 
-func packagesRequired(obj fyne.CanvasObject) []string {
+func packagesRequired(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string) []string {
 	if w, ok := obj.(fyne.Widget); ok {
 		return packagesRequiredForWidget(w)
 	}
@@ -106,11 +107,15 @@ func packagesRequired(obj fyne.CanvasObject) []string {
 	var objs []fyne.CanvasObject
 	if c, ok := obj.(*fyne.Container); ok {
 		objs = c.Objects
+		layout, ok := meta[c]["layout"]
+		if ok && layout == "Form" {
+			ret = append(ret, "layout")
+		}
 	} else if c, ok := obj.(*fyne.Container); ok {
 		objs = c.Objects
 	}
 	for _, w := range objs {
-		for _, p := range packagesRequired(w) {
+		for _, p := range packagesRequired(w, meta) {
 			added := false
 			for _, exists := range ret {
 				if p == exists {

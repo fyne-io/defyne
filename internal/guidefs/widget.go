@@ -652,14 +652,21 @@ func initWidgets() {
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 				c := obj.(*fyne.Container)
 				l := props[c]["layout"]
+				if l == "" {
+					l = "Stack"
+				}
 				lay := Layouts[l]
 				if lay.goText != nil {
 					return lay.goText(c, props, defs)
 				}
 
 				str := &strings.Builder{}
-				str.WriteString(fmt.Sprintf("container.New%s(", l))
-				writeGoString(str, nil, props, defs, c.Objects...)
+				if l == "Form" {
+					str.WriteString("container.New(layout.NewFormLayout(), ")
+				} else {
+					str.WriteString(fmt.Sprintf("container.New%s(", l))
+				}
+				writeGoStringExcluding(str, nil, props, defs, c.Objects...)
 				str.WriteString(")")
 				return widgetRef(props[obj], defs, str.String())
 			},
@@ -678,7 +685,7 @@ func initWidgets() {
 				s := obj.(*container.Scroll)
 				str := &strings.Builder{}
 				str.WriteString("container.NewScroll(")
-				writeGoString(str, nil, props, defs, s.Content)
+				writeGoStringExcluding(str, nil, props, defs, s.Content)
 				str.WriteString(")")
 				return str.String()
 			},
