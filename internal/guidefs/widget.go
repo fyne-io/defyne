@@ -227,11 +227,35 @@ func initWidgets() {
 				entry.OnChanged = func(text string) {
 					l.SetText(text)
 				}
+
+				bold := widget.NewCheck("", func(on bool) {
+					l.TextStyle.Bold = on
+					l.Refresh()
+				})
+				bold.Checked = l.TextStyle.Bold
+				italic := widget.NewCheck("", func(on bool) {
+					l.TextStyle.Italic = on
+					l.Refresh()
+				})
+				italic.Checked = l.TextStyle.Italic
+				mono := widget.NewCheck("", func(on bool) {
+					l.TextStyle.Monospace = on
+					l.Refresh()
+				})
+				mono.Checked = l.TextStyle.Monospace
+
 				return []*widget.FormItem{
-					widget.NewFormItem("Text", entry)}
+					widget.NewFormItem("Text", entry),
+					widget.NewFormItem("Bold", bold),
+					widget.NewFormItem("Italic", italic),
+					widget.NewFormItem("Monospace", mono)}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 				l := obj.(*widget.Label)
+				if l.TextStyle.Bold || l.TextStyle.Italic || l.TextStyle.Monospace {
+					return widgetRef(props[obj], defs,
+						fmt.Sprintf("widget.NewLabelWithStyle(\"%s\", fyne.TextAlignLeading, %#v)", escapeLabel(l.Text), l.TextStyle))
+				}
 				return widgetRef(props[obj], defs,
 					fmt.Sprintf("widget.NewLabel(\"%s\")", escapeLabel(l.Text)))
 			},
