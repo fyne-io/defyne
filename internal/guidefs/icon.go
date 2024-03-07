@@ -1,7 +1,6 @@
 package guidefs
 
 import (
-	"fmt"
 	"sort"
 
 	"fyne.io/fyne/v2"
@@ -12,7 +11,7 @@ var (
 	// IconNames is an array with the list of names of all the Icons
 	IconNames []string
 
-	// iconsReverse Contains the key value pair where the key is the address of the icon and the value is the Name
+	// IconReverse Contains the key value pair where the key is the address of the icon and the value is the Name
 	IconReverse map[string]string
 
 	// Icons Has the hashmap of Icons from the standard theme.
@@ -150,8 +149,8 @@ func extractIconNames() []string {
 func reverseIconMap() map[string]string {
 	var iconReverseFromData = make(map[string]string, len(Icons))
 	for k, v := range Icons {
-		s := fmt.Sprintf("%p", v)
-		iconReverseFromData[s] = k
+		iconReverseFromData[v.Name()] = k
 	}
+
 	return iconReverseFromData
 }

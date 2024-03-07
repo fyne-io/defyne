@@ -52,7 +52,7 @@ func initWidgets() {
 					b.SetIcon(Icons[selected])
 				})
 				if b.Icon != nil {
-					name := IconReverse[fmt.Sprintf("%p", b.Icon)]
+					name := IconName(b.Icon)
 					for _, n := range IconNames {
 						if n == name {
 							icon.SetSelected(n)
@@ -88,7 +88,7 @@ func initWidgets() {
 					}
 				}
 
-				icon := "theme." + IconReverse[fmt.Sprintf("%p", b.Icon)] + "()"
+				icon := "theme." + IconName(b.Icon) + "()"
 				if b.Importance == widget.MediumImportance {
 					return widgetRef(props[obj], defs, fmt.Sprintf("widget.NewButtonWithIcon(\"%s\", %s, func() {})", escapeLabel(b.Text), icon))
 				} else {
@@ -208,7 +208,7 @@ func initWidgets() {
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 				i := obj.(*widget.Icon)
 
-				res := "theme." + IconReverse[fmt.Sprintf("%p", i.Resource)] + "()"
+				res := "theme." + IconName(i.Resource) + "()"
 				return widgetRef(props[obj], defs, fmt.Sprintf("widget.NewIcon(%s)", res))
 			},
 			Packages: func(obj fyne.CanvasObject) []string {
