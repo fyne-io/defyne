@@ -1,3 +1,5 @@
+//go:generate fyne bundle -o bundled.go -package guidefs ../../assets
+
 package guidefs
 
 import (
@@ -244,11 +246,42 @@ func initWidgets() {
 				})
 				mono.Checked = l.TextStyle.Monospace
 
+				var left, center, right *widget.Button
+				setAlign := func(a fyne.TextAlign) {
+					l.Alignment = a
+					l.Refresh()
+
+					setState := func(b *widget.Button, a fyne.TextAlign) {
+						if l.Alignment == a {
+							b.Importance = widget.HighImportance
+						} else {
+							b.Importance = widget.MediumImportance
+						}
+						b.Refresh()
+					}
+
+					setState(left, fyne.TextAlignLeading)
+					setState(center, fyne.TextAlignCenter)
+					setState(right, fyne.TextAlignTrailing)
+				}
+				left = widget.NewButtonWithIcon("", resourceFormatalignleftSvg, func() {
+					setAlign(fyne.TextAlignLeading)
+				})
+				center = widget.NewButtonWithIcon("", resourceFormataligncenterSvg, func() {
+					setAlign(fyne.TextAlignCenter)
+				})
+				right = widget.NewButtonWithIcon("", resourceFormatalignrightSvg, func() {
+					setAlign(fyne.TextAlignTrailing)
+				})
+				aligns := container.NewHBox(left, center, right)
+				setAlign(l.Alignment)
+
 				return []*widget.FormItem{
 					widget.NewFormItem("Text", entry),
 					widget.NewFormItem("Bold", bold),
 					widget.NewFormItem("Italic", italic),
-					widget.NewFormItem("Monospace", mono)}
+					widget.NewFormItem("Monospace", mono),
+					widget.NewFormItem("Alignment", aligns)}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 				l := obj.(*widget.Label)

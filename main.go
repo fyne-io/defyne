@@ -1,4 +1,4 @@
-//go:generate fyne bundle -o bundled.go assets
+//go:generate fyne bundle -o bundled.go assets/folder-play.svg
 //go:generate fyne bundle -a -o bundled.go Icon.png
 
 package main
