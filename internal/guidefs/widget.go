@@ -498,12 +498,27 @@ func initWidgets() {
 						slider.SetValue(f)
 					}
 				}
+				vert := widget.NewCheck("", func(on bool) {
+					if on {
+						slider.Orientation = widget.Vertical
+					} else {
+						slider.Orientation = widget.Horizontal
+					}
+					slider.Refresh()
+				})
+				vert.Checked = slider.Orientation == widget.Vertical
 				return []*widget.FormItem{
-					widget.NewFormItem("Value", val)}
+					widget.NewFormItem("Value", val),
+					widget.NewFormItem("Vertical", vert),
+				}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 				slider := obj.(*widget.Slider)
-				return widgetRef(props[obj], defs, fmt.Sprintf("widget.NewSlider(Min:0, Max:100, Value:%f)", slider.Value))
+				orient := "widget.Horizontal"
+				if slider.Orientation == widget.Vertical {
+					orient = "widget.Vertical"
+				}
+				return widgetRef(props[obj], defs, fmt.Sprintf("&widget.Slider{Min:0, Max:100, Value:%f, Orientation: %s}", slider.Value, orient))
 			},
 		},
 		"*widget.Table": {
