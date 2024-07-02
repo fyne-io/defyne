@@ -316,7 +316,8 @@ func decodeWidget(m map[string]interface{}) fyne.Widget {
 
 		typeName := f.Type().String()
 		switch typeName {
-		case "fyne.TextAlign", "fyne.TextTruncation", "fyne.TextWrap", "widget.ButtonAlign", "widget.ButtonImportance", "widget.ButtonIconPlacement", "widget.Importance", "widget.ScrollDirection":
+		case "fyne.TextAlign", "fyne.TextTruncation", "fyne.TextWrap", "widget.ButtonAlign", "widget.ButtonImportance",
+			"widget.ButtonIconPlacement", "widget.Importance", "widget.Orientation", "widget.ScrollDirection":
 			f.SetInt(int64(reflect.ValueOf(v).Float()))
 		case "fyne.TextStyle":
 			f.Set(reflect.ValueOf(decodeTextStyle(reflect.ValueOf(v).Interface().(map[string]interface{}))))
