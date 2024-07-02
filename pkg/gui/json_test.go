@@ -34,11 +34,11 @@ const labelJSON = `{
 }
 `
 
-func TestDecodeJSON(t *testing.T) {
+func TestDecodeObject(t *testing.T) {
 	guidefs.InitOnce()
 
 	buf := bytes.NewReader([]byte(labelJSON))
-	obj, meta, err := DecodeJSON(buf)
+	obj, meta, err := DecodeObject(buf)
 	assert.Nil(t, err)
 
 	l, ok := obj.(*widget.Label)
@@ -49,14 +49,14 @@ func TestDecodeJSON(t *testing.T) {
 	assert.Equal(t, fyne.TextStyle{Bold: true}, l.TextStyle)
 }
 
-func TestEncodeJSON(t *testing.T) {
+func TestEncodeObject(t *testing.T) {
 	l := widget.NewLabelWithStyle("Hi", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 
 	props := map[string]string{"name": "myLabel"}
 	meta := map[fyne.CanvasObject]map[string]string{l: props}
 
 	var buf bytes.Buffer
-	err := EncodeJSON(l, meta, &buf)
+	err := EncodeObject(l, meta, &buf)
 	assert.Nil(t, err)
 	assert.Equal(t, labelJSON, buf.String())
 }

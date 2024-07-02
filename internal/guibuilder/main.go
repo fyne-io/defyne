@@ -47,7 +47,7 @@ func NewBuilder(u fyne.URI, win fyne.Window) *Builder {
 	if r == nil {
 		obj = previewUI()
 	} else {
-		obj, meta, err = gui.DecodeJSON(r)
+		obj, meta, err = gui.DecodeObject(r)
 		if err != nil {
 			dialog.ShowError(err, win)
 		}
@@ -129,7 +129,7 @@ func (b *Builder) Save() error {
 }
 
 func (b *Builder) save(w fyne.URIWriteCloser) error {
-	err := gui.EncodeJSON(b.root, b.meta, w)
+	err := gui.EncodeObject(b.root, b.meta, w)
 	_ = w.Close()
 	return err
 }

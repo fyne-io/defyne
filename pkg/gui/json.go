@@ -41,9 +41,9 @@ type cont struct {
 	Properties map[string]string `json:",omitempty"`
 }
 
-// DecodeJSON returns a tree of `CanvasObject` elements from the provided JSON `Reader` and
+// DecodeObject returns a tree of `CanvasObject` elements from the provided JSON `Reader` and
 // updates the metadata map to include any additional information.
-func DecodeJSON(r io.Reader) (fyne.CanvasObject, map[fyne.CanvasObject]map[string]string, error) {
+func DecodeObject(r io.Reader) (fyne.CanvasObject, map[fyne.CanvasObject]map[string]string, error) {
 	guidefs.InitOnce()
 
 	var data interface{}
@@ -110,9 +110,9 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 	return obj, nil
 }
 
-// EncodeJSON writes a JSON stream for the tree of `CanvasObject` elements provided.
+// EncodeObject writes a JSON stream for the tree of `CanvasObject` elements provided.
 // If an error occurs it will be returned, otherwise nil.
-func EncodeJSON(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string, w io.Writer) error {
+func EncodeObject(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string, w io.Writer) error {
 	guidefs.InitOnce()
 
 	if meta == nil {
