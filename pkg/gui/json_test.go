@@ -26,7 +26,8 @@ const labelJSON = `{
       "Italic": false,
       "Monospace": false,
       "Symbol": false,
-      "TabWidth": 0
+      "TabWidth": 0,
+      "Underline": false
     },
     "Truncation": 0,
     "Importance": 0
