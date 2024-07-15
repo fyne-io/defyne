@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -182,7 +183,16 @@ func (b *Builder) buildLibrary() fyne.CanvasObject {
 				b.choose(c)
 			}
 			return
+		} else {
+			class := reflect.TypeOf(b.current).String()
+			if wid, ok := guidefs.Widgets[class]; ok && wid.IsContainer() {
+				wid.AddChild(b.current, selected.Create())
+
+				return
+			}
 		}
+
+		dialog.ShowInformation("Selected not a container", "Please select a container to add items", b.win)
 	}), nil, nil, list)
 }
 

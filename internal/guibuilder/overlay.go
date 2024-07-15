@@ -2,12 +2,15 @@ package guibuilder
 
 import (
 	"image/color"
+	"reflect"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+
+	"github.com/fyne-io/defyne/internal/guidefs"
 )
 
 type overlay struct {
@@ -67,6 +70,26 @@ func findObject(o fyne.CanvasObject, p fyne.Position) fyne.CanvasObject {
 			}
 		}
 		return w
+	case fyne.Widget:
+		class := reflect.TypeOf(o).String()
+		info, ok := guidefs.Widgets[class]
+		if !ok || !info.IsContainer() {
+			return nil
+		}
+
+		for _, child := range info.Children(o) {
+			if !insideObject(child, p) {
+				continue
+			}
+
+			match := findObject(child, p.Subtract(child.Position()))
+			if match != nil && isContainerOrWidget(match) {
+				return match
+			}
+			if isContainerOrWidget(child) {
+				return child
+			}
+		}
 	}
 
 	return nil

@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -29,10 +30,16 @@ var (
 
 type WidgetInfo struct {
 	Name     string
+	Children func(o fyne.CanvasObject) []fyne.CanvasObject
+	AddChild func(parent, child fyne.CanvasObject)
 	Create   func() fyne.CanvasObject
 	Edit     func(fyne.CanvasObject, map[string]string) []*widget.FormItem
 	Gostring func(fyne.CanvasObject, map[fyne.CanvasObject]map[string]string, map[string]string) string
 	Packages func(object fyne.CanvasObject) []string
+}
+
+func (w WidgetInfo) IsContainer() bool {
+	return w.Children != nil
 }
 
 func initWidgets() {
@@ -745,10 +752,17 @@ func initWidgets() {
 		},
 		"*container.Scroll": {
 			Name: "Scroll",
+			Children: func(o fyne.CanvasObject) []fyne.CanvasObject {
+				split := o.(*container.Scroll)
+				return []fyne.CanvasObject{split.Content}
+			},
+			AddChild: func(parent, o fyne.CanvasObject) {
+				split := parent.(*container.Scroll)
+				split.Content = o
+				split.Refresh()
+			},
 			Create: func() fyne.CanvasObject {
-				s := container.NewScroll(nil)
-				s.Content = container.NewStack()
-				return s
+				return container.NewScroll(&dropZone{})
 			},
 			Edit: func(obj fyne.CanvasObject, props map[string]string) []*widget.FormItem {
 				return []*widget.FormItem{}
@@ -760,6 +774,9 @@ func initWidgets() {
 				writeGoStringExcluding(str, nil, props, defs, s.Content)
 				str.WriteString(")")
 				return str.String()
+			},
+			Packages: func(_ fyne.CanvasObject) []string {
+				return []string{"container"}
 			},
 		},
 	}
@@ -795,4 +812,8 @@ func InitOnce() {
 		initIcons()
 		initWidgets()
 	})
+}
+
+type dropZone struct {
+	canvas.Rectangle
 }
