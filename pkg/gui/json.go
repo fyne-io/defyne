@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"fyne.io/fyne/v2/container"
 	"github.com/fyne-io/defyne/internal/guidefs"
 
 	"fyne.io/fyne/v2"
@@ -20,6 +21,11 @@ type canvObj struct {
 	Type   string
 	Name   string
 	Struct fyne.CanvasObject `json:",omitempty"`
+}
+
+type cntObj struct {
+	canvObj
+	Struct map[string]interface{}
 }
 
 type form struct {
@@ -64,7 +70,8 @@ func DecodeObject(r io.Reader) (fyne.CanvasObject, map[fyne.CanvasObject]map[str
 func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]string) (fyne.CanvasObject, error) {
 	guidefs.InitOnce()
 
-	if m["Type"] == "*fyne.Container" {
+	switch m["Type"] {
+	case "*fyne.Container":
 		obj := &fyne.Container{}
 		name := m["Layout"].(string)
 
@@ -91,6 +98,31 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 			}
 		}
 		obj.Layout = guidefs.Layouts[name].Create(obj, props)
+		if name, ok := m["Name"]; ok {
+			props["name"] = name.(string)
+		}
+
+		meta[obj] = props
+		return obj, nil
+	case "*container.Split":
+		obj := &container.Split{}
+		info := m["Struct"].(map[string]interface{})
+		if info["Horizontal"].(bool) {
+			obj.Horizontal = true
+		}
+		if off, ok := info["Offset"]; ok {
+			obj.Offset = off.(float64)
+		}
+		if info["Leading"] != nil {
+			child, _ := DecodeMap(info["Leading"].(map[string]interface{}), meta)
+			obj.Leading = child
+		}
+		if info["Trailing"] != nil {
+			child, _ := DecodeMap(info["Trailing"].(map[string]interface{}), meta)
+			obj.Trailing = child
+		}
+
+		props := map[string]string{}
 		if name, ok := m["Name"]; ok {
 			props["name"] = name.(string)
 		}
@@ -184,6 +216,20 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 		}
 
 		return encodeWidget(c, name), nil
+	case *container.Split:
+		node := &cntObj{Struct: make(map[string]interface{})}
+		node.Type = "*container.Split"
+		node.Struct["Horizontal"] = c.Horizontal
+		node.Struct["Offset"] = c.Offset
+		node.Name = name
+
+		node.Struct["Leading"], _ = EncodeMap(c.Leading, meta)
+		node.Struct["Trailing"], _ = EncodeMap(c.Trailing, meta)
+
+		return &node, nil
+
+		ret := encodeWidget(c, name)
+		return ret, nil
 	case fyne.Widget:
 		if form, ok := c.(*widget.Form); ok {
 			return encodeForm(form, name), nil

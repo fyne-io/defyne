@@ -779,6 +779,59 @@ func initWidgets() {
 				return []string{"container"}
 			},
 		},
+		"*container.Split": {
+			Name: "Split",
+			Children: func(o fyne.CanvasObject) []fyne.CanvasObject {
+				split := o.(*container.Split)
+				return []fyne.CanvasObject{split.Leading, split.Trailing}
+			},
+			AddChild: func(parent, o fyne.CanvasObject) {
+				split := parent.(*container.Split)
+				if split.Leading == nil {
+					split.Leading = o
+				} else if _, ok := split.Leading.(*dropZone); ok {
+					split.Leading = o
+				} else {
+					split.Trailing = o
+				}
+				split.Refresh()
+			},
+			Create: func() fyne.CanvasObject {
+				return container.NewHSplit(container.NewStack(), container.NewStack()) //&dropZone{}, &dropZone{})
+			},
+			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+				split := obj.(*container.Split)
+				offset := widget.NewEntry()
+				offset.SetText(fmt.Sprintf("%f", split.Offset))
+				offset.OnChanged = func(s string) {
+					if f, err := strconv.ParseFloat(s, 64); err == nil {
+						split.SetOffset(f)
+					}
+				}
+				vert := widget.NewCheck("", func(on bool) {
+					split.Horizontal = !on
+					split.Refresh()
+				})
+				vert.Checked = !split.Horizontal
+				return []*widget.FormItem{
+					widget.NewFormItem("Offset", offset),
+					widget.NewFormItem("Vertical", vert),
+				}
+			},
+			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+				s := obj.(*container.Split)
+				str := &strings.Builder{}
+				str.WriteString(fmt.Sprintf("&container.Split{Horizontal: %t, Offset: %f, Leading: ", s.Horizontal, s.Offset))
+				writeGoStringExcluding(str, nil, props, defs, s.Leading)
+				str.WriteString(", Trailing: ")
+				writeGoStringExcluding(str, nil, props, defs, s.Trailing)
+				str.WriteString("}")
+				return str.String()
+			},
+			Packages: func(_ fyne.CanvasObject) []string {
+				return []string{"container"}
+			},
+		},
 	}
 
 	Widgets["*widget.Scroll"] = Widgets["*container.Scroll"]
