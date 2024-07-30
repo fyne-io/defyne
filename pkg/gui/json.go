@@ -104,6 +104,24 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 
 		meta[obj] = props
 		return obj, nil
+	case "*container.Scroll":
+		obj := &container.Scroll{}
+		info := m["Struct"].(map[string]interface{})
+		if off, ok := info["Direction"]; ok {
+			obj.Direction = container.ScrollDirection(off.(float64))
+		}
+		if info["Content"] != nil {
+			child, _ := DecodeMap(info["Content"].(map[string]interface{}), meta)
+			obj.Content = child
+		}
+
+		props := map[string]string{}
+		if name, ok := m["Name"]; ok {
+			props["name"] = name.(string)
+		}
+
+		meta[obj] = props
+		return obj, nil
 	case "*container.Split":
 		obj := &container.Split{}
 		info := m["Struct"].(map[string]interface{})
@@ -216,6 +234,15 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 		}
 
 		return encodeWidget(c, name), nil
+	case *container.Scroll:
+		node := &cntObj{Struct: make(map[string]interface{})}
+		node.Type = "*container.Scroll"
+		node.Struct["Direction"] = c.Direction
+		node.Name = name
+
+		node.Struct["Content"], _ = EncodeMap(c.Content, meta)
+
+		return &node, nil
 	case *container.Split:
 		node := &cntObj{Struct: make(map[string]interface{})}
 		node.Type = "*container.Split"
@@ -227,9 +254,6 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 		node.Struct["Trailing"], _ = EncodeMap(c.Trailing, meta)
 
 		return &node, nil
-
-		ret := encodeWidget(c, name)
-		return ret, nil
 	case fyne.Widget:
 		if form, ok := c.(*widget.Form); ok {
 			return encodeForm(form, name), nil
