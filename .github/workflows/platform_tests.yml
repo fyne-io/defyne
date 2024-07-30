@@ -6,7 +6,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        go-version: [1.17.x, 1.21.x]
+        go-version: [1.19.x, 1.22.x]
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
@@ -34,7 +34,7 @@ jobs:
 
     - name: Update coverage
       run: |
-        GO111MODULE=off go get github.com/mattn/goveralls
+        go install github.com/mattn/goveralls@latest
 
         set -e
         go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
