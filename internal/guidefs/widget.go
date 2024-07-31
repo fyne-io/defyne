@@ -11,7 +11,6 @@ import (
 	"sync"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -762,7 +761,7 @@ func initWidgets() {
 				split.Refresh()
 			},
 			Create: func() fyne.CanvasObject {
-				return container.NewScroll(&dropZone{})
+				return container.NewScroll(container.NewStack())
 			},
 			Edit: func(obj fyne.CanvasObject, props map[string]string) []*widget.FormItem {
 				return []*widget.FormItem{}
@@ -789,15 +788,13 @@ func initWidgets() {
 				split := parent.(*container.Split)
 				if split.Leading == nil {
 					split.Leading = o
-				} else if _, ok := split.Leading.(*dropZone); ok {
-					split.Leading = o
 				} else {
 					split.Trailing = o
 				}
 				split.Refresh()
 			},
 			Create: func() fyne.CanvasObject {
-				return container.NewHSplit(container.NewStack(), container.NewStack()) //&dropZone{}, &dropZone{})
+				return container.NewHSplit(container.NewStack(), container.NewStack())
 			},
 			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
 				split := obj.(*container.Split)
@@ -865,8 +862,4 @@ func InitOnce() {
 		initIcons()
 		initWidgets()
 	})
-}
-
-type dropZone struct {
-	canvas.Rectangle
 }
