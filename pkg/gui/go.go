@@ -99,10 +99,6 @@ func (g *gui) makeUI() fyne.CanvasObject {
 }
 
 func packagesRequired(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string) []string {
-	if w, ok := obj.(fyne.Widget); ok {
-		return packagesRequiredForWidget(w)
-	}
-
 	ret := []string{"container"}
 	var objs []fyne.CanvasObject
 	if c, ok := obj.(*fyne.Container); ok {
@@ -111,9 +107,19 @@ func packagesRequired(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[stri
 		if ok && layout == "Form" {
 			ret = append(ret, "layout")
 		}
-	} else if c, ok := obj.(*fyne.Container); ok {
-		objs = c.Objects
+	} else {
+		class := reflect.TypeOf(obj).String()
+		info, ok := guidefs.Widgets[class]
+
+		if ok && info.IsContainer() {
+			objs = info.Children(obj)
+		} else {
+			if w, ok := obj.(fyne.Widget); ok {
+				return packagesRequiredForWidget(w)
+			}
+		}
 	}
+
 	for _, w := range objs {
 		for _, p := range packagesRequired(w, meta) {
 			added := false
@@ -142,14 +148,6 @@ func packagesRequiredForWidget(w fyne.Widget) []string {
 
 func varsRequired(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string) []string {
 	name := props[obj]["name"]
-	if w, ok := obj.(fyne.Widget); ok {
-		if name == "" {
-			return []string{}
-		}
-
-		_, class := getTypeOf(w)
-		return []string{name + " " + class}
-	}
 
 	var ret []string
 	if c, ok := obj.(*fyne.Container); ok {
@@ -159,6 +157,22 @@ func varsRequired(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]
 
 		for _, w := range c.Objects {
 			ret = append(ret, varsRequired(w, props)...)
+		}
+	} else {
+		class := reflect.TypeOf(obj).String()
+		info, ok := guidefs.Widgets[class]
+
+		if ok && info.IsContainer() {
+			for _, child := range info.Children(obj) {
+				ret = append(ret, varsRequired(child, props)...)
+			}
+		}
+	}
+
+	if w, ok := obj.(fyne.Widget); ok {
+		if name != "" {
+			_, class := getTypeOf(w)
+			ret = append(ret, name+" "+class)
 		}
 	}
 	return ret
