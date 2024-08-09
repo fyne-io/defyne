@@ -299,6 +299,46 @@ func initWidgets() {
 					fmt.Sprintf("widget.NewLabel(\"%s\")", escapeLabel(l.Text)))
 			},
 		},
+		"*widget.RichText": {
+			Name: "RichText",
+			Create: func() fyne.CanvasObject {
+				return widget.NewRichTextFromMarkdown("## Rich Text")
+			},
+			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+				r := obj.(*widget.RichText)
+				entry := widget.NewEntry()
+				entry.SetText(r.String()) // TODO re-assemble the markdown !?
+				entry.OnChanged = func(text string) {
+					r.ParseMarkdown(text)
+				}
+
+				wraps := map[string]fyne.TextWrap{
+					"Off":   fyne.TextWrapOff,
+					"Word":  fyne.TextWrapWord,
+					"Break": fyne.TextWrapBreak,
+				}
+				wrap := widget.NewSelect([]string{"Off", "Word", "Break"}, func(w string) {
+					r.Wrapping = wraps[w]
+					r.Refresh()
+				})
+				wrap.Selected = "Off"
+				if r.Wrapping == fyne.TextWrapWord {
+					wrap.Selected = "Word"
+				} else if r.Wrapping == fyne.TextWrapBreak {
+					wrap.Selected = "Break"
+				}
+
+				return []*widget.FormItem{
+					widget.NewFormItem("Text", entry),
+					widget.NewFormItem("Wrapping", wrap)}
+			},
+			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+				l := obj.(*widget.RichText)
+				// TODO wrap
+				return widgetRef(props[obj], defs,
+					fmt.Sprintf("widget.NewRichTextFromMarkdown(`%s`)", l.String())) // TODO re-assemble the markdown !?
+			},
+		},
 		"*widget.Check": {
 			Name: "Check",
 			Create: func() fyne.CanvasObject {

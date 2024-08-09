@@ -2,6 +2,7 @@ package gui
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/url"
 	"reflect"
@@ -377,11 +378,20 @@ func decodeToolbarItem(m map[string]interface{}) widget.ToolbarItem {
 	return widget.NewToolbarAction(guidefs.Icons[m["Icon"].(string)], nil)
 }
 
-func decodeWidget(m map[string]interface{}) fyne.Widget {
-	class := m["Type"].(string)
-	obj := guidefs.Widgets[class].Create().(fyne.Widget)
-	e := reflect.ValueOf(obj).Elem()
-	for k, v := range m["Struct"].(map[string]interface{}) {
+func decodeRichTextStyle(m map[string]interface{}) (s widget.RichTextStyle) {
+	for k, v := range m {
+		switch k {
+		case "TextStyle":
+			s.TextStyle = decodeTextStyle(v.(map[string]interface{}))
+		// TODO more!
+		}
+	}
+
+	return
+}
+
+func decodeFields(e reflect.Value, in map[string]interface{}) error {
+	for k, v := range in {
 		f := e.FieldByName(k)
 
 		typeName := f.Type().String()
@@ -391,6 +401,8 @@ func decodeWidget(m map[string]interface{}) fyne.Widget {
 			f.SetInt(int64(reflect.ValueOf(v).Float()))
 		case "fyne.TextStyle":
 			f.Set(reflect.ValueOf(decodeTextStyle(reflect.ValueOf(v).Interface().(map[string]interface{}))))
+		case "widget.RichTextStyle":
+			f.Set(reflect.ValueOf(decodeRichTextStyle(reflect.ValueOf(v).Interface().(map[string]interface{}))))
 		case "fyne.Position":
 			f.Set(reflect.ValueOf(decodePosition(reflect.ValueOf(v).Interface().(map[string]interface{}))))
 		case "fyne.Resource":
@@ -410,8 +422,16 @@ func decodeWidget(m map[string]interface{}) fyne.Widget {
 				items = append(items, decodeToolbarItem(item.(map[string]interface{})))
 			}
 			f.Set(reflect.ValueOf(items))
+		case "[]widget.RichTextSegment":
+			var items []widget.RichTextSegment
+			for _, item := range reflect.ValueOf(v).Interface().([]interface{}) {
+				obj := &widget.TextSegment{}
+				_ = decodeFields(reflect.ValueOf(obj).Elem(), item.(map[string]interface{}))
+				items = append(items, obj)
+			}
+			f.Set(reflect.ValueOf(items))
 		case "fyne.CanvasObject":
-			fyne.LogError("Unsupported object type: "+class, nil)
+			return errors.New("unsupported object type")
 		case "*url.URL":
 			u := &url.URL{}
 			decodeFromMap(reflect.ValueOf(v).Interface().(map[string]interface{}), u)
@@ -425,6 +445,18 @@ func decodeWidget(m map[string]interface{}) fyne.Widget {
 		}
 	}
 
+	return nil
+}
+
+func decodeWidget(m map[string]interface{}) fyne.Widget {
+	class := m["Type"].(string)
+	obj := guidefs.Widgets[class].Create().(fyne.Widget)
+	e := reflect.ValueOf(obj).Elem()
+
+	err := decodeFields(e, m["Struct"].(map[string]interface{}))
+	if err != nil {
+		fyne.LogError("Failed to handle type "+class, err)
+	}
 	return obj
 }
 
