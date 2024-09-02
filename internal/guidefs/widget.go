@@ -427,8 +427,15 @@ func initWidgets() {
 				for _, v := range s.Options {
 					opts = append(opts, escapeLabel(v))
 				}
-				return widgetRef(props[obj], defs,
-					fmt.Sprintf("widget.NewSelect([]string{%s}, func(s string) {})", "\""+strings.Join(opts, "\", \"")+"\""))
+
+				optionString := "\"" + strings.Join(opts, "\", \"") + "\""
+				if s.Selected == "" {
+					return widgetRef(props[obj], defs,
+						fmt.Sprintf("widget.NewSelect([]string{%s}, func(s string) {})", optionString))
+				} else {
+					format := "&widget.Select{Options: []string{%s}, Selected: \"%s\", OnChanged: func(s string) {}}"
+					return widgetRef(props[obj], defs, fmt.Sprintf(format, optionString, s.Selected))
+				}
 			},
 		},
 		"*widget.Accordion": {

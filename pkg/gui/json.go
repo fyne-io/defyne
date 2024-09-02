@@ -436,6 +436,13 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 			u := &url.URL{}
 			decodeFromMap(reflect.ValueOf(v).Interface().(map[string]interface{}), u)
 			f.Set(reflect.ValueOf(u))
+		case "[]string":
+			anySlice := reflect.ValueOf(v).Interface().([]interface{})
+			strings := make([]string, len(anySlice))
+			for i, a := range anySlice {
+				strings[i] = a.(string)
+			}
+			f.Set(reflect.ValueOf(strings))
 		default:
 			if strings.Index(typeName, "int") == 0 {
 				f.SetInt(int64(reflect.ValueOf(v).Float()))
