@@ -56,14 +56,32 @@ func initWidgets() {
 					b.SetText(text)
 				}
 
-				icon := widget.NewSelect(append([]string{"(No Icon)"}, IconNames...), func(selected string) {
-					b.SetIcon(Icons[selected])
+				items := make([]*fyne.MenuItem, len(IconNames))
+				var iconSel *widget.Button
+				for i, n := range IconNames {
+					name := n
+					items[i] = &fyne.MenuItem{
+						Label: n,
+						Icon:  Icons[n],
+						Action: func() {
+							iconSel.SetText(name)
+							iconSel.SetIcon(Icons[name])
+							b.SetIcon(Icons[name])
+						},
+					}
+				}
+				iconSel = widget.NewButton("(No Icon)", func() {
+					d := fyne.CurrentApp().Driver()
+					c := d.CanvasForObject(iconSel)
+					p := d.AbsolutePositionForObject(iconSel).AddXY(0, iconSel.Size().Height)
+					widget.NewPopUpMenu(fyne.NewMenu("", items...), c).ShowAtPosition(p)
 				})
 				if b.Icon != nil {
 					name := IconName(b.Icon)
 					for _, n := range IconNames {
 						if n == name {
-							icon.SetSelected(n)
+							iconSel.SetText(n)
+							iconSel.SetIcon(Icons[n])
 							break
 						}
 					}
@@ -81,7 +99,7 @@ func initWidgets() {
 				importance.SetSelectedIndex(int(b.Importance))
 				return []*widget.FormItem{
 					widget.NewFormItem("Text", entry),
-					widget.NewFormItem("Icon", icon),
+					widget.NewFormItem("Icon", iconSel),
 					widget.NewFormItem("Importance", importance),
 				}
 			},
@@ -799,13 +817,13 @@ func initWidgets() {
 		"*container.Scroll": {
 			Name: "Scroll",
 			Children: func(o fyne.CanvasObject) []fyne.CanvasObject {
-				split := o.(*container.Scroll)
-				return []fyne.CanvasObject{split.Content}
+				scr := o.(*container.Scroll)
+				return []fyne.CanvasObject{scr.Content}
 			},
 			AddChild: func(parent, o fyne.CanvasObject) {
-				split := parent.(*container.Scroll)
-				split.Content = o
-				split.Refresh()
+				scr := parent.(*container.Scroll)
+				scr.Content = o
+				scr.Refresh()
 			},
 			Create: func() fyne.CanvasObject {
 				return container.NewScroll(container.NewStack())
