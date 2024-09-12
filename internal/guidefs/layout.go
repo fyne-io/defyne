@@ -75,7 +75,7 @@ var (
 						wid := w.(fyne.Widget)
 						name := props["name"]
 						if name == "" {
-							name = fmt.Sprintf("%p", wid)
+							name = widgetName(w)
 						}
 						label = fmt.Sprintf("%s (%s)", reflect.TypeOf(wid).Elem().Name(), name)
 					}
@@ -138,6 +138,7 @@ var (
 					widget.NewFormItem("Bottom", bottom),
 					widget.NewFormItem("Left", left),
 					widget.NewFormItem("Right", right),
+					widget.NewFormItem("Middle", widget.NewLabel("(all other widgets)")),
 				}
 			},
 			func(c *fyne.Container, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
@@ -404,6 +405,31 @@ func extractLayoutNames() []string {
 
 	sort.Strings(layoutsNamesFromData)
 	return layoutsNamesFromData
+}
+
+func trim(in string, count int) string {
+	if len(in) > count {
+		return in[:count] + "…"
+	}
+
+	return in
+}
+
+func widgetName(o fyne.CanvasObject) string {
+	switch w := o.(type) {
+	case *widget.Button:
+		return trim(w.Text, 10)
+	case *widget.Label:
+		return trim(w.Text, 10)
+	case *widget.Select:
+		if len(w.Options) == 0 {
+			return "No options"
+		}
+
+		return fmt.Sprintf("[%s, …]", w.Options[0])
+	default:
+		return fmt.Sprintf("%p", o)
+	}
 }
 
 func writeGoString(str *strings.Builder, props map[fyne.CanvasObject]map[string]string,
