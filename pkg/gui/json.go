@@ -383,7 +383,7 @@ func decodeRichTextStyle(m map[string]interface{}) (s widget.RichTextStyle) {
 		switch k {
 		case "TextStyle":
 			s.TextStyle = decodeTextStyle(v.(map[string]interface{}))
-		// TODO more!
+			// TODO more!
 		}
 	}
 
@@ -451,6 +451,15 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 				fyne.LogError("Failed parse time "+s, err)
 			} else {
 				f.Set(reflect.ValueOf(t))
+			}
+		case "*time.Time":
+			s := reflect.ValueOf(v).String()
+
+			t, err := time.Parse(time.RFC3339, s)
+			if err != nil {
+				fyne.LogError("Failed parse time "+s, err)
+			} else {
+				f.Set(reflect.ValueOf(&t))
 			}
 		default:
 			if strings.Index(typeName, "int") == 0 {
