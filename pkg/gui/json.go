@@ -447,7 +447,11 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 			s := reflect.ValueOf(v).String()
 
 			t, err := time.Parse(time.RFC3339, s)
-			f.Set(reflect.ValueOf(t))
+			if err != nil {
+				fyne.LogError("Failed parse time "+s, err)
+			} else {
+				f.Set(reflect.ValueOf(t))
+			}
 		default:
 			if strings.Index(typeName, "int") == 0 {
 				f.SetInt(int64(reflect.ValueOf(v).Float()))
