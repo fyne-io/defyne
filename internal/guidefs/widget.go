@@ -456,6 +456,22 @@ func initWidgets() {
 				}
 			},
 		},
+		"*widget.DateEntry": {
+			Name: "DateEntry",
+			Create: func() fyne.CanvasObject {
+				return widget.NewDateEntry()
+			},
+			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+				_ = obj.(*widget.DateEntry)
+
+				return []*widget.FormItem{}
+			},
+			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+				_ = obj.(*widget.DateEntry)
+
+				return widgetRef(props[obj], defs, "widget.NewDateEntry()")
+			},
+		},
 		"*widget.Accordion": {
 			Name: "Accordion",
 			Create: func() fyne.CanvasObject {

@@ -443,6 +443,11 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 				strings[i] = a.(string)
 			}
 			f.Set(reflect.ValueOf(strings))
+		case "time.Time":
+			s := reflect.ValueOf(v).String()
+
+			t, err := time.Parse(time.RFC3339, s)
+			f.Set(reflect.ValueOf(t))
 		default:
 			if strings.Index(typeName, "int") == 0 {
 				f.SetInt(int64(reflect.ValueOf(v).Float()))
