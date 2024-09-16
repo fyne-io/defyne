@@ -258,6 +258,16 @@ func initWidgets() {
 					l.SetText(text)
 				}
 
+				wrap := widget.NewCheck("", func(on bool) {
+					if on {
+						l.Wrapping = fyne.TextWrapWord
+					} else {
+						l.Wrapping = fyne.TextWrapOff
+					}
+					l.Refresh()
+				})
+				wrap.Checked = l.Wrapping == fyne.TextWrapWord
+
 				bold := widget.NewCheck("", func(on bool) {
 					l.TextStyle.Bold = on
 					l.Refresh()
@@ -306,6 +316,7 @@ func initWidgets() {
 
 				return []*widget.FormItem{
 					widget.NewFormItem("Text", entry),
+					widget.NewFormItem("Word Wrap", wrap),
 					widget.NewFormItem("Bold", bold),
 					widget.NewFormItem("Italic", italic),
 					widget.NewFormItem("Monospace", mono),
@@ -313,9 +324,19 @@ func initWidgets() {
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 				l := obj.(*widget.Label)
+				if l.Alignment != fyne.TextAlignLeading || l.Wrapping != fyne.TextWrapOff {
+					style := ""
+					if l.TextStyle.Bold || l.TextStyle.Italic || l.TextStyle.Monospace {
+						style = fmt.Sprintf(", TextStyle: %#v", l.TextStyle)
+					}
+
+					return widgetRef(props[obj], defs,
+						fmt.Sprintf("&widget.Label{Text: \"%s\"%s, Alignment: %d, Wrapping: %d}", escapeLabel(l.Text), style, l.Alignment, l.Wrapping))
+				}
+
 				if l.TextStyle.Bold || l.TextStyle.Italic || l.TextStyle.Monospace {
 					return widgetRef(props[obj], defs,
-						fmt.Sprintf("widget.NewLabelWithStyle(\"%s\", fyne.TextAlignLeading, %#v)", escapeLabel(l.Text), l.TextStyle))
+						fmt.Sprintf("widget.NewLabelWithStyle(\"%s\", %d, %#v)", escapeLabel(l.Text), l.Alignment, l.TextStyle))
 				}
 				return widgetRef(props[obj], defs,
 					fmt.Sprintf("widget.NewLabel(\"%s\")", escapeLabel(l.Text)))
