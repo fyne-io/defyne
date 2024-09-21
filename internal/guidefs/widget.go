@@ -937,15 +937,18 @@ func initWidgets() {
 		},
 	}
 
-	Widgets["*widget.Scroll"] = Widgets["*container.Scroll"]
+	Widgets["*widget.Scroll"] = Widgets["*container.Scroll"] // internal widget name may be used
 	WidgetNames = extractWidgetNames()
 }
 
 // extractWidgetNames returns all the list of names of all the Widgets from our data
 func extractWidgetNames() []string {
-	var widgetNamesFromData = make([]string, len(Widgets))
+	var widgetNamesFromData = make([]string, len(Widgets)-1)
 	i := 0
 	for k := range Widgets {
+		if k == "*widget.Scroll" { // do not duplicate scroll
+			continue
+		}
 		widgetNamesFromData[i] = k
 		i++
 	}
