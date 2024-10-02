@@ -19,10 +19,10 @@ import (
 
 var (
 	// WidgetNames is an array with the list of names of all the Widgets
-	WidgetNames []string
+	WidgetNames, CollectionNames, ContainerNames []string
 
-	Widgets map[string]WidgetInfo
-	once    sync.Once
+	Widgets, Collections, Containers map[string]WidgetInfo
+	once                             sync.Once
 
 	importances = []string{"Medium", "High", "Low", "Danger", "Warning", "Success"}
 )
@@ -512,32 +512,6 @@ func initWidgets() {
 					"widget.NewAccordion(\"widget.NewAccordionItem(\"Item 1\", widget.NewLabel(\"The content goes here\")), widget.NewAccordionItem(\"Item 2\", widget.NewLabel(\"Content part 2 goes here\")))")
 			},
 		},
-		"*widget.List": {
-			Name: "List",
-			Create: func() fyne.CanvasObject {
-				myList := []string{"Item 1", "Item 2", "Item 3", "Item 4"}
-				// TODO: Need to make the list get adjusted to show the full list of items, currently it has only one item height apprx.
-				return widget.NewList(func() int { return len(myList) }, func() fyne.CanvasObject {
-					return container.New(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
-				}, func(id widget.ListItemID, item fyne.CanvasObject) {
-					item.(*fyne.Container).Objects[1].(*widget.Label).SetText(myList[id])
-				})
-			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
-				return []*widget.FormItem{}
-			},
-			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
-				return widgetRef(props[obj], defs,
-					`widget.NewList(func() int { return len(myList) }, func() fyne.CanvasObject {
-				return container.New(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
-			}, func(id widget.ListItemID, item fyne.CanvasObject) {
-				item.(*fyne.Container).Objects[1].(*widget.Label).SetText(myList[id])
-			})`)
-			},
-			Packages: func(obj fyne.CanvasObject) []string {
-				return []string{"widget", "container"}
-			},
-		},
 		"*widget.Menu": {
 			Name: "Menu",
 			Create: func() fyne.CanvasObject {
@@ -666,43 +640,6 @@ func initWidgets() {
 				return widgetRef(props[obj], defs, fmt.Sprintf("&widget.Slider{Min:0, Max:100, Value:%f, Orientation: %s}", slider.Value, orient))
 			},
 		},
-		"*widget.Table": {
-			Name: "Table",
-			Create: func() fyne.CanvasObject {
-				return widget.NewTable(func() (int, int) { return 3, 3 }, func() fyne.CanvasObject {
-					return widget.NewLabel("Cell 000, 000")
-				}, func(id widget.TableCellID, cell fyne.CanvasObject) {
-					label := cell.(*widget.Label)
-					switch id.Col {
-					case 0:
-						label.SetText(fmt.Sprintf("%d", id.Row+1))
-					case 1:
-						label.SetText("A longer cell")
-					default:
-						label.SetText(fmt.Sprintf("Cell %d, %d", id.Row+1, id.Col+1))
-					}
-				})
-			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
-				return []*widget.FormItem{}
-			},
-			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
-				return widgetRef(props[obj], defs,
-					`widget.NewTable(func() (int, int) { return 3, 3 }, func() fyne.CanvasObject {
-				return widget.NewLabel("Cell 000, 000")
-			}, func(id widget.TableCellID, cell fyne.CanvasObject) {
-				label := cell.(*widget.Label)
-				switch id.Col {
-				case 0:
-					label.SetText(fmt.Sprintf("%d", id.Row+1))
-				case 1:
-					label.SetText("A longer cell")
-				default:
-					label.SetText(fmt.Sprintf("Cell %d, %d", id.Row+1, id.Col+1))
-				}
-			})`)
-			},
-		},
 		"*widget.TextGrid": {
 			Name: "Text Grid",
 			Create: func() fyne.CanvasObject {
@@ -754,6 +691,72 @@ func initWidgets() {
 			)`)
 			},
 		},
+	}
+
+	Collections = map[string]WidgetInfo{
+		"*widget.List": {
+			Name: "List",
+			Create: func() fyne.CanvasObject {
+				myList := []string{"Item 1", "Item 2", "Item 3", "Item 4"}
+				// TODO: Need to make the list get adjusted to show the full list of items, currently it has only one item height apprx.
+				return widget.NewList(func() int { return len(myList) }, func() fyne.CanvasObject {
+					return container.New(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
+				}, func(id widget.ListItemID, item fyne.CanvasObject) {
+					item.(*fyne.Container).Objects[1].(*widget.Label).SetText(myList[id])
+				})
+			},
+			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+				return []*widget.FormItem{}
+			},
+			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+				return widgetRef(props[obj], defs,
+					`widget.NewList(func() int { return len(myList) }, func() fyne.CanvasObject {
+				return container.New(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
+			}, func(id widget.ListItemID, item fyne.CanvasObject) {
+				item.(*fyne.Container).Objects[1].(*widget.Label).SetText(myList[id])
+			})`)
+			},
+			Packages: func(obj fyne.CanvasObject) []string {
+				return []string{"widget", "container"}
+			},
+		},
+		"*widget.Table": {
+			Name: "Table",
+			Create: func() fyne.CanvasObject {
+				return widget.NewTable(func() (int, int) { return 3, 3 }, func() fyne.CanvasObject {
+					return widget.NewLabel("Cell 000, 000")
+				}, func(id widget.TableCellID, cell fyne.CanvasObject) {
+					label := cell.(*widget.Label)
+					switch id.Col {
+					case 0:
+						label.SetText(fmt.Sprintf("%d", id.Row+1))
+					case 1:
+						label.SetText("A longer cell")
+					default:
+						label.SetText(fmt.Sprintf("Cell %d, %d", id.Row+1, id.Col+1))
+					}
+				})
+			},
+			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+				return []*widget.FormItem{}
+			},
+			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+				return widgetRef(props[obj], defs,
+					`widget.NewTable(func() (int, int) { return 3, 3 }, func() fyne.CanvasObject {
+				return widget.NewLabel("Cell 000, 000")
+			}, func(id widget.TableCellID, cell fyne.CanvasObject) {
+				label := cell.(*widget.Label)
+				switch id.Col {
+				case 0:
+					label.SetText(fmt.Sprintf("%d", id.Row+1))
+				case 1:
+					label.SetText("A longer cell")
+				default:
+					label.SetText(fmt.Sprintf("Cell %d, %d", id.Row+1, id.Col+1))
+				}
+			})`)
+			},
+		},
 		"*widget.Tree": {
 			Name: "Tree",
 			Create: func() fyne.CanvasObject {
@@ -801,7 +804,9 @@ func initWidgets() {
 			},
 			//GoString: // TODO
 		},
+	}
 
+	Containers = map[string]WidgetInfo{
 		"*fyne.Container": {
 			Name: "Container",
 			Create: func() fyne.CanvasObject {
@@ -937,22 +942,31 @@ func initWidgets() {
 		},
 	}
 
-	Widgets["*widget.Scroll"] = Widgets["*container.Scroll"] // internal widget name may be used
-	WidgetNames = extractWidgetNames()
+	Containers["*widget.Scroll"] = Containers["*container.Scroll"] // internal widget name may be used
+
+	WidgetNames = extractNames(Widgets)
+	CollectionNames = extractNames(Collections)
+	ContainerNames = extractNames(Containers)
 }
 
 // extractWidgetNames returns all the list of names of all the Widgets from our data
-func extractWidgetNames() []string {
-	var widgetNamesFromData = make([]string, len(Widgets)-1)
+func extractNames(in map[string]WidgetInfo) []string {
+	var widgetNamesFromData = make([]string, len(in))
+	dupe := false
+
 	i := 0
-	for k := range Widgets {
+	for k := range in {
 		if k == "*widget.Scroll" { // do not duplicate scroll
+			dupe = true
 			continue
 		}
 		widgetNamesFromData[i] = k
 		i++
 	}
 
+	if dupe {
+		widgetNamesFromData = widgetNamesFromData[:len(widgetNamesFromData)-1]
+	}
 	sort.Strings(widgetNamesFromData)
 	return widgetNamesFromData
 }
