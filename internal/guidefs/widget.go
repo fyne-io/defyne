@@ -986,3 +986,17 @@ func InitOnce() {
 		initWidgets()
 	})
 }
+
+func Lookup(clazz string) *WidgetInfo {
+	if match, ok := Widgets[clazz]; ok {
+		return &match
+	}
+	if match, ok := Collections[clazz]; ok {
+		return &match
+	}
+	if match, ok := Containers[clazz]; ok {
+		return &match
+	}
+
+	return nil
+}

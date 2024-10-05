@@ -27,7 +27,7 @@ func WidgetClassList() []string {
 
 func DropZonesForObject(o fyne.CanvasObject) []fyne.CanvasObject {
 	class := reflect.TypeOf(o).String()
-	info := guidefs.Widgets[class]
+	info := guidefs.Lookup(class)
 
 	if !info.IsContainer() {
 		return nil

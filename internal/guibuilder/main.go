@@ -148,11 +148,12 @@ func (b *Builder) buildLibrary() fyne.CanvasObject {
 	}, func() fyne.CanvasObject {
 		return widget.NewLabel("")
 	}, func(i widget.ListItemID, obj fyne.CanvasObject) {
-		obj.(*widget.Label).SetText(guidefs.Widgets[tempNames[i]].Name)
+		obj.(*widget.Label).SetText(guidefs.Lookup(tempNames[i]).Name)
 	})
 	list.OnSelected = func(i widget.ListItemID) {
-		if match, ok := guidefs.Widgets[tempNames[i]]; ok {
-			selected = &match
+		match := guidefs.Lookup(tempNames[i])
+		if match != nil {
+			selected = match
 		}
 	}
 	list.OnUnselected = func(widget.ListItemID) {
@@ -185,7 +186,7 @@ func (b *Builder) buildLibrary() fyne.CanvasObject {
 			return
 		} else {
 			class := reflect.TypeOf(b.current).String()
-			if wid, ok := guidefs.Widgets[class]; ok && wid.IsContainer() {
+			if wid := guidefs.Lookup(class); wid != nil && wid.IsContainer() {
 				wid.AddChild(b.current, selected.Create())
 
 				return

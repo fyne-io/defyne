@@ -72,8 +72,8 @@ func findObject(o fyne.CanvasObject, p fyne.Position) fyne.CanvasObject {
 		return w
 	case fyne.Widget:
 		class := reflect.TypeOf(o).String()
-		info, ok := guidefs.Widgets[class]
-		if !ok || !info.IsContainer() {
+		info := guidefs.Lookup(class)
+		if info == nil || !info.IsContainer() {
 			return nil
 		}
 

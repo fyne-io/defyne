@@ -436,7 +436,7 @@ func writeGoString(str *strings.Builder, props map[fyne.CanvasObject]map[string]
 	defs map[string]string, o fyne.CanvasObject) error {
 	clazz := reflect.TypeOf(o).String()
 
-	if match, ok := Widgets[clazz]; ok {
+	if match := Lookup(clazz); match != nil {
 		code := match.Gostring(o, props, defs)
 		str.WriteString(fmt.Sprintf("\n\t\t%s", code))
 	} else {

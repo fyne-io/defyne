@@ -57,7 +57,7 @@ func exportCode(pkgs, vars []string, obj fyne.CanvasObject, meta map[fyne.Canvas
 	defs := make(map[string]string)
 
 	_, clazz := getTypeOf(obj)
-	main := guidefs.Widgets[clazz].Gostring(obj, meta, defs)
+	main := guidefs.Lookup(clazz).Gostring(obj, meta, defs)
 	setup := ""
 	for k, v := range defs {
 		setup += "g." + k + " = " + v + "\n"
@@ -109,9 +109,9 @@ func packagesRequired(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[stri
 		}
 	} else {
 		class := reflect.TypeOf(obj).String()
-		info, ok := guidefs.Widgets[class]
+		info := guidefs.Lookup(class)
 
-		if ok && info.IsContainer() {
+		if info != nil && info.IsContainer() {
 			objs = info.Children(obj)
 		} else {
 			if w, ok := obj.(fyne.Widget); ok {
@@ -139,8 +139,8 @@ func packagesRequired(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[stri
 
 func packagesRequiredForWidget(w fyne.Widget) []string {
 	name := reflect.TypeOf(w).String()
-	if guidefs.Widgets[name].Packages != nil {
-		return guidefs.Widgets[name].Packages(w)
+	if pkgs := guidefs.Lookup(name).Packages; pkgs != nil {
+		return pkgs(w)
 	}
 
 	return []string{"widget"}
@@ -160,9 +160,9 @@ func varsRequired(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]
 		}
 	} else {
 		class := reflect.TypeOf(obj).String()
-		info, ok := guidefs.Widgets[class]
+		info := guidefs.Lookup(class)
 
-		if ok && info.IsContainer() {
+		if info != nil && info.IsContainer() {
 			for _, child := range info.Children(obj) {
 				ret = append(ret, varsRequired(child, props)...)
 			}

@@ -497,7 +497,7 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 
 func decodeWidget(m map[string]interface{}) fyne.Widget {
 	class := m["Type"].(string)
-	obj := guidefs.Widgets[class].Create().(fyne.Widget)
+	obj := guidefs.Lookup(class).Create().(fyne.Widget)
 	e := reflect.ValueOf(obj).Elem()
 
 	err := decodeFields(e, m["Struct"].(map[string]interface{}))

@@ -11,13 +11,7 @@ import (
 func CreateNew(name string) fyne.CanvasObject {
 	guidefs.InitOnce()
 
-	if match, ok := guidefs.Widgets[name]; ok {
-		return match.Create()
-	}
-	if match, ok := guidefs.Collections[name]; ok {
-		return match.Create()
-	}
-	if match, ok := guidefs.Containers[name]; ok {
+	if match := guidefs.Lookup(name); match != nil {
 		return match.Create()
 	}
 
@@ -29,13 +23,7 @@ func EditorFor(o fyne.CanvasObject, props map[string]string) []*widget.FormItem 
 
 	_, clazz := getTypeOf(o)
 
-	if match, ok := guidefs.Widgets[clazz]; ok {
-		return match.Edit(o, props)
-	}
-	if match, ok := guidefs.Collections[clazz]; ok {
-		return match.Edit(o, props)
-	}
-	if match, ok := guidefs.Containers[clazz]; ok {
+	if match := guidefs.Lookup(clazz); match != nil {
 		return match.Edit(o, props)
 	}
 
@@ -47,13 +35,7 @@ func GoStringFor(o fyne.CanvasObject, props map[fyne.CanvasObject]map[string]str
 
 	name := reflect.TypeOf(o).String()
 
-	if match, ok := guidefs.Widgets[name]; ok {
-		return match.Gostring(o, props, defs)
-	}
-	if match, ok := guidefs.Collections[name]; ok {
-		return match.Gostring(o, props, defs)
-	}
-	if match, ok := guidefs.Containers[name]; ok {
+	if match := guidefs.Lookup(name); match != nil {
 		return match.Gostring(o, props, defs)
 	}
 
