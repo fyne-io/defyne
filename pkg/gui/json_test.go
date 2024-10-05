@@ -17,8 +17,7 @@ import (
 )
 
 const labelJSON = `{
-  "Type": "*widget.Label",
-  "Name": "%s",
+  "Type": "*widget.Label",%s
   "Struct": {
     "Hidden": false,
     "Text": "Hi",
@@ -72,7 +71,7 @@ var splitJSON = `{
 func TestDecodeObject(t *testing.T) {
 	guidefs.InitOnce()
 
-	buf := bytes.NewReader([]byte(fmt.Sprintf(labelJSON, "myLabel")))
+	buf := bytes.NewReader([]byte(fmt.Sprintf(labelJSON, "\n  \"Name\": \"myLabel\",")))
 	obj, meta, err := DecodeObject(buf)
 	assert.Nil(t, err)
 
@@ -116,7 +115,7 @@ func TestEncodeObject(t *testing.T) {
 	var buf bytes.Buffer
 	err := EncodeObject(l, meta, &buf)
 	assert.Nil(t, err)
-	assert.Equal(t, fmt.Sprintf(labelJSON, "myLabel")+"\n", buf.String())
+	assert.Equal(t, fmt.Sprintf(labelJSON, "\n  \"Name\": \"myLabel\",")+"\n", buf.String())
 }
 
 func TestEncodeSplit(t *testing.T) {
