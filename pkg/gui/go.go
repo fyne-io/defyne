@@ -114,9 +114,7 @@ func packagesRequired(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[stri
 		if info != nil && info.IsContainer() {
 			objs = info.Children(obj)
 		} else {
-			if w, ok := obj.(fyne.Widget); ok {
-				return packagesRequiredForWidget(w)
-			}
+			return packagesRequiredForWidget(obj)
 		}
 	}
 
@@ -137,13 +135,17 @@ func packagesRequired(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[stri
 	return ret
 }
 
-func packagesRequiredForWidget(w fyne.Widget) []string {
+func packagesRequiredForWidget(w fyne.CanvasObject) []string {
 	name := reflect.TypeOf(w).String()
 	if pkgs := guidefs.Lookup(name).Packages; pkgs != nil {
 		return pkgs(w)
 	}
 
-	return []string{"widget"}
+	if _, ok := w.(fyne.Widget); ok {
+		return []string{"widget"}
+	}
+
+	return []string{}
 }
 
 func varsRequired(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string) []string {
