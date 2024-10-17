@@ -47,6 +47,9 @@ func initGraphics() {
 					widget.NewFormItem("Angle", angleSlide),
 				}
 			},
+			Packages: func(_ fyne.CanvasObject) []string {
+				return []string{"canvas", "image/color"}
+			},
 		},
 		"*canvas.RadialGradient": {
 			Name: "RadialGradient",
@@ -65,6 +68,9 @@ func initGraphics() {
 						r.Refresh()
 					})),
 				}
+			},
+			Packages: func(_ fyne.CanvasObject) []string {
+				return []string{"canvas", "image/color"}
 			},
 		},
 		"*canvas.Rectangle": {
@@ -92,6 +98,9 @@ func initGraphics() {
 						r.Refresh()
 					})),
 				}
+			},
+			Packages: func(_ fyne.CanvasObject) []string {
+				return []string{"canvas", "image/color"}
 			},
 		},
 	}
