@@ -57,7 +57,7 @@ func exportCode(pkgs, vars []string, obj fyne.CanvasObject, meta map[fyne.Canvas
 	defs := make(map[string]string)
 
 	_, clazz := getTypeOf(obj)
-	main := guidefs.Lookup(clazz).Gostring(obj, meta, defs)
+	main := guidefs.GoString(clazz, obj, meta, defs)
 	setup := ""
 	for k, v := range defs {
 		setup += "g." + k + " = " + v + "\n"

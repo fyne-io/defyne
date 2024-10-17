@@ -376,6 +376,10 @@ func decodeFromMap(m map[string]interface{}, in interface{}) {
 	t := reflect.ValueOf(in).Elem()
 	for k, v := range m {
 		val := t.FieldByName(k)
+		if !val.IsValid() {
+			continue
+		}
+
 		switch val.Type().Kind() {
 		case reflect.Ptr:
 			continue
