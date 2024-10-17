@@ -19,6 +19,12 @@ func ContainerClassList() []string {
 	return guidefs.ContainerNames
 }
 
+// GraphicsClassList returns the list of supported graphics primitives classes.
+// These can be used for passing to `CreateNew` or `EditorFor`.
+func GraphicsClassList() []string {
+	return guidefs.GraphicsNames
+}
+
 // WidgetClassList returns the list of supported widget classes.
 // These can be used for passing to `CreateNew` or `EditorFor`.
 func WidgetClassList() []string {

@@ -152,6 +152,9 @@ func (b *Builder) buildLibrary() fyne.CanvasObject {
 	for _, name := range guidefs.CollectionNames {
 		addClass(name)
 	}
+	for _, name := range guidefs.GraphicsNames {
+		addClass(name)
+	}
 	list := widget.NewList(func() int {
 		return len(tempNames)
 	}, func() fyne.CanvasObject {

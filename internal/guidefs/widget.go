@@ -983,6 +983,7 @@ func widgetRef(props map[string]string, defs map[string]string, code string) str
 func InitOnce() {
 	once.Do(func() {
 		initIcons()
+		initGraphics()
 		initWidgets()
 	})
 }
@@ -995,6 +996,9 @@ func Lookup(clazz string) *WidgetInfo {
 		return &match
 	}
 	if match, ok := Containers[clazz]; ok {
+		return &match
+	}
+	if match, ok := Graphics[clazz]; ok {
 		return &match
 	}
 

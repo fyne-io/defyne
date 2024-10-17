@@ -437,8 +437,12 @@ func writeGoString(str *strings.Builder, props map[fyne.CanvasObject]map[string]
 	clazz := reflect.TypeOf(o).String()
 
 	if match := Lookup(clazz); match != nil {
-		code := match.Gostring(o, props, defs)
-		str.WriteString(fmt.Sprintf("\n\t\t%s", code))
+		if f := match.Gostring; f != nil {
+			code := match.Gostring(o, props, defs)
+			str.WriteString(fmt.Sprintf("\n\t\t%s", code))
+		} else {
+			str.WriteString(fmt.Sprintf("\n\t\t%#v", o))
+		}
 	} else {
 		return errors.New("failed to find go string for type" + clazz)
 	}

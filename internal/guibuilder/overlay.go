@@ -69,6 +69,16 @@ func findObject(o fyne.CanvasObject, p fyne.Position) fyne.CanvasObject {
 				return child
 			}
 		}
+
+		// also see if we have any raw canvas objects
+		for _, child := range w.Objects {
+			if !insideObject(child, p) {
+				continue
+			}
+
+			return child
+		}
+
 		return w
 	case fyne.Widget:
 		class := reflect.TypeOf(o).String()

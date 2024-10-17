@@ -3,12 +3,14 @@ package gui
 import (
 	"encoding/json"
 	"errors"
+	"image/color"
 	"io"
 	"net/url"
 	"reflect"
 	"strings"
 	"time"
 
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"github.com/fyne-io/defyne/internal/guidefs"
 
@@ -149,6 +151,12 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 
 		meta[obj] = props
 		return obj, nil
+	case "*canvas.Rectangle":
+		obj := &canvas.Rectangle{}
+		e := reflect.ValueOf(obj).Elem()
+
+		err := decodeFields(e, m["Struct"].(map[string]interface{}))
+		return obj, err
 	}
 
 	obj := decodeWidget(m)
@@ -301,7 +309,7 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 		return &node, nil
 	}
 
-	return nil, nil
+	return &canvObj{Type: reflect.TypeOf(obj).String(), Name: name, Struct: obj}, nil
 }
 
 func encodeForm(obj *widget.Form, name string) interface{} {
@@ -356,10 +364,14 @@ func decodeFromMap(m map[string]interface{}, in interface{}) {
 	t := reflect.ValueOf(in).Elem()
 	for k, v := range m {
 		val := t.FieldByName(k)
-		if val.Type().Kind() == reflect.Ptr {
+		switch val.Type().Kind() {
+		case reflect.Ptr:
 			continue
+		case reflect.Uint8:
+			val.SetUint(uint64(reflect.ValueOf(v).Float()))
+		default:
+			val.Set(reflect.ValueOf(v))
 		}
-		val.Set(reflect.ValueOf(v))
 	}
 }
 
@@ -483,9 +495,15 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 			} else {
 				f.Set(reflect.ValueOf(&t))
 			}
+		case "color.Color":
+			c := &color.NRGBA{}
+			decodeFromMap(reflect.ValueOf(v).Interface().(map[string]interface{}), c)
+			f.Set(reflect.ValueOf(c))
 		default:
 			if strings.Index(typeName, "int") == 0 {
 				f.SetInt(int64(reflect.ValueOf(v).Float()))
+			} else if typeName == "float32" {
+				f.SetFloat(reflect.ValueOf(v).Float())
 			} else if v != nil {
 				f.Set(reflect.ValueOf(v))
 			}
