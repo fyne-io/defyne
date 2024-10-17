@@ -139,9 +139,18 @@ func (b *Builder) buildLibrary() fyne.CanvasObject {
 	var selected *guidefs.WidgetInfo
 	tempNames := []string{}
 	widgetLowerNames := []string{}
-	for _, name := range guidefs.WidgetNames {
+	addClass := func(name string) {
 		widgetLowerNames = append(widgetLowerNames, strings.ToLower(name))
 		tempNames = append(tempNames, name)
+	}
+	for _, name := range guidefs.WidgetNames {
+		addClass(name)
+	}
+	for _, name := range guidefs.ContainerNames {
+		addClass(name)
+	}
+	for _, name := range guidefs.CollectionNames {
+		addClass(name)
 	}
 	list := widget.NewList(func() int {
 		return len(tempNames)
