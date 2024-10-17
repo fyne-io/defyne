@@ -157,6 +157,18 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 
 		err := decodeFields(e, m["Struct"].(map[string]interface{}))
 		return obj, err
+	case "*canvas.LinearGradient":
+		obj := &canvas.LinearGradient{}
+		e := reflect.ValueOf(obj).Elem()
+
+		err := decodeFields(e, m["Struct"].(map[string]interface{}))
+		return obj, err
+	case "*canvas.RadialGradient":
+		obj := &canvas.RadialGradient{}
+		e := reflect.ValueOf(obj).Elem()
+
+		err := decodeFields(e, m["Struct"].(map[string]interface{}))
+		return obj, err
 	}
 
 	obj := decodeWidget(m)
@@ -497,7 +509,12 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 			}
 		case "color.Color":
 			c := &color.NRGBA{}
-			decodeFromMap(reflect.ValueOf(v).Interface().(map[string]interface{}), c)
+			val := reflect.ValueOf(v)
+			if v == nil {
+				continue
+			}
+
+			decodeFromMap(val.Interface().(map[string]interface{}), c)
 			f.Set(reflect.ValueOf(c))
 		default:
 			if strings.Index(typeName, "int") == 0 {

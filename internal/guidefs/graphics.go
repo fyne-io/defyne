@@ -22,6 +22,51 @@ var (
 
 func initGraphics() {
 	Graphics = map[string]WidgetInfo{
+		"*canvas.LinearGradient": {
+			Name: "LinearGradient",
+			Create: func() fyne.CanvasObject {
+				return &canvas.LinearGradient{StartColor: color.White}
+			},
+			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+				r := obj.(*canvas.LinearGradient)
+				angleSlide := widget.NewSlider(0, 360)
+				angleSlide.Step = 90
+				angleSlide.OnChanged = func(f float64) {
+					r.Angle = f
+					r.Refresh()
+				}
+				return []*widget.FormItem{
+					widget.NewFormItem("Start", newColorButton(r.StartColor, func(c color.Color) {
+						r.StartColor = c
+						r.Refresh()
+					})),
+					widget.NewFormItem("End", newColorButton(r.EndColor, func(c color.Color) {
+						r.EndColor = c
+						r.Refresh()
+					})),
+					widget.NewFormItem("Angle", angleSlide),
+				}
+			},
+		},
+		"*canvas.RadialGradient": {
+			Name: "RadialGradient",
+			Create: func() fyne.CanvasObject {
+				return &canvas.RadialGradient{StartColor: color.White}
+			},
+			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+				r := obj.(*canvas.RadialGradient)
+				return []*widget.FormItem{
+					widget.NewFormItem("Start", newColorButton(r.StartColor, func(c color.Color) {
+						r.StartColor = c
+						r.Refresh()
+					})),
+					widget.NewFormItem("End", newColorButton(r.EndColor, func(c color.Color) {
+						r.EndColor = c
+						r.Refresh()
+					})),
+				}
+			},
+		},
 		"*canvas.Rectangle": {
 			Name: "Rectangle",
 			Create: func() fyne.CanvasObject {
@@ -34,12 +79,12 @@ func initGraphics() {
 						r.FillColor = c
 						r.Refresh()
 					})),
-					widget.NewFormItem("Corner", newSliderButton(r.CornerRadius, func(f float32) {
-						r.CornerRadius = f
+					widget.NewFormItem("Corner", newSliderButton(float64(r.CornerRadius), 0, 32, func(f float64) {
+						r.CornerRadius = float32(f)
 						r.Refresh()
 					})),
-					widget.NewFormItem("Stroke", newSliderButton(r.StrokeWidth, func(f float32) {
-						r.StrokeWidth = f
+					widget.NewFormItem("Stroke", newSliderButton(float64(r.StrokeWidth), 0, 32, func(f float64) {
+						r.StrokeWidth = float32(f)
 						r.Refresh()
 					})),
 					widget.NewFormItem("Color", newColorButton(r.StrokeColor, func(c color.Color) {
@@ -108,11 +153,11 @@ func (c *colorTapper) setColor(col color.Color) {
 	c.r.Refresh()
 }
 
-func newSliderButton(f float32, fn func(float32)) fyne.CanvasObject {
+func newSliderButton(f float64, start, end float64, fn func(float64)) fyne.CanvasObject {
 	input := widget.NewEntry()
 	input.SetText(strconv.Itoa(int(f)))
-	slide := widget.NewSlider(0, 32)
-	slide.SetValue(float64(f))
+	slide := widget.NewSlider(start, end)
+	slide.SetValue(f)
 
 	input.OnChanged = func(s string) {
 		f, err := strconv.ParseFloat(s, 64)
@@ -121,11 +166,11 @@ func newSliderButton(f float32, fn func(float32)) fyne.CanvasObject {
 		}
 
 		slide.SetValue(f)
-		fn(float32(f))
+		fn(f)
 	}
 	slide.OnChanged = func(f float64) {
 		input.SetText(fmt.Sprintf("%0.0f", f)) // format like an int
-		fn(float32(f))
+		fn(f)
 	}
 	return container.NewBorder(nil, nil, input, nil, slide)
 }
