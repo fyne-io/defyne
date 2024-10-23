@@ -58,46 +58,6 @@ func initWidgets() {
 					b.SetText(text)
 				}
 
-				items := make([]*fyne.MenuItem, len(IconNames)+1)
-				var iconSel *widget.Button
-
-				items[0] = &fyne.MenuItem{
-					Label: noIconLabel,
-					Icon:  nil,
-					Action: func() {
-						iconSel.SetText(noIconLabel)
-						iconSel.SetIcon(nil)
-						b.SetIcon(nil)
-					},
-				}
-				for i, n := range IconNames {
-					name := n
-					items[i+1] = &fyne.MenuItem{
-						Label: n,
-						Icon:  Icons[n],
-						Action: func() {
-							iconSel.SetText(name)
-							iconSel.SetIcon(Icons[name])
-							b.SetIcon(Icons[name])
-						},
-					}
-				}
-				iconSel = widget.NewButton(noIconLabel, func() {
-					d := fyne.CurrentApp().Driver()
-					c := d.CanvasForObject(iconSel)
-					p := d.AbsolutePositionForObject(iconSel).AddXY(0, iconSel.Size().Height)
-					widget.NewPopUpMenu(fyne.NewMenu("", items...), c).ShowAtPosition(p)
-				})
-				if b.Icon != nil {
-					name := IconName(b.Icon)
-					for _, n := range IconNames {
-						if n == name {
-							iconSel.SetText(n)
-							iconSel.SetIcon(Icons[n])
-							break
-						}
-					}
-				}
 				importance := widget.NewSelect(importances, func(s string) {
 					var i widget.Importance
 					for ii, imp := range importances {
@@ -111,7 +71,7 @@ func initWidgets() {
 				importance.SetSelectedIndex(int(b.Importance))
 				return []*widget.FormItem{
 					widget.NewFormItem("Text", entry),
-					widget.NewFormItem("Icon", iconSel),
+					widget.NewFormItem("Icon", newIconSelectorButton(b.Icon, b.SetIcon, true)),
 					widget.NewFormItem("Importance", importance),
 				}
 			},
