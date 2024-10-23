@@ -17,6 +17,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+const noIconLabel = "(No Icon)"
+
 var (
 	// WidgetNames is an array with the list of names of all the Widgets
 	WidgetNames, CollectionNames, ContainerNames []string
@@ -56,11 +58,21 @@ func initWidgets() {
 					b.SetText(text)
 				}
 
-				items := make([]*fyne.MenuItem, len(IconNames))
+				items := make([]*fyne.MenuItem, len(IconNames)+1)
 				var iconSel *widget.Button
+
+				items[0] = &fyne.MenuItem{
+					Label: noIconLabel,
+					Icon:  nil,
+					Action: func() {
+						iconSel.SetText(noIconLabel)
+						iconSel.SetIcon(nil)
+						b.SetIcon(nil)
+					},
+				}
 				for i, n := range IconNames {
 					name := n
-					items[i] = &fyne.MenuItem{
+					items[i+1] = &fyne.MenuItem{
 						Label: n,
 						Icon:  Icons[n],
 						Action: func() {
@@ -70,7 +82,7 @@ func initWidgets() {
 						},
 					}
 				}
-				iconSel = widget.NewButton("(No Icon)", func() {
+				iconSel = widget.NewButton(noIconLabel, func() {
 					d := fyne.CurrentApp().Driver()
 					c := d.CanvasForObject(iconSel)
 					p := d.AbsolutePositionForObject(iconSel).AddXY(0, iconSel.Size().Height)
