@@ -244,9 +244,14 @@ func (b *Builder) choose(o fyne.CanvasObject) {
 	if props == nil {
 		props = make(map[string]string)
 	}
-	items := gui.EditorFor(o, props)
-
 	nameItem := widget.NewFormItem("Type", widget.NewLabel(gui.NameOf(o)))
+	items := gui.EditorFor(o, props, func(items []*widget.FormItem) {
+		editForm.Items = nil
+		editForm.Refresh()
+		editForm.Items = append([]*widget.FormItem{nameItem}, items...)
+		editForm.Refresh()
+	})
+
 	items = append([]*widget.FormItem{nameItem}, items...)
 	b.meta[o] = props
 

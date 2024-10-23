@@ -18,13 +18,13 @@ func CreateNew(name string) fyne.CanvasObject {
 	return nil
 }
 
-func EditorFor(o fyne.CanvasObject, props map[string]string) []*widget.FormItem {
+func EditorFor(o fyne.CanvasObject, props map[string]string, refresh func([]*widget.FormItem)) []*widget.FormItem {
 	guidefs.InitOnce()
 
 	_, clazz := getTypeOf(o)
 
 	if match := guidefs.Lookup(clazz); match != nil {
-		return match.Edit(o, props)
+		return match.Edit(o, props, refresh)
 	}
 
 	return nil

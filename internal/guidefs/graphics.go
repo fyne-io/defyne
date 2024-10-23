@@ -27,7 +27,7 @@ func initGraphics() {
 			Create: func() fyne.CanvasObject {
 				return &canvas.LinearGradient{StartColor: color.White}
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
 				r := obj.(*canvas.LinearGradient)
 				angleSlide := widget.NewSlider(0, 360)
 				angleSlide.Step = 90
@@ -56,7 +56,7 @@ func initGraphics() {
 			Create: func() fyne.CanvasObject {
 				return &canvas.RadialGradient{StartColor: color.White}
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
 				r := obj.(*canvas.RadialGradient)
 				return []*widget.FormItem{
 					widget.NewFormItem("Start", newColorButton(r.StartColor, func(c color.Color) {
@@ -78,7 +78,7 @@ func initGraphics() {
 			Create: func() fyne.CanvasObject {
 				return canvas.NewRectangle(color.Black)
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
 				r := obj.(*canvas.Rectangle)
 				return []*widget.FormItem{
 					widget.NewFormItem("Fill", newColorButton(r.FillColor, func(c color.Color) {

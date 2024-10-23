@@ -19,7 +19,7 @@ func initContainers() {
 			Create: func() fyne.CanvasObject {
 				return container.NewStack()
 			},
-			Edit: func(obj fyne.CanvasObject, props map[string]string) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, props map[string]string, refresh func([]*widget.FormItem)) []*widget.FormItem {
 				c := obj.(*fyne.Container)
 
 				choose := widget.NewFormItem("Layout", widget.NewSelect(layoutNames, nil))
@@ -29,7 +29,6 @@ func initContainers() {
 					props["layout"] = l
 					c.Layout = lay.Create(c, props)
 					c.Refresh()
-					choose.Widget.Hide()
 
 					edit := lay.Edit
 					items = []*widget.FormItem{choose}
@@ -37,10 +36,7 @@ func initContainers() {
 						items = append(items, edit(c, props)...)
 					}
 
-					// TODO wtf?					editForm = widget.NewForm(items...)
-					//					paletteList.Objects = []fyne.CanvasObject{editForm}
-					choose.Widget.Show()
-					//					paletteList.Refresh()
+					refresh(items)
 				}
 				choose.Widget.(*widget.Select).SetSelected(props["layout"])
 				return items
@@ -87,7 +83,7 @@ func initContainers() {
 			Create: func() fyne.CanvasObject {
 				return container.NewAppTabs(container.NewTabItem("Untitled", container.NewStack()))
 			},
-			Edit: func(obj fyne.CanvasObject, props map[string]string) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, props map[string]string, setItems func([]*widget.FormItem)) []*widget.FormItem {
 				tabs := obj.(*container.AppTabs)
 				items := make([]*widget.FormItem, len(tabs.Items)+2)
 				itemNames := make([]string, len(tabs.Items))
@@ -114,6 +110,7 @@ func initContainers() {
 							itemNames = append(itemNames[:i], itemNames[i+1:]...)
 						}
 						tabs.Refresh()
+						setItems(items)
 					})
 					del.Importance = widget.DangerImportance
 
@@ -127,13 +124,17 @@ func initContainers() {
 
 				items[len(items)-2] = widget.NewFormItem("",
 					widget.NewButton("Add Tab", func() {
-						title := fmt.Sprintf("Tab %d", len(tabs.Items))
+						title := fmt.Sprintf("Tab %d", len(tabs.Items)+1)
 						item := container.NewTabItem(title, container.NewStack())
-						tabs.Append(item)
 
-						add := items[len(items)-1]
-						newItem := newRow(item, len(tabs.Items)-1)
-						items = append(items[:len(items)-1], newItem, add)
+						add := items[len(items)-2]
+						sel := items[len(items)-1]
+						newItem := newRow(item, len(tabs.Items))
+						items = append(items[:len(items)-2], newItem, add, sel)
+						itemNames = append(itemNames, title)
+
+						tabs.Append(item)
+						setItems(items)
 					}))
 				selected := widget.NewSelect(itemNames, nil)
 				selected.OnChanged = func(_ string) {
@@ -192,7 +193,7 @@ func initContainers() {
 			Create: func() fyne.CanvasObject {
 				return container.NewScroll(container.NewStack())
 			},
-			Edit: func(obj fyne.CanvasObject, props map[string]string) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, props map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
 				return []*widget.FormItem{}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
@@ -225,7 +226,7 @@ func initContainers() {
 			Create: func() fyne.CanvasObject {
 				return container.NewHSplit(container.NewStack(), container.NewStack())
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
 				split := obj.(*container.Split)
 				offset := widget.NewEntry()
 				offset.SetText(fmt.Sprintf("%f", split.Offset))
