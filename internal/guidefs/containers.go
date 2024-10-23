@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -64,6 +65,117 @@ func initContainers() {
 				writeGoStringExcluding(str, nil, props, defs, c.Objects...)
 				str.WriteString(")")
 				return widgetRef(props[obj], defs, str.String())
+			},
+		},
+		"*container.AppTabs": {
+			Name: "App Tabs",
+			Children: func(o fyne.CanvasObject) []fyne.CanvasObject {
+				tabs := o.(*container.AppTabs)
+
+				children := make([]fyne.CanvasObject, len(tabs.Items))
+				for i, c := range tabs.Items {
+					children[i] = c.Content
+				}
+				return children
+			},
+			AddChild: func(parent, o fyne.CanvasObject) {
+				tabs := o.(*container.AppTabs)
+
+				item := container.NewTabItem("Untitled", o)
+				tabs.Append(item)
+			},
+			Create: func() fyne.CanvasObject {
+				return container.NewAppTabs(container.NewTabItem("Untitled", container.NewStack()))
+			},
+			Edit: func(obj fyne.CanvasObject, props map[string]string) []*widget.FormItem {
+				tabs := obj.(*container.AppTabs)
+				items := make([]*widget.FormItem, len(tabs.Items)+2)
+				itemNames := make([]string, len(tabs.Items))
+
+				newRow := func(item *container.TabItem, i int) *widget.FormItem {
+					icon := newIconSelectorButton(item.Icon, func(i fyne.Resource) {
+						item.Icon = i
+						tabs.Refresh()
+					}, false)
+					edit := widget.NewEntry()
+					edit.SetText(item.Text)
+					edit.OnChanged = func(s string) {
+						item.Text = s
+						tabs.Refresh()
+					}
+					del := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
+						if i == len(tabs.Items)-1 {
+							tabs.Items = tabs.Items[:i]
+							items = items[:i]
+							itemNames = itemNames[:i]
+						} else {
+							tabs.Items = append(tabs.Items[:i], tabs.Items[i+1:]...)
+							items = append(items[:i], items[i+1:]...)
+							itemNames = append(itemNames[:i], itemNames[i+1:]...)
+						}
+						tabs.Refresh()
+					})
+					del.Importance = widget.DangerImportance
+
+					tools := container.NewBorder(nil, nil, icon, del, edit)
+					return widget.NewFormItem(fmt.Sprintf("Tab %d", i+1), tools)
+				}
+				for i, c := range tabs.Items {
+					items[i] = newRow(c, i)
+					itemNames[i] = c.Text
+				}
+
+				items[len(items)-2] = widget.NewFormItem("",
+					widget.NewButton("Add Tab", func() {
+						title := fmt.Sprintf("Tab %d", len(tabs.Items))
+						item := container.NewTabItem(title, container.NewStack())
+						tabs.Append(item)
+
+						add := items[len(items)-1]
+						newItem := newRow(item, len(tabs.Items)-1)
+						items = append(items[:len(items)-1], newItem, add)
+					}))
+				selected := widget.NewSelect(itemNames, nil)
+				selected.OnChanged = func(_ string) {
+					tabs.SelectIndex(selected.SelectedIndex())
+				}
+				selected.SetSelectedIndex(tabs.SelectedIndex())
+				items[len(items)-1] = widget.NewFormItem("Selected", selected)
+				return items
+			},
+			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+				tabs := obj.(*container.AppTabs)
+				str := &strings.Builder{}
+				str.WriteString("container.NewAppTabs(")
+
+				for i, c := range tabs.Items {
+					if i > 0 {
+						str.WriteString(",\n")
+					}
+
+					hasIcon := c.Icon != nil
+					constr := "NewTabItem"
+					if hasIcon {
+						constr = "NewTabItemWithIcon"
+					}
+					str.WriteString(fmt.Sprintf("container.%s(\"%s\", ", constr, c.Text))
+					if hasIcon {
+						str.WriteString("theme." + IconName(c.Icon) + "(), ")
+					}
+					writeGoStringExcluding(str, nil, props, defs, c.Content)
+					str.WriteString(")")
+				}
+				str.WriteString(")")
+				return str.String()
+			},
+			Packages: func(obj fyne.CanvasObject) []string {
+				tabs := obj.(*container.AppTabs)
+				for _, c := range tabs.Items {
+					if c.Icon != nil {
+						return []string{"container", "theme"}
+					}
+				}
+				return []string{"container"}
 			},
 		},
 		"*container.Scroll": {

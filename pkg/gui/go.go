@@ -112,6 +112,7 @@ func packagesRequired(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[stri
 		info := guidefs.Lookup(class)
 
 		if info != nil && info.IsContainer() {
+			ret = packagesRequiredForWidget(obj)
 			objs = info.Children(obj)
 		} else {
 			return packagesRequiredForWidget(obj)

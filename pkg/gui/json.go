@@ -108,6 +108,39 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 
 		meta[obj] = props
 		return obj, nil
+	case "*container.AppTabs":
+		obj := &container.AppTabs{}
+		info := m["Struct"].(map[string]interface{})
+
+		items := info["Items"]
+		if items != nil {
+			for _, c := range items.([]interface{}) {
+				item := &container.TabItem{}
+
+				data := c.(map[string]interface{})
+				item.Text = data["Text"].(string)
+
+				if data["Icon"] != nil {
+					res := guidefs.Icons[data["Icon"].(string)]
+					if res != nil {
+						item.Icon = res
+					}
+				}
+				item.Content, _ = DecodeMap(data["Content"].(map[string]interface{}), meta)
+				obj.Append(item)
+			}
+		}
+
+		props := map[string]string{}
+		if name, ok := m["Name"]; ok {
+			props["name"] = name.(string)
+		}
+		if index, ok := info["SelectedIndex"]; ok {
+			obj.SelectIndex(int(index.(float64)))
+		}
+
+		meta[obj] = props
+		return obj, nil
 	case "*container.Scroll":
 		obj := &container.Scroll{}
 		info := m["Struct"].(map[string]interface{})
@@ -271,6 +304,27 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 		}
 
 		return encodeWidget(c, name, actions), nil
+	case *container.AppTabs:
+		node := &cntObj{Struct: make(map[string]interface{})}
+		node.Type = "*container.AppTabs"
+		node.Name = name
+
+		items := make([]interface{}, len(c.Items))
+		for i, child := range c.Items {
+			data := map[string]interface{}{
+				"Text": child.Text,
+			}
+			if child.Icon != nil {
+				data["Icon"] = guidefs.WrapResource(child.Icon)
+			}
+			data["Content"], _ = EncodeMap(child.Content, meta)
+
+			items[i] = data
+		}
+		node.Struct["Items"] = items
+		node.Struct["SelectedIndex"] = c.SelectedIndex()
+
+		return &node, nil
 	case *container.Scroll:
 		node := &cntObj{Struct: make(map[string]interface{})}
 		node.Type = "*container.Scroll"

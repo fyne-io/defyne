@@ -57,7 +57,7 @@ func findObject(o fyne.CanvasObject, p fyne.Position) fyne.CanvasObject {
 	switch w := o.(type) {
 	case *fyne.Container:
 		for _, child := range w.Objects {
-			if !insideObject(child, p) {
+			if !child.Visible() || !insideObject(child, p) {
 				continue
 			}
 
@@ -88,7 +88,7 @@ func findObject(o fyne.CanvasObject, p fyne.Position) fyne.CanvasObject {
 		}
 
 		for _, child := range info.Children(o) {
-			if !insideObject(child, p) {
+			if !child.Visible() || !insideObject(child, p) {
 				continue
 			}
 
