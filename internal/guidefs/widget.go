@@ -475,13 +475,27 @@ func initWidgets() {
 				return widget.NewAccordion(widget.NewAccordionItem("Item 1", widget.NewLabel("The content goes here")), widget.NewAccordionItem("Item 2", widget.NewLabel("Content part 2 goes here")))
 			},
 			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+				acc := obj.(*widget.Accordion)
+				multi := widget.NewCheck("", func(on bool) {
+					acc.MultiOpen = on
+					acc.Refresh()
+				})
+				multi.Checked = acc.MultiOpen
+
 				// TODO: Need to add the properties
 				// entry := widget.NewEntry()
-				return []*widget.FormItem{}
+				return []*widget.FormItem{widget.NewFormItem("Multiple Open", multi)}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+				items := "widget.NewAccordionItem(\"Item 1\", widget.NewLabel(\"The content goes here\")), widget.NewAccordionItem(\"Item 2\", widget.NewLabel(\"Content part 2 goes here\"))"
+				acc := obj.(*widget.Accordion)
+				if acc.MultiOpen {
+					return widgetRef(props[obj], defs,
+						fmt.Sprintf("&widget.Accordion{Items: []*widget.AccordionItem{%s}, MultiOpen: true}", items))
+				}
+
 				return widgetRef(props[obj], defs,
-					"widget.NewAccordion(\"widget.NewAccordionItem(\"Item 1\", widget.NewLabel(\"The content goes here\")), widget.NewAccordionItem(\"Item 2\", widget.NewLabel(\"Content part 2 goes here\")))")
+					fmt.Sprintf("widget.NewAccordion(%s)", items))
 			},
 		},
 		"*widget.Menu": {

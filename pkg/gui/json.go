@@ -260,6 +260,24 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 	}
 
 	switch c := obj.(type) {
+	case *widget.Accordion:
+		node := &cntObj{Struct: make(map[string]interface{})}
+		node.Type = "*widget.Accordion"
+		node.Name = name
+
+		items := make([]interface{}, len(c.Items))
+		for i, child := range c.Items {
+			data := map[string]interface{}{
+				"Title": child.Title,
+			}
+			data["Detail"], _ = EncodeMap(child.Detail, meta)
+
+			items[i] = data
+		}
+		node.Struct["Items"] = items
+		node.Struct["MultiOpen"] = c.MultiOpen
+
+		return &node, nil
 	case *widget.Button:
 		if c.Icon == nil {
 			return encodeWidget(c, name, actions), nil
@@ -412,6 +430,20 @@ func encodeWidget(obj fyne.CanvasObject, name string, actions map[string]string)
 	return w
 }
 
+func decodeAccordionItem(m map[string]interface{}) *widget.AccordionItem {
+	f := &widget.AccordionItem{}
+	if str, ok := m["Title"]; ok {
+		f.Title = str.(string)
+	}
+	if on, ok := m["Open"]; ok {
+		f.Open = on.(bool)
+	}
+	if wid, ok := m["Detail"]; ok {
+		f.Detail = decodeWidget(wid.(map[string]interface{}))
+	}
+	return f
+}
+
 func decodeFormItem(m map[string]interface{}) *widget.FormItem {
 	f := &widget.FormItem{}
 	if str, ok := m["HintText"]; ok {
@@ -514,6 +546,12 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 			if res != nil {
 				f.Set(reflect.ValueOf(res))
 			}
+		case "[]*widget.AccordionItem":
+			var items []*widget.AccordionItem
+			for _, item := range reflect.ValueOf(v).Interface().([]interface{}) {
+				items = append(items, decodeAccordionItem(item.(map[string]interface{})))
+			}
+			f.Set(reflect.ValueOf(items))
 		case "[]*widget.FormItem":
 			var items []*widget.FormItem
 			for _, item := range reflect.ValueOf(v).Interface().([]interface{}) {
