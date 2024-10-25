@@ -47,7 +47,7 @@ func main() {
 
 func exportCode(pkgs, vars []string, obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string) string {
 	for i := 0; i < len(pkgs); i++ {
-		if pkgs[i] != "net/url" && pkgs[i] != "image/color" {
+		if pkgs[i] != "fmt" && pkgs[i] != "net/url" && pkgs[i] != "image/color" {
 			pkgs[i] = "fyne.io/fyne/v2/" + pkgs[i]
 		}
 

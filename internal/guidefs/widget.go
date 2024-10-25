@@ -12,7 +12,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -683,12 +682,12 @@ func initWidgets() {
 		"*widget.List": {
 			Name: "List",
 			Create: func() fyne.CanvasObject {
-				myList := []string{"Item 1", "Item 2", "Item 3", "Item 4"}
-				// TODO: Need to make the list get adjusted to show the full list of items, currently it has only one item height apprx.
-				return widget.NewList(func() int { return len(myList) }, func() fyne.CanvasObject {
-					return container.New(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
+				return widget.NewList(func() int {
+					return 5
+				}, func() fyne.CanvasObject {
+					return widget.NewLabel("Template Object")
 				}, func(id widget.ListItemID, item fyne.CanvasObject) {
-					item.(*fyne.Container).Objects[1].(*widget.Label).SetText(myList[id])
+					item.(*widget.Label).SetText(fmt.Sprintf("Item %d", id+1))
 				})
 			},
 			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
@@ -696,31 +695,28 @@ func initWidgets() {
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 				return widgetRef(props[obj], defs,
-					`widget.NewList(func() int { return len(myList) }, func() fyne.CanvasObject {
-				return container.New(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
+					`widget.NewList(func() int {
+				return 5
+			}, func() fyne.CanvasObject {
+				return widget.NewLabel("Template Object")
 			}, func(id widget.ListItemID, item fyne.CanvasObject) {
-				item.(*fyne.Container).Objects[1].(*widget.Label).SetText(myList[id])
+				item.(*widget.Label).SetText(fmt.Sprintf("Item %d", id+1))
 			})`)
 			},
 			Packages: func(obj fyne.CanvasObject) []string {
-				return []string{"widget", "container"}
+				return []string{"widget", "fmt"}
 			},
 		},
 		"*widget.Table": {
 			Name: "Table",
 			Create: func() fyne.CanvasObject {
-				return widget.NewTable(func() (int, int) { return 3, 3 }, func() fyne.CanvasObject {
+				return widget.NewTable(func() (int, int) {
+					return 3, 3
+				}, func() fyne.CanvasObject {
 					return widget.NewLabel("Cell 000, 000")
 				}, func(id widget.TableCellID, cell fyne.CanvasObject) {
 					label := cell.(*widget.Label)
-					switch id.Col {
-					case 0:
-						label.SetText(fmt.Sprintf("%d", id.Row+1))
-					case 1:
-						label.SetText("A longer cell")
-					default:
-						label.SetText(fmt.Sprintf("Cell %d, %d", id.Row+1, id.Col+1))
-					}
+					label.SetText(fmt.Sprintf("Cell %d, %d", id.Row+1, id.Col+1))
 				})
 			},
 			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
@@ -728,19 +724,17 @@ func initWidgets() {
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 				return widgetRef(props[obj], defs,
-					`widget.NewTable(func() (int, int) { return 3, 3 }, func() fyne.CanvasObject {
+					`widget.NewTable(func() (int, int) {
+				return 3, 3
+			}, func() fyne.CanvasObject {
 				return widget.NewLabel("Cell 000, 000")
 			}, func(id widget.TableCellID, cell fyne.CanvasObject) {
 				label := cell.(*widget.Label)
-				switch id.Col {
-				case 0:
-					label.SetText(fmt.Sprintf("%d", id.Row+1))
-				case 1:
-					label.SetText("A longer cell")
-				default:
-					label.SetText(fmt.Sprintf("Cell %d, %d", id.Row+1, id.Col+1))
-				}
+				label.SetText(fmt.Sprintf("Cell %d, %d", id.Row+1, id.Col+1))
 			})`)
+			},
+			Packages: func(obj fyne.CanvasObject) []string {
+				return []string{"widget", "fmt"}
 			},
 		},
 		"*widget.Tree": {
@@ -788,7 +782,33 @@ func initWidgets() {
 			Edit: func(co fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
 				return []*widget.FormItem{}
 			},
-			//GoString: // TODO
+			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+				return `widget.NewTreeWithStrings(
+map[string][]string{
+	"":  {"A"},
+	"A": {"B", "D", "H", "J", "L", "O", "P", "S", "V"},
+	"B": {"C"},
+	"C": {"abc"},
+	"D": {"E"},
+	"E": {"F", "G"},
+	"F": {"adef"},
+	"G": {"adeg"},
+	"H": {"I"},
+	"I": {"ahi"},
+	"O": {"ao"},
+	"P": {"Q"},
+	"Q": {"R"},
+	"R": {"apqr"},
+	"S": {"T"},
+	"T": {"U"},
+	"U": {"astu"},
+	"V": {"W"},
+	"W": {"X"},
+	"X": {"Y"},
+	"Y": {"Z"},
+	"Z": {"avwxyz"},
+})`
+			},
 		},
 	}
 
