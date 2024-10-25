@@ -33,7 +33,7 @@ type WidgetInfo struct {
 	Children func(o fyne.CanvasObject) []fyne.CanvasObject
 	AddChild func(parent, child fyne.CanvasObject)
 	Create   func() fyne.CanvasObject
-	Edit     func(fyne.CanvasObject, map[string]string) []*widget.FormItem
+	Edit     func(fyne.CanvasObject, map[string]string, func([]*widget.FormItem)) []*widget.FormItem
 	Gostring func(fyne.CanvasObject, map[fyne.CanvasObject]map[string]string, map[string]string) string
 	Packages func(object fyne.CanvasObject) []string
 }
