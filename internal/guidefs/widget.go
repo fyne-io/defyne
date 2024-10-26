@@ -202,9 +202,9 @@ func initWidgets() {
 			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
 				i := obj.(*widget.Icon)
 				return []*widget.FormItem{
-					widget.NewFormItem("Icon", widget.NewSelect(IconNames, func(selected string) {
-						i.SetResource(Icons[selected])
-					}))}
+					widget.NewFormItem("Icon", newIconSelectorButton(i.Resource, func(res fyne.Resource) {
+						i.SetResource(res)
+					}, true))}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 				i := obj.(*widget.Icon)

@@ -546,6 +546,10 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 			if res != nil {
 				f.Set(reflect.ValueOf(res))
 			}
+		case "fyne.ThemeSizeName":
+			if v != nil {
+				f.Set(reflect.ValueOf(fyne.ThemeSizeName(v.(string))))
+			}
 		case "[]*widget.AccordionItem":
 			var items []*widget.AccordionItem
 			for _, item := range reflect.ValueOf(v).Interface().([]interface{}) {
