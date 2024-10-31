@@ -76,7 +76,9 @@ func initGraphics() {
 		"*canvas.Rectangle": {
 			Name: "Rectangle",
 			Create: func() fyne.CanvasObject {
-				return canvas.NewRectangle(color.Black)
+				rect := canvas.NewRectangle(color.Black)
+				rect.StrokeColor = color.Black
+				return rect
 			},
 			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
 				r := obj.(*canvas.Rectangle)

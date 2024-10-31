@@ -320,7 +320,7 @@ func initWidgets() {
 			},
 			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
 				r := obj.(*widget.RichText)
-				entry := widget.NewEntry()
+				entry := widget.NewMultiLineEntry()
 				entry.SetText(r.String()) // TODO re-assemble the markdown !?
 				entry.OnChanged = func(text string) {
 					r.ParseMarkdown(text)
