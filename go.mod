@@ -3,7 +3,7 @@ module github.com/fyne-io/defyne
 go 1.19
 
 require (
-	fyne.io/fyne/v2 v2.5.2-0.20240913165512-ef35454e4bcb
+	fyne.io/fyne/v2 v2.5.2
 	fyne.io/setup v0.0.0-20230325225027-e5de4a66c608
 	fyne.io/x/fyne v0.0.0-20211027195715-357fb402507f
 	github.com/fyne-io/terminal v0.0.0-20211022214227-ef292b54d29a
@@ -24,8 +24,8 @@ require (
 	github.com/fyne-io/image v0.0.0-20220602074514-4956b0afb3d2 // indirect
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6 // indirect
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a // indirect
-	github.com/go-text/render v0.1.1-0.20240418202334-dd62631dae9b // indirect
-	github.com/go-text/typesetting v0.1.0 // indirect
+	github.com/go-text/render v0.2.0 // indirect
+	github.com/go-text/typesetting v0.2.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/jeandeaual/go-locale v0.0.0-20240223122105-ce5225dcaa49 // indirect
