@@ -167,7 +167,7 @@ func initContainers() {
 					str.WriteString(")")
 				}
 				str.WriteString(")")
-				return str.String()
+				return widgetRef(props[obj], defs, str.String())
 			},
 			Packages: func(obj fyne.CanvasObject) []string {
 				tabs := obj.(*container.AppTabs)
@@ -202,7 +202,7 @@ func initContainers() {
 				str.WriteString("container.NewScroll(")
 				writeGoStringExcluding(str, nil, props, defs, s.Content)
 				str.WriteString(")")
-				return str.String()
+				return widgetRef(props[obj], defs, str.String())
 			},
 			Packages: func(_ fyne.CanvasObject) []string {
 				return []string{"container"}
@@ -254,7 +254,7 @@ func initContainers() {
 				str.WriteString(", Trailing: ")
 				writeGoStringExcluding(str, nil, props, defs, s.Trailing)
 				str.WriteString("}")
-				return str.String()
+				return widgetRef(props[obj], defs, str.String())
 			},
 			Packages: func(_ fyne.CanvasObject) []string {
 				return []string{"container"}
