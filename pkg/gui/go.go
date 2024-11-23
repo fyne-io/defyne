@@ -83,7 +83,7 @@ type %s struct {
 %s
 }
 
-func new%sGUI() *gui {
+func new%sGUI() *%s {
 	return &gui{}
 }
 
@@ -95,7 +95,7 @@ func (g *%s) makeUI() fyne.CanvasObject {
 		strings.Join(pkgs, "\n"),
 		guiName,
 		strings.Join(vars, "\n"),
-		guiNameUpper, guiName,
+		guiNameUpper, guiName, guiName,
 		setup, main)
 
 	formatted, err := format.Source([]byte(code))
