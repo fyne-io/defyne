@@ -530,6 +530,11 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 	for k, v := range in {
 		f := e.FieldByName(k)
 
+		if !f.IsValid() {
+			fyne.LogError("Field "+k+" is not valid", nil)
+			continue
+		}
+
 		typeName := f.Type().String()
 		switch typeName {
 		case "fyne.TextAlign", "fyne.TextTruncation", "fyne.TextWrap", "widget.ButtonAlign", "widget.ButtonImportance",
@@ -635,7 +640,13 @@ func decodeWidget(m map[string]interface{}) fyne.Widget {
 	obj := guidefs.Lookup(class).Create().(fyne.Widget)
 	e := reflect.ValueOf(obj).Elem()
 
-	err := decodeFields(e, m["Struct"].(map[string]interface{}))
+	data, ok := m["Struct"]
+	if !ok {
+		fyne.LogError("Struct was not found in JSON data", nil)
+		return obj
+	}
+
+	err := decodeFields(e, data.(map[string]interface{}))
 	if err != nil {
 		fyne.LogError("Failed to handle type "+class, err)
 	}
