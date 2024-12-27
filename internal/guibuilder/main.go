@@ -139,9 +139,9 @@ func (b *Builder) save(w fyne.URIWriteCloser) error {
 func (b *Builder) buildLibrary() fyne.CanvasObject {
 	var selected *guidefs.WidgetInfo
 	tempNames := []string{}
-	widgetLowerNames := []string{}
+	widgetNames := []string{}
 	addClass := func(name string) {
-		widgetLowerNames = append(widgetLowerNames, strings.ToLower(name))
+		widgetNames = append(widgetNames, name)
 		tempNames = append(tempNames, name)
 	}
 	for _, name := range guidefs.WidgetNames {
@@ -178,9 +178,10 @@ func (b *Builder) buildLibrary() fyne.CanvasObject {
 	searchBox.OnChanged = func(s string) {
 		s = strings.ToLower(s)
 		tempNames = []string{}
-		for i := 0; i < len(widgetLowerNames); i++ {
-			if strings.Contains(widgetLowerNames[i], s) {
-				tempNames = append(tempNames, guidefs.WidgetNames[i])
+		for i := 0; i < len(widgetNames); i++ {
+			test := strings.ToLower(guidefs.Lookup(widgetNames[i]).Name)
+			if strings.Contains(test, s) {
+				tempNames = append(tempNames, widgetNames[i])
 			}
 		}
 		list.Refresh()
