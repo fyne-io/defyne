@@ -246,6 +246,7 @@ func (b *Builder) choose(o fyne.CanvasObject) {
 		props = make(map[string]string)
 	}
 	nameItem := widget.NewFormItem("Type", widget.NewLabel(gui.NameOf(o)))
+	editForm = widget.NewForm()
 	items := gui.EditorFor(o, props, func(items []*widget.FormItem) {
 		editForm.Items = nil
 		editForm.Refresh()
@@ -256,14 +257,9 @@ func (b *Builder) choose(o fyne.CanvasObject) {
 	items = append([]*widget.FormItem{nameItem}, items...)
 	b.meta[o] = props
 
-	editForm = widget.NewForm(items...)
+	editForm.Items = items
 	remove := widget.NewButton("Remove", func() {
-		var parent *fyne.Container
-		if c, ok := b.current.(*fyne.Container); ok {
-			parent = findParent(c, b.root)
-		} else if w, ok := b.current.(fyne.Widget); ok {
-			parent = findParent(w, b.root)
-		}
+		parent := findParent(b.current, b.root)
 		if parent == nil {
 			return
 		}

@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
@@ -117,7 +118,7 @@ func insideObject(o fyne.CanvasObject, p fyne.Position) bool {
 
 func isContainerOrWidget(o fyne.CanvasObject) bool {
 	switch o.(type) {
-	case fyne.Widget, *fyne.Container:
+	case fyne.Widget, *fyne.Container, *layout.Spacer:
 		return true
 	default:
 		return false

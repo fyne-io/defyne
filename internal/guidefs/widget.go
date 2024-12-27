@@ -12,6 +12,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -482,6 +483,21 @@ func initWidgets() {
 					format := "&widget.Select{Options: []string{%s}, Selected: \"%s\", OnChanged: func(s string) {}}"
 					return widgetRef(props[obj], defs, fmt.Sprintf(format, optionString, s.Selected))
 				}
+			},
+		},
+		"*layout.Spacer": {
+			Name: "Spacer",
+			Create: func() fyne.CanvasObject {
+				return layout.NewSpacer()
+			},
+			Edit: func(_ fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+				return []*widget.FormItem{}
+			},
+			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+				return widgetRef(props[obj], defs, "layout.NewSpacer()")
+			},
+			Packages: func(_ fyne.CanvasObject) []string {
+				return []string{"layout"}
 			},
 		},
 		"*widget.DateEntry": {
