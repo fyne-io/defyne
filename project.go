@@ -202,7 +202,7 @@ func (g *gui) makeUI() fyne.CanvasObject {
 
 	err = writeFile(dir, "go.mod", `module `+name+`
 
-require fyne.io/fyne/v2 v2.4.0
+require fyne.io/fyne/v2 v2.5.3
 `)
 	if err != nil {
 		fyne.LogError("Failed to write go.mod", err) // we can just return the partial project

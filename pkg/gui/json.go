@@ -5,14 +5,16 @@ import (
 	"errors"
 	"image/color"
 	"io"
+	"log"
 	"net/url"
 	"reflect"
 	"strings"
 	"time"
 
+	"github.com/fyne-io/defyne/internal/guidefs"
+
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"github.com/fyne-io/defyne/internal/guidefs"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
@@ -98,7 +100,9 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 					continue
 				}
 				child, _ := DecodeMap(data.(map[string]interface{}), meta)
-				obj.Objects = append(obj.Objects, child)
+				if child != nil {
+					obj.Objects = append(obj.Objects, child)
+				}
 			}
 		}
 		obj.Layout = guidefs.Layouts[name].Create(obj, props)
@@ -127,7 +131,9 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 					}
 				}
 				item.Content, _ = DecodeMap(data["Content"].(map[string]interface{}), meta)
-				obj.Append(item)
+				if item != nil {
+					obj.Append(item)
+				}
 			}
 		}
 
@@ -205,6 +211,9 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 	}
 
 	obj := decodeWidget(m)
+	if obj == nil {
+		return nil, errors.New("failed to parse object from JSON")
+	}
 	obj.Refresh()
 	props := map[string]string{}
 	if name, ok := m["Name"]; ok {
@@ -635,9 +644,13 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 	return nil
 }
 
-func decodeWidget(m map[string]interface{}) fyne.Widget {
-	class := m["Type"].(string)
-	obj := guidefs.Lookup(class).Create().(fyne.Widget)
+func decodeWidget(m map[string]interface{}) fyne.CanvasObject {
+	class, ok := m["Type"].(string)
+	if !ok {
+		log.Println("Failed to detect type of object")
+		return nil
+	}
+	obj := guidefs.Lookup(class).Create()
 	e := reflect.ValueOf(obj).Elem()
 
 	data, ok := m["Struct"]

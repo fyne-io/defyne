@@ -161,6 +161,9 @@ func (b *Builder) buildLibrary() fyne.CanvasObject {
 	}, func() fyne.CanvasObject {
 		return widget.NewLabel("")
 	}, func(i widget.ListItemID, obj fyne.CanvasObject) {
+		if i >= len(tempNames) {
+			return
+		}
 		obj.(*widget.Label).SetText(guidefs.Lookup(tempNames[i]).Name)
 	})
 	list.OnSelected = func(i widget.ListItemID) {
