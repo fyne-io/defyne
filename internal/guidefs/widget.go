@@ -866,7 +866,7 @@ map[string][]string{
 
 // extractWidgetNames returns all the list of names of all the Widgets from our data
 func extractNames(in map[string]WidgetInfo) []string {
-	var widgetNamesFromData = make([]string, len(in))
+	var widgetNamesFromData = make(widgetNames, len(in))
 	dupe := false
 
 	i := 0
@@ -882,7 +882,8 @@ func extractNames(in map[string]WidgetInfo) []string {
 	if dupe {
 		widgetNamesFromData = widgetNamesFromData[:len(widgetNamesFromData)-1]
 	}
-	sort.Strings(widgetNamesFromData)
+
+	sort.Sort(widgetNamesFromData)
 	return widgetNamesFromData
 }
 
@@ -919,4 +920,21 @@ func Lookup(clazz string) *WidgetInfo {
 	}
 
 	return nil
+}
+
+type widgetNames []string
+
+func (w widgetNames) Len() int {
+	return len(w)
+}
+
+func (w widgetNames) Less(i, j int) bool {
+	partsI := strings.Split(w[i], ".")
+	partsJ := strings.Split(w[j], ".")
+
+	return partsI[1] < partsJ[1]
+}
+
+func (w widgetNames) Swap(i, j int) {
+	w[i], w[j] = w[j], w[i]
 }
