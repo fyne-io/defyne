@@ -45,7 +45,7 @@ func (o *overlay) Tapped(pe *fyne.PointEvent) {
 	obj := findObject(o.b.root, pos)
 
 	// TODO update when an item is removed, inserted, or if the UI resizes
-	o.indicator.StrokeColor = theme.PrimaryColor()
+	o.indicator.StrokeColor = theme.Color(theme.ColorNamePrimary)
 	objAbsPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(obj)
 	objPos := objAbsPos.Subtract(rootPos)
 	o.indicator.Move(objPos)
