@@ -129,9 +129,7 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 					}
 				}
 				item.Content, _ = DecodeMap(data["Content"].(map[string]interface{}), meta)
-				if item != nil {
-					obj.Append(item)
-				}
+				obj.Append(item)
 			}
 		}
 
