@@ -20,8 +20,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-const jsonKeyObject = "Object"
-
 type canvObj struct {
 	Type    string
 	Name    string            `json:",omitempty"`
