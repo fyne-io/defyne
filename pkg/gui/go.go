@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+// ExportGo generates a full Go package for the given object and writes it to the provided file handle
 func ExportGo(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string, name string, w io.Writer) error {
 	guidefs.InitOnce()
 
@@ -23,6 +24,7 @@ func ExportGo(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]strin
 	return err
 }
 
+// ExportGoPreview generates a preview version of the Go code with a `main()` method for the given object and writes it to the file handle
 func ExportGoPreview(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string, w io.Writer) error {
 	guidefs.InitOnce()
 

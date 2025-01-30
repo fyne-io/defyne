@@ -23,6 +23,7 @@ var (
 	// layoutNames is an array with the list of names of all the Layouts
 	layoutNames = extractLayoutNames()
 
+	// Layouts maps container names to layout information to create and edit containers, and generate code
 	Layouts = map[string]layoutInfo{
 		"Border": {
 			func(c *fyne.Container, props map[string]string) fyne.Layout {
