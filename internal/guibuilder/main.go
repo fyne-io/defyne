@@ -80,7 +80,15 @@ func (b *Builder) Run() {
 	}
 
 	w, err := storage.Writer(goURI)
+	if err != nil {
+		fyne.LogError("Failed get storage writer", err)
+		return
+	}
 	err = gui.ExportGoPreview(b.root, b.meta, w)
+	if err != nil {
+		fyne.LogError("Failed to export go preview", err)
+		return
+	}
 
 	pwd, _ := os.Getwd()
 	os.Chdir(path)
@@ -115,6 +123,9 @@ func (b *Builder) Save() error {
 		return err
 	}
 	err = gui.ExportGo(b.root, b.meta, name, w)
+	if err != nil {
+		return err
+	}
 
 	_ = w.Close()
 
