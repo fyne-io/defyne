@@ -116,19 +116,19 @@ func initWidgets() {
 				if b.Icon == nil {
 					if b.Importance == widget.MediumImportance && b.Alignment == widget.ButtonAlignCenter {
 						return widgetRef(props[obj], defs, fmt.Sprintf("widget.NewButton(\"%s\", %s)", escapeLabel(b.Text), action))
-					} else {
-						return widgetRef(props[obj], defs, fmt.Sprintf("&widget.Button{Text: \"%s\", Importance: %d, Alignment: %d, OnTapped: %s}",
-							escapeLabel(b.Text), b.Importance, b.Alignment, action))
 					}
+
+					return widgetRef(props[obj], defs, fmt.Sprintf("&widget.Button{Text: \"%s\", Importance: %d, Alignment: %d, OnTapped: %s}",
+						escapeLabel(b.Text), b.Importance, b.Alignment, action))
 				}
 
 				icon := "theme." + IconName(b.Icon) + "()"
 				if b.Importance == widget.MediumImportance && b.Alignment == widget.ButtonAlignCenter {
 					return widgetRef(props[obj], defs, fmt.Sprintf("widget.NewButtonWithIcon(\"%s\", %s, %s)", escapeLabel(b.Text), icon, action))
-				} else {
-					return widgetRef(props[obj], defs, fmt.Sprintf("&widget.Button{Text: \"%s\", Importance: %d, Icon: %s, Alignment: %d, OnTapped: %s}",
-						escapeLabel(b.Text), b.Importance, icon, b.Alignment, action))
 				}
+
+				return widgetRef(props[obj], defs, fmt.Sprintf("&widget.Button{Text: \"%s\", Importance: %d, Icon: %s, Alignment: %d, OnTapped: %s}",
+					escapeLabel(b.Text), b.Importance, icon, b.Alignment, action))
 			},
 			Packages: func(obj fyne.CanvasObject) []string {
 				b := obj.(*widget.Button)

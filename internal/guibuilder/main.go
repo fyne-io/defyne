@@ -201,13 +201,13 @@ func (b *Builder) buildLibrary() fyne.CanvasObject {
 				b.choose(c)
 			}
 			return
-		} else {
-			class := reflect.TypeOf(b.current).String()
-			if wid := guidefs.Lookup(class); wid != nil && wid.IsContainer() {
-				wid.AddChild(b.current, selected.Create())
+		}
 
-				return
-			}
+		class := reflect.TypeOf(b.current).String()
+		if wid := guidefs.Lookup(class); wid != nil && wid.IsContainer() {
+			wid.AddChild(b.current, selected.Create())
+
+			return
 		}
 
 		dialog.ShowInformation("Selected not a container", "Please select a container to add items", b.win)
