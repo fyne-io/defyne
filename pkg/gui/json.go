@@ -20,8 +20,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-const jsonKeyObject = "Object"
-
 type canvObj struct {
 	Type    string
 	Name    string            `json:",omitempty"`
@@ -131,9 +129,7 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 					}
 				}
 				item.Content, _ = DecodeMap(data["Content"].(map[string]interface{}), meta)
-				if item != nil {
-					obj.Append(item)
-				}
+				obj.Append(item)
 			}
 		}
 

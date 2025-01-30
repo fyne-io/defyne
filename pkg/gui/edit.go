@@ -8,6 +8,7 @@ import (
 	"github.com/fyne-io/defyne/internal/guidefs"
 )
 
+// CreateNew returns a new instance of the given widget type
 func CreateNew(name string) fyne.CanvasObject {
 	guidefs.InitOnce()
 
@@ -18,6 +19,7 @@ func CreateNew(name string) fyne.CanvasObject {
 	return nil
 }
 
+// EditorFor returns an array of FormItem to edit the given widget
 func EditorFor(o fyne.CanvasObject, props map[string]string, refresh func([]*widget.FormItem)) []*widget.FormItem {
 	guidefs.InitOnce()
 
@@ -30,6 +32,7 @@ func EditorFor(o fyne.CanvasObject, props map[string]string, refresh func([]*wid
 	return nil
 }
 
+// GoStringFor generates the Go code for the given widget
 func GoStringFor(o fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 	guidefs.InitOnce()
 
@@ -49,6 +52,7 @@ func getTypeOf(o fyne.CanvasObject) (string, string) {
 	return name, class
 }
 
+// NameOf returns the name for a given object
 func NameOf(o fyne.CanvasObject) string {
 	typeName := reflect.TypeOf(o).Elem().Name()
 	l := reflect.ValueOf(o).Elem()

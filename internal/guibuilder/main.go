@@ -80,7 +80,15 @@ func (b *Builder) Run() {
 	}
 
 	w, err := storage.Writer(goURI)
+	if err != nil {
+		fyne.LogError("Failed get storage writer", err)
+		return
+	}
 	err = gui.ExportGoPreview(b.root, b.meta, w)
+	if err != nil {
+		fyne.LogError("Failed to export go preview", err)
+		return
+	}
 
 	pwd, _ := os.Getwd()
 	os.Chdir(path)
@@ -115,6 +123,9 @@ func (b *Builder) Save() error {
 		return err
 	}
 	err = gui.ExportGo(b.root, b.meta, name, w)
+	if err != nil {
+		return err
+	}
 
 	_ = w.Close()
 
@@ -201,13 +212,13 @@ func (b *Builder) buildLibrary() fyne.CanvasObject {
 				b.choose(c)
 			}
 			return
-		} else {
-			class := reflect.TypeOf(b.current).String()
-			if wid := guidefs.Lookup(class); wid != nil && wid.IsContainer() {
-				wid.AddChild(b.current, selected.Create())
+		}
 
-				return
-			}
+		class := reflect.TypeOf(b.current).String()
+		if wid := guidefs.Lookup(class); wid != nil && wid.IsContainer() {
+			wid.AddChild(b.current, selected.Create())
+
+			return
 		}
 
 		dialog.ShowInformation("Selected not a container", "Please select a container to add items", b.win)

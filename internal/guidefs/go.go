@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+// GoString generates Go code for the given type and object
 func GoString(clazz string, obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
 	info := Lookup(clazz)
 	if info == nil {

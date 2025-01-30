@@ -21,14 +21,24 @@ const noIconLabel = "(No Icon)"
 
 var (
 	// WidgetNames is an array with the list of names of all the Widgets
-	WidgetNames, CollectionNames, ContainerNames []string
+	WidgetNames []string
+	// CollectionNames is an array with collection type names
+	CollectionNames []string
+	// ContainerNames is an array of known container type names
+	ContainerNames []string
 
-	Widgets, Collections, Containers map[string]WidgetInfo
-	once                             sync.Once
+	// Widgets maps names to widget information and corresponding functions
+	Widgets map[string]WidgetInfo
+	// Collections maps names to widget information and corresponding functions
+	Collections map[string]WidgetInfo
+	// Containers maps names to widget information and corresponding functions
+	Containers map[string]WidgetInfo
+	once       sync.Once
 
 	importances = []string{"Medium", "High", "Low", "Danger", "Warning", "Success"}
 )
 
+// WidgetInfo contains the name and corresponding functions for the widget type
 type WidgetInfo struct {
 	Name     string
 	Children func(o fyne.CanvasObject) []fyne.CanvasObject
@@ -39,6 +49,7 @@ type WidgetInfo struct {
 	Packages func(object fyne.CanvasObject) []string
 }
 
+// IsContainer indicates wether a widget children or not
 func (w WidgetInfo) IsContainer() bool {
 	return w.Children != nil
 }
@@ -116,19 +127,19 @@ func initWidgets() {
 				if b.Icon == nil {
 					if b.Importance == widget.MediumImportance && b.Alignment == widget.ButtonAlignCenter {
 						return widgetRef(props[obj], defs, fmt.Sprintf("widget.NewButton(\"%s\", %s)", escapeLabel(b.Text), action))
-					} else {
-						return widgetRef(props[obj], defs, fmt.Sprintf("&widget.Button{Text: \"%s\", Importance: %d, Alignment: %d, OnTapped: %s}",
-							escapeLabel(b.Text), b.Importance, b.Alignment, action))
 					}
+
+					return widgetRef(props[obj], defs, fmt.Sprintf("&widget.Button{Text: \"%s\", Importance: %d, Alignment: %d, OnTapped: %s}",
+						escapeLabel(b.Text), b.Importance, b.Alignment, action))
 				}
 
 				icon := "theme." + IconName(b.Icon) + "()"
 				if b.Importance == widget.MediumImportance && b.Alignment == widget.ButtonAlignCenter {
 					return widgetRef(props[obj], defs, fmt.Sprintf("widget.NewButtonWithIcon(\"%s\", %s, %s)", escapeLabel(b.Text), icon, action))
-				} else {
-					return widgetRef(props[obj], defs, fmt.Sprintf("&widget.Button{Text: \"%s\", Importance: %d, Icon: %s, Alignment: %d, OnTapped: %s}",
-						escapeLabel(b.Text), b.Importance, icon, b.Alignment, action))
 				}
+
+				return widgetRef(props[obj], defs, fmt.Sprintf("&widget.Button{Text: \"%s\", Importance: %d, Icon: %s, Alignment: %d, OnTapped: %s}",
+					escapeLabel(b.Text), b.Importance, icon, b.Alignment, action))
 			},
 			Packages: func(obj fyne.CanvasObject) []string {
 				b := obj.(*widget.Button)
@@ -479,10 +490,10 @@ func initWidgets() {
 				if s.Selected == "" {
 					return widgetRef(props[obj], defs,
 						fmt.Sprintf("widget.NewSelect([]string{%s}, func(s string) {})", optionString))
-				} else {
-					format := "&widget.Select{Options: []string{%s}, Selected: \"%s\", OnChanged: func(s string) {}}"
-					return widgetRef(props[obj], defs, fmt.Sprintf(format, optionString, s.Selected))
 				}
+
+				format := "&widget.Select{Options: []string{%s}, Selected: \"%s\", OnChanged: func(s string) {}}"
+				return widgetRef(props[obj], defs, fmt.Sprintf(format, optionString, s.Selected))
 			},
 		},
 		"*layout.Spacer": {
@@ -896,6 +907,7 @@ func widgetRef(props map[string]string, defs map[string]string, code string) str
 	return code
 }
 
+// InitOnce initializes icons, graphics, containers, and widgets one time
 func InitOnce() {
 	once.Do(func() {
 		initIcons()
@@ -905,6 +917,7 @@ func InitOnce() {
 	})
 }
 
+// Lookup returns the [WidgetInfo] for the given widget type
 func Lookup(clazz string) *WidgetInfo {
 	if match, ok := Widgets[clazz]; ok {
 		return &match

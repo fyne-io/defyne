@@ -14,10 +14,12 @@ func (r *jsonResource) MarshalJSON() ([]byte, error) {
 	return []byte(icon), nil
 }
 
+// WrapResource wraps a fyne.Resource for integration with JSON
 func WrapResource(r fyne.Resource) fyne.Resource {
 	return &jsonResource{r}
 }
 
+// IconName returns the name for an icon
 func IconName(res fyne.Resource) string {
 	name := res.Name()
 	// strip prefix numbers to unwrap
