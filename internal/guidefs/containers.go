@@ -17,7 +17,7 @@ func initContainers() {
 		"*fyne.Container": {
 			Name: "Container",
 			Create: func() fyne.CanvasObject {
-				return container.NewStack()
+				return container.NewVBox()
 			},
 			Edit: func(obj fyne.CanvasObject, props map[string]string, refresh func([]*widget.FormItem)) []*widget.FormItem {
 				c := obj.(*fyne.Container)
@@ -45,7 +45,7 @@ func initContainers() {
 				c := obj.(*fyne.Container)
 				l := props[c]["layout"]
 				if l == "" {
-					l = "Stack"
+					l = "VBox"
 				}
 				lay := Layouts[l]
 				if lay.goText != nil {
