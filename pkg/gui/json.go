@@ -543,7 +543,7 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 		typeName := f.Type().String()
 		switch typeName {
 		case "fyne.TextAlign", "fyne.TextTruncation", "fyne.TextWrap", "widget.ButtonAlign", "widget.ButtonImportance",
-			"widget.ButtonIconPlacement", "widget.Importance", "widget.Orientation", "widget.ScrollDirection":
+			"widget.ButtonIconPlacement", "widget.Importance", "widget.Orientation", "widget.ScrollDirection", "fyne.ScrollDirection":
 			f.SetInt(int64(reflect.ValueOf(v).Float()))
 		case "fyne.TextStyle":
 			f.Set(reflect.ValueOf(decodeTextStyle(reflect.ValueOf(v).Interface().(map[string]interface{}))))
