@@ -20,13 +20,17 @@ func CreateNew(name string) fyne.CanvasObject {
 }
 
 // EditorFor returns an array of FormItem to edit the given widget
-func EditorFor(o fyne.CanvasObject, props map[string]string, refresh func([]*widget.FormItem)) []*widget.FormItem {
+func EditorFor(o fyne.CanvasObject, props map[string]string, refresh func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 	guidefs.InitOnce()
 
 	_, clazz := getTypeOf(o)
 
+	if onchanged == nil {
+		onchanged = func() {}
+	}
+
 	if match := guidefs.Lookup(clazz); match != nil {
-		return match.Edit(o, props, refresh)
+		return match.Edit(o, props, refresh, onchanged)
 	}
 
 	return nil

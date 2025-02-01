@@ -27,22 +27,25 @@ func initGraphics() {
 			Create: func() fyne.CanvasObject {
 				return &canvas.LinearGradient{StartColor: color.White}
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				r := obj.(*canvas.LinearGradient)
 				angleSlide := widget.NewSlider(0, 360)
 				angleSlide.Step = 90
 				angleSlide.OnChanged = func(f float64) {
 					r.Angle = f
 					r.Refresh()
+					onchanged()
 				}
 				return []*widget.FormItem{
 					widget.NewFormItem("Start", newColorButton(r.StartColor, func(c color.Color) {
 						r.StartColor = c
 						r.Refresh()
+						onchanged()
 					})),
 					widget.NewFormItem("End", newColorButton(r.EndColor, func(c color.Color) {
 						r.EndColor = c
 						r.Refresh()
+						onchanged()
 					})),
 					widget.NewFormItem("Angle", angleSlide),
 				}
@@ -56,16 +59,18 @@ func initGraphics() {
 			Create: func() fyne.CanvasObject {
 				return &canvas.RadialGradient{StartColor: color.White}
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				r := obj.(*canvas.RadialGradient)
 				return []*widget.FormItem{
 					widget.NewFormItem("Start", newColorButton(r.StartColor, func(c color.Color) {
 						r.StartColor = c
 						r.Refresh()
+						onchanged()
 					})),
 					widget.NewFormItem("End", newColorButton(r.EndColor, func(c color.Color) {
 						r.EndColor = c
 						r.Refresh()
+						onchanged()
 					})),
 				}
 			},
@@ -80,24 +85,28 @@ func initGraphics() {
 				rect.StrokeColor = color.Black
 				return rect
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				r := obj.(*canvas.Rectangle)
 				return []*widget.FormItem{
 					widget.NewFormItem("Fill", newColorButton(r.FillColor, func(c color.Color) {
 						r.FillColor = c
 						r.Refresh()
+						onchanged()
 					})),
 					widget.NewFormItem("Corner", newSliderButton(float64(r.CornerRadius), 0, 32, func(f float64) {
 						r.CornerRadius = float32(f)
 						r.Refresh()
+						onchanged()
 					})),
 					widget.NewFormItem("Stroke", newSliderButton(float64(r.StrokeWidth), 0, 32, func(f float64) {
 						r.StrokeWidth = float32(f)
 						r.Refresh()
+						onchanged()
 					})),
 					widget.NewFormItem("Color", newColorButton(r.StrokeColor, func(c color.Color) {
 						r.StrokeColor = c
 						r.Refresh()
+						onchanged()
 					})),
 				}
 			},

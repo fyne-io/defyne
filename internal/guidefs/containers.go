@@ -19,11 +19,12 @@ func initContainers() {
 			Create: func() fyne.CanvasObject {
 				return container.NewVBox()
 			},
-			Edit: func(obj fyne.CanvasObject, props map[string]string, refresh func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, props map[string]string, refresh func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				c := obj.(*fyne.Container)
 
 				choose := widget.NewFormItem("Layout", widget.NewSelect(layoutNames, nil))
 				items := []*widget.FormItem{choose}
+				ready := false
 				choose.Widget.(*widget.Select).OnChanged = func(l string) {
 					lay := Layouts[l]
 					props["layout"] = l
@@ -37,8 +38,12 @@ func initContainers() {
 					}
 
 					refresh(items)
+					if ready {
+						onchanged()
+					}
 				}
 				choose.Widget.(*widget.Select).SetSelected(props["layout"])
+				ready = true
 				return items
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
@@ -83,7 +88,7 @@ func initContainers() {
 			Create: func() fyne.CanvasObject {
 				return container.NewAppTabs(container.NewTabItem("Untitled", container.NewStack()))
 			},
-			Edit: func(obj fyne.CanvasObject, props map[string]string, setItems func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, props map[string]string, setItems func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				tabs := obj.(*container.AppTabs)
 				items := make([]*widget.FormItem, len(tabs.Items)+2)
 				itemNames := make([]string, len(tabs.Items))
@@ -92,12 +97,14 @@ func initContainers() {
 					icon := newIconSelectorButton(item.Icon, func(i fyne.Resource) {
 						item.Icon = i
 						tabs.Refresh()
+						onchanged()
 					}, false)
 					edit := widget.NewEntry()
 					edit.SetText(item.Text)
 					edit.OnChanged = func(s string) {
 						item.Text = s
 						tabs.Refresh()
+						onchanged()
 					}
 					del := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
 						if i == len(tabs.Items)-1 {
@@ -111,6 +118,7 @@ func initContainers() {
 						}
 						tabs.Refresh()
 						setItems(items)
+						onchanged()
 					})
 					del.Importance = widget.DangerImportance
 
@@ -135,12 +143,18 @@ func initContainers() {
 
 						tabs.Append(item)
 						setItems(items)
+						onchanged()
 					}))
+				ready := false
 				selected := widget.NewSelect(itemNames, nil)
 				selected.OnChanged = func(_ string) {
 					tabs.SelectIndex(selected.SelectedIndex())
+					if ready {
+						onchanged()
+					}
 				}
 				selected.SetSelectedIndex(tabs.SelectedIndex())
+				ready = true
 				items[len(items)-1] = widget.NewFormItem("Selected", selected)
 				return items
 			},
@@ -193,7 +207,7 @@ func initContainers() {
 			Create: func() fyne.CanvasObject {
 				return container.NewScroll(container.NewStack())
 			},
-			Edit: func(obj fyne.CanvasObject, props map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, props map[string]string, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
 				return []*widget.FormItem{}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
@@ -226,7 +240,7 @@ func initContainers() {
 			Create: func() fyne.CanvasObject {
 				return container.NewHSplit(container.NewStack(), container.NewStack())
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				split := obj.(*container.Split)
 				offset := widget.NewEntry()
 				offset.SetText(fmt.Sprintf("%f", split.Offset))
@@ -234,11 +248,13 @@ func initContainers() {
 					if f, err := strconv.ParseFloat(s, 64); err == nil {
 						split.SetOffset(f)
 					}
+					onchanged()
 				}
 				// TODO - add Fyne split.OnChanged
 				vert := widget.NewCheck("", func(on bool) {
 					split.Horizontal = !on
 					split.Refresh()
+					onchanged()
 				})
 				vert.Checked = !split.Horizontal
 				return []*widget.FormItem{
