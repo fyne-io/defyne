@@ -19,7 +19,8 @@ func CreateNew(name string) fyne.CanvasObject {
 	return nil
 }
 
-// EditorFor returns an array of FormItem to edit the given widget
+// EditorFor returns an array of FormItems for editing, taking the widget, properties, callback to refresh the form items,
+// and an optional callback that fires after changes to the widget.
 func EditorFor(o fyne.CanvasObject, props map[string]string, refresh func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 	guidefs.InitOnce()
 
