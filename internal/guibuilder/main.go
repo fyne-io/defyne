@@ -267,7 +267,7 @@ func (b *Builder) choose(o fyne.CanvasObject) {
 		editForm.Refresh()
 		editForm.Items = append([]*widget.FormItem{nameItem}, items...)
 		editForm.Refresh()
-	})
+	}, nil)
 
 	items = append([]*widget.FormItem{nameItem}, items...)
 	b.meta[o] = props

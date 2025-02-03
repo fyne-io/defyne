@@ -44,7 +44,7 @@ type WidgetInfo struct {
 	Children func(o fyne.CanvasObject) []fyne.CanvasObject
 	AddChild func(parent, child fyne.CanvasObject)
 	Create   func() fyne.CanvasObject
-	Edit     func(fyne.CanvasObject, map[string]string, func([]*widget.FormItem)) []*widget.FormItem
+	Edit     func(fyne.CanvasObject, map[string]string, func([]*widget.FormItem), func()) []*widget.FormItem
 	Gostring func(fyne.CanvasObject, map[fyne.CanvasObject]map[string]string, map[string]string) string
 	Packages func(object fyne.CanvasObject) []string
 }
@@ -61,14 +61,16 @@ func initWidgets() {
 			Create: func() fyne.CanvasObject {
 				return widget.NewButton("Button", func() {})
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				b := obj.(*widget.Button)
 				entry := widget.NewEntry()
 				entry.SetText(b.Text)
 				entry.OnChanged = func(text string) {
 					b.SetText(text)
+					onchanged()
 				}
 
+				ready := false
 				importance := widget.NewSelect(importances, func(s string) {
 					var i widget.Importance
 					for ii, imp := range importances {
@@ -78,6 +80,9 @@ func initWidgets() {
 					}
 					b.Importance = i
 					b.Refresh()
+					if ready {
+						onchanged()
+					}
 				})
 				importance.SetSelectedIndex(int(b.Importance))
 
@@ -98,6 +103,9 @@ func initWidgets() {
 					setState(left, widget.ButtonAlignLeading)
 					setState(center, widget.ButtonAlignCenter)
 					setState(right, widget.ButtonAlignTrailing)
+					if ready {
+						onchanged()
+					}
 				}
 				left = widget.NewButtonWithIcon("", resourceFormatalignleftSvg, func() {
 					setAlign(widget.ButtonAlignLeading)
@@ -111,6 +119,7 @@ func initWidgets() {
 				aligns := container.NewHBox(left, center, right)
 				setAlign(b.Alignment)
 
+				ready = true
 				return []*widget.FormItem{
 					widget.NewFormItem("Text", entry),
 					widget.NewFormItem("Icon", newIconSelectorButton(b.Icon, b.SetIcon, true)),
@@ -156,18 +165,20 @@ func initWidgets() {
 				fyneURL, _ := url.Parse("https://fyne.io")
 				return widget.NewHyperlink("Link Text", fyneURL)
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				link := obj.(*widget.Hyperlink)
 				title := widget.NewEntry()
 				title.SetText(link.Text)
 				title.OnChanged = func(text string) {
 					link.SetText(text)
+					onchanged()
 				}
 				subtitle := widget.NewEntry()
 				subtitle.SetText(link.URL.String())
 				subtitle.OnChanged = func(text string) {
 					fyneURL, _ := url.Parse(text)
 					link.SetURL(fyneURL)
+					onchanged()
 				}
 				return []*widget.FormItem{
 					widget.NewFormItem("Text", title),
@@ -186,17 +197,19 @@ func initWidgets() {
 			Create: func() fyne.CanvasObject {
 				return widget.NewCard("Title", "Subtitle", widget.NewLabel("Content here"))
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				c := obj.(*widget.Card)
 				title := widget.NewEntry()
 				title.SetText(c.Title)
 				title.OnChanged = func(text string) {
 					c.SetTitle(text)
+					onchanged()
 				}
 				subtitle := widget.NewEntry()
 				subtitle.SetText(c.Subtitle)
 				subtitle.OnChanged = func(text string) {
 					c.SetSubTitle(text)
+					onchanged()
 				}
 				return []*widget.FormItem{
 					widget.NewFormItem("Title", title),
@@ -215,17 +228,19 @@ func initWidgets() {
 				e.SetPlaceHolder("Entry")
 				return e
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				l := obj.(*widget.Entry)
 				entry1 := widget.NewEntry()
 				entry1.SetText(l.Text)
 				entry1.OnChanged = func(text string) {
 					l.SetText(text)
+					onchanged()
 				}
 				entry2 := widget.NewEntry()
 				entry2.SetText(l.PlaceHolder)
 				entry2.OnChanged = func(text string) {
 					l.SetPlaceHolder(text)
+					onchanged()
 				}
 				return []*widget.FormItem{
 					widget.NewFormItem("Text", entry1),
@@ -243,11 +258,12 @@ func initWidgets() {
 			Create: func() fyne.CanvasObject {
 				return widget.NewIcon(theme.HelpIcon())
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				i := obj.(*widget.Icon)
 				return []*widget.FormItem{
 					widget.NewFormItem("Icon", newIconSelectorButton(i.Resource, func(res fyne.Resource) {
 						i.SetResource(res)
+						onchanged()
 					}, true))}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
@@ -265,12 +281,13 @@ func initWidgets() {
 			Create: func() fyne.CanvasObject {
 				return widget.NewLabel("Label")
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				l := obj.(*widget.Label)
 				entry := widget.NewEntry()
 				entry.SetText(l.Text)
 				entry.OnChanged = func(text string) {
 					l.SetText(text)
+					onchanged()
 				}
 
 				wrap := widget.NewCheck("", func(on bool) {
@@ -280,26 +297,31 @@ func initWidgets() {
 						l.Wrapping = fyne.TextWrapOff
 					}
 					l.Refresh()
+					onchanged()
 				})
 				wrap.Checked = l.Wrapping == fyne.TextWrapWord
 
 				bold := widget.NewCheck("", func(on bool) {
 					l.TextStyle.Bold = on
 					l.Refresh()
+					onchanged()
 				})
 				bold.Checked = l.TextStyle.Bold
 				italic := widget.NewCheck("", func(on bool) {
 					l.TextStyle.Italic = on
 					l.Refresh()
+					onchanged()
 				})
 				italic.Checked = l.TextStyle.Italic
 				mono := widget.NewCheck("", func(on bool) {
 					l.TextStyle.Monospace = on
 					l.Refresh()
+					onchanged()
 				})
 				mono.Checked = l.TextStyle.Monospace
 
 				var left, center, right *widget.Button
+				ready := false
 				setAlign := func(a fyne.TextAlign) {
 					l.Alignment = a
 					l.Refresh()
@@ -316,6 +338,9 @@ func initWidgets() {
 					setState(left, fyne.TextAlignLeading)
 					setState(center, fyne.TextAlignCenter)
 					setState(right, fyne.TextAlignTrailing)
+					if ready {
+						onchanged()
+					}
 				}
 				left = widget.NewButtonWithIcon("", resourceFormatalignleftSvg, func() {
 					setAlign(fyne.TextAlignLeading)
@@ -329,6 +354,7 @@ func initWidgets() {
 				aligns := container.NewHBox(left, center, right)
 				setAlign(l.Alignment)
 
+				ready = true
 				return []*widget.FormItem{
 					widget.NewFormItem("Text", entry),
 					widget.NewFormItem("Word Wrap", wrap),
@@ -362,12 +388,13 @@ func initWidgets() {
 			Create: func() fyne.CanvasObject {
 				return widget.NewRichTextFromMarkdown("## Rich Text")
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				r := obj.(*widget.RichText)
 				entry := widget.NewMultiLineEntry()
 				entry.SetText(r.String()) // TODO re-assemble the markdown !?
 				entry.OnChanged = func(text string) {
 					r.ParseMarkdown(text)
+					onchanged()
 				}
 
 				wraps := map[string]fyne.TextWrap{
@@ -378,6 +405,7 @@ func initWidgets() {
 				wrap := widget.NewSelect([]string{"Off", "Word", "Break"}, func(w string) {
 					r.Wrapping = wraps[w]
 					r.Refresh()
+					onchanged()
 				})
 				wrap.Selected = "Off"
 				if r.Wrapping == fyne.TextWrapWord {
@@ -402,15 +430,22 @@ func initWidgets() {
 			Create: func() fyne.CanvasObject {
 				return widget.NewCheck("Tick it or don't", func(b bool) {})
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				c := obj.(*widget.Check)
 				title := widget.NewEntry()
 				title.SetText(c.Text)
 				title.OnChanged = func(text string) {
 					c.Text = text
 					c.Refresh()
+					onchanged()
 				}
-				isChecked := widget.NewCheck("", func(b bool) { c.SetChecked(b) })
+				ready := false
+				isChecked := widget.NewCheck("", func(b bool) {
+					c.SetChecked(b)
+					if ready {
+						onchanged()
+					}
+				})
 				isChecked.SetChecked(c.Checked)
 				return []*widget.FormItem{
 					widget.NewFormItem("Title", title),
@@ -427,9 +462,12 @@ func initWidgets() {
 			Create: func() fyne.CanvasObject {
 				return widget.NewRadioGroup([]string{"Option 1", "Option 2"}, func(s string) {})
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				r := obj.(*widget.RadioGroup)
-				initialOption := widget.NewRadioGroup(r.Options, func(s string) { r.SetSelected(s) })
+				initialOption := widget.NewRadioGroup(r.Options, func(s string) {
+					r.SetSelected(s)
+					onchanged()
+				})
 				initialOption.SetSelected(r.Selected)
 				entry := widget.NewMultiLineEntry()
 				entry.SetText(strings.Join(r.Options, "\n"))
@@ -438,6 +476,7 @@ func initWidgets() {
 					r.Refresh()
 					initialOption.Options = strings.Split(text, "\n")
 					initialOption.Refresh()
+					onchanged()
 				}
 				return []*widget.FormItem{
 					widget.NewFormItem("Options", entry),
@@ -458,13 +497,14 @@ func initWidgets() {
 			Create: func() fyne.CanvasObject {
 				return widget.NewSelect([]string{"Option 1", "Option 2"}, func(value string) {})
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				s := obj.(*widget.Select)
 				initialOption := widget.NewSelect(append([]string{"(Select one)"}, s.Options...), func(opt string) {
 					s.SetSelected(opt)
 					if opt == "(Select one)" {
 						s.ClearSelected()
 					}
+					onchanged()
 				})
 				initialOption.SetSelected(s.Selected)
 				entry := widget.NewMultiLineEntry()
@@ -474,6 +514,7 @@ func initWidgets() {
 					s.Refresh()
 					initialOption.Options = strings.Split(text, "\n")
 					initialOption.Refresh()
+					onchanged()
 				}
 				return []*widget.FormItem{
 					widget.NewFormItem("Options", entry),
@@ -501,7 +542,7 @@ func initWidgets() {
 			Create: func() fyne.CanvasObject {
 				return layout.NewSpacer()
 			},
-			Edit: func(_ fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(_ fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
 				return []*widget.FormItem{}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
@@ -516,7 +557,7 @@ func initWidgets() {
 			Create: func() fyne.CanvasObject {
 				return widget.NewDateEntry()
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
 				_ = obj.(*widget.DateEntry)
 
 				return []*widget.FormItem{}
@@ -532,11 +573,12 @@ func initWidgets() {
 			Create: func() fyne.CanvasObject {
 				return widget.NewAccordion(widget.NewAccordionItem("Item 1", widget.NewLabel("The content goes here")), widget.NewAccordionItem("Item 2", widget.NewLabel("Content part 2 goes here")))
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				acc := obj.(*widget.Accordion)
 				multi := widget.NewCheck("", func(on bool) {
 					acc.MultiOpen = on
 					acc.Refresh()
+					onchanged()
 				})
 				multi.Checked = acc.MultiOpen
 
@@ -562,7 +604,7 @@ func initWidgets() {
 				myMenu := fyne.NewMenu("Menu Name", fyne.NewMenuItem("Item 1", func() { fmt.Println("From Item 1") }), fyne.NewMenuItem("Item 2", func() { fmt.Println("From Item 2") }), fyne.NewMenuItem("Item 3", func() { fmt.Println("From Item 3") }))
 				return widget.NewMenu(myMenu)
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
 				return []*widget.FormItem{}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
@@ -578,7 +620,7 @@ func initWidgets() {
 				f.OnCancel = func() {}
 				return f
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
 				return []*widget.FormItem{}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
@@ -612,7 +654,7 @@ func initWidgets() {
 				p.SetValue(0.1)
 				return p
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				p := obj.(*widget.ProgressBar)
 				value := widget.NewEntry()
 				value.SetText(fmt.Sprintf("%f", p.Value))
@@ -620,6 +662,7 @@ func initWidgets() {
 					if f, err := strconv.ParseFloat(s, 64); err == nil {
 						p.SetValue(f)
 					}
+					onchanged()
 				}
 				return []*widget.FormItem{
 					widget.NewFormItem("Value", value)}
@@ -636,7 +679,7 @@ func initWidgets() {
 			Create: func() fyne.CanvasObject {
 				return widget.NewSeparator()
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
 				return []*widget.FormItem{}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
@@ -652,7 +695,7 @@ func initWidgets() {
 				}
 				return s
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				slider := obj.(*widget.Slider)
 				val := widget.NewEntry()
 				val.SetText(fmt.Sprintf("%f", slider.Value))
@@ -660,6 +703,7 @@ func initWidgets() {
 					if f, err := strconv.ParseFloat(s, 64); err == nil {
 						slider.SetValue(f)
 					}
+					onchanged()
 				}
 				vert := widget.NewCheck("", func(on bool) {
 					if on {
@@ -668,6 +712,7 @@ func initWidgets() {
 						slider.Orientation = widget.Horizontal
 					}
 					slider.Refresh()
+					onchanged()
 				})
 				vert.Checked = slider.Orientation == widget.Vertical
 				return []*widget.FormItem{
@@ -691,12 +736,13 @@ func initWidgets() {
 				to.SetText("ABCD \nEFGH")
 				return to
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				to := obj.(*widget.TextGrid)
 				entry := widget.NewEntry()
 				entry.SetText(to.Text())
 				entry.OnChanged = func(s string) {
 					to.SetText(s)
+					onchanged()
 				}
 				return []*widget.FormItem{
 					widget.NewFormItem("Text", entry)}
@@ -720,7 +766,7 @@ func initWidgets() {
 					widget.NewToolbarAction(Icons["HelpIcon"], func() { fmt.Println("Clicked on HelpIcon") }),
 				)
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
 				return []*widget.FormItem{}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
@@ -749,7 +795,7 @@ func initWidgets() {
 					item.(*widget.Label).SetText(fmt.Sprintf("Item %d", id+1))
 				})
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
 				return []*widget.FormItem{}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
@@ -778,7 +824,7 @@ func initWidgets() {
 					label.SetText(fmt.Sprintf("Cell %d, %d", id.Row+1, id.Col+1))
 				})
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
 				return []*widget.FormItem{}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
@@ -838,7 +884,7 @@ func initWidgets() {
 				tree.OpenBranch("M")
 				return tree
 			},
-			Edit: func(co fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem)) []*widget.FormItem {
+			Edit: func(co fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
 				return []*widget.FormItem{}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
