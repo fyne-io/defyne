@@ -499,14 +499,15 @@ func initWidgets() {
 			},
 			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				s := obj.(*widget.Select)
-				initialOption := widget.NewSelect(append([]string{"(Select one)"}, s.Options...), func(opt string) {
+				initialOption := widget.NewSelect(append([]string{"(Select one)"}, s.Options...), nil)
+				initialOption.SetSelected(s.Selected)
+				initialOption.OnChanged = func(opt string) {
 					s.SetSelected(opt)
 					if opt == "(Select one)" {
 						s.ClearSelected()
 					}
 					onchanged()
-				})
-				initialOption.SetSelected(s.Selected)
+				}
 				entry := widget.NewMultiLineEntry()
 				entry.SetText(strings.Join(s.Options, "\n"))
 				entry.OnChanged = func(text string) {
