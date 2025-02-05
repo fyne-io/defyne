@@ -12,6 +12,10 @@ import (
 )
 
 func initContainers() {
+	layoutIndex := make(map[string]int)
+	for n, e := range layoutNames {
+		layoutIndex[e] = n
+	}
 
 	Containers = map[string]WidgetInfo{
 		"*fyne.Container": {
@@ -22,10 +26,45 @@ func initContainers() {
 			Edit: func(obj fyne.CanvasObject, props map[string]string, refresh func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				c := obj.(*fyne.Container)
 
-				choose := widget.NewFormItem("Layout", widget.NewSelect(layoutNames, nil))
+				var popUp *widget.PopUp
+				layoutList := &widget.List{}
+
+				maxLen := 0
+				for _, s := range layoutNames {
+					if len(s) > maxLen {
+						maxLen = len(s)
+					}
+				}
+
+				button := newLayoutListItem(theme.FileIcon(), strings.Repeat("M", maxLen), nil)
+				size := button.MinSize()
+				size.Height = size.Height * float32(len(layoutNames))
+				choose := widget.NewFormItem("Layout", button)
 				items := []*widget.FormItem{choose}
-				ready := false
-				choose.Widget.(*widget.Select).OnChanged = func(l string) {
+				button.OnTapped = func() {
+					d := fyne.CurrentApp().Driver()
+					c := d.CanvasForObject(button)
+					p := d.AbsolutePositionForObject(button).AddXY(0, button.Size().Height)
+					popUp = widget.NewPopUp(layoutList, c)
+					popUp.Resize(size)
+					popUp.ShowAtPosition(p)
+				}
+
+				layoutListItemSelect := func(l string) {
+					i := -1
+					for n, s := range layoutNames {
+						if s == props["layout"] {
+							i = n
+							break
+						}
+					}
+					if i == -1 {
+						return
+					}
+					layoutList.Select(i)
+				}
+
+				onListItemTapped := func(l string) {
 					lay := Layouts[l]
 					props["layout"] = l
 					c.Layout = lay.Create(c, props)
@@ -37,13 +76,35 @@ func initContainers() {
 						items = append(items, edit(c, props)...)
 					}
 
+					button.SetText(l)
+
+					layoutListItemSelect(l)
+
 					refresh(items)
-					if ready {
-						onchanged()
-					}
+					onchanged()
+
+					popUp.Hide()
 				}
-				choose.Widget.(*widget.Select).SetSelected(props["layout"])
-				ready = true
+
+				layoutList.Length = func() int {
+					return len(layoutNames)
+				}
+				layoutList.CreateItem = func() fyne.CanvasObject {
+					return newLayoutListItem(theme.FileIcon(), "", nil)
+				}
+				layoutList.UpdateItem = func(id widget.ListItemID, obj fyne.CanvasObject) {
+					l := layoutNames[id]
+					item := obj.(*layoutListItem)
+					item.OnTapped = func() {
+						onListItemTapped(l)
+					}
+					item.SetIcon(theme.FileIcon())
+					item.SetText(layoutNames[id])
+				}
+
+				button.SetText(props["layout"])
+				layoutListItemSelect(props["layout"])
+
 				return items
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
