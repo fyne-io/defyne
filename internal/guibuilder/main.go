@@ -73,7 +73,9 @@ func (b *Builder) MakeUI() fyne.CanvasObject {
 // Run generates a go main function and runs it so we can preview the UI in a real app.
 func (b *Builder) Run() {
 	path := filepath.Join(os.TempDir(), "fynebuilder")
-	goURI, err := storage.Child(storage.NewFileURI(path), "main.go")
+	dir := storage.NewFileURI(path)
+	storage.CreateListable(dir)
+	goURI, err := storage.Child(dir, "main.go")
 	if err != nil {
 		fyne.LogError("Failed to write temporary code", err)
 		return
