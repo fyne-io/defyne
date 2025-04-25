@@ -733,7 +733,7 @@ func initWidgets() {
 					tidyWidget(wid, o.Widget)
 
 					var row *fyne.Container
-					edit := widget.NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
+					edit := widget.NewButtonWithIcon("", theme.DocumentCreateIcon(), func() {
 						index := getCurrentIndex(row, items)
 						editItem(index)
 					})
