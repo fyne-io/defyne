@@ -64,3 +64,9 @@ func newIconSelectorButton(ic fyne.Resource, fn func(fyne.Resource), showName bo
 
 	return iconSel
 }
+
+func removeFormItem(i int, l []*widget.FormItem) []*widget.FormItem {
+	copy(l[i:], l[i+1:])
+	l[len(l)-1] = nil
+	return l[:len(l)-1]
+}

@@ -5,6 +5,7 @@ package guidefs
 import (
 	"fmt"
 	"net/url"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -12,6 +13,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -616,17 +618,145 @@ func initWidgets() {
 		"*widget.Form": {
 			Name: "Form",
 			Create: func() fyne.CanvasObject {
-				f := widget.NewForm(widget.NewFormItem("Username", widget.NewEntry()), widget.NewFormItem("Password", widget.NewPasswordEntry()))
+				f := widget.NewForm(widget.NewFormItem("Username", widget.NewEntry()), widget.NewFormItem("Password", widget.NewPasswordEntry()), widget.NewFormItem("Remember", widget.NewCheck("", func(bool) {})))
 				f.OnSubmit = func() {}
 				f.OnCancel = func() {}
 				return f
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
-				return []*widget.FormItem{}
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, refresh func([]*widget.FormItem), _ func()) []*widget.FormItem {
+				items := []*widget.FormItem{}
+				formItems := obj.(*widget.Form).Items
+
+				tidyWidget := func(wid, src fyne.CanvasObject) {
+					switch t := wid.(type) {
+					case *widget.Entry:
+						t.PlaceHolder = ""
+						t.Password = src.(*widget.Entry).Password
+						t.MultiLine = src.(*widget.Entry).MultiLine
+					case *widget.Check:
+						t.Text = ""
+					}
+				}
+
+				getCurrentIndex := func(obj fyne.CanvasObject, list []*widget.FormItem) int {
+					for i, item := range list {
+						if item.Widget == obj {
+							return i
+						}
+					}
+
+					return 0
+				}
+
+				// TODO get the window passed in somehow
+				w := fyne.CurrentApp().Driver().AllWindows()[0]
+
+				var editItem, removeItem func(int)
+				add := widget.NewButtonWithIcon("Add...", theme.ContentAddIcon(), nil)
+				addLine := widget.NewFormItem("", add)
+				add.OnTapped = func() {
+
+					insertChose := ""
+					name := widget.NewEntry()
+					options := widget.NewSelect([]string{"Check", "DateEntry", "Entry", "MultiLineEntry", "PasswordEntry", "Select", "Slider"}, func(s string) {
+						insertChose = s
+					})
+
+					items := []*widget.FormItem{
+						widget.NewFormItem("Name", name),
+						widget.NewFormItem("Type", options),
+					}
+
+					dialog.ShowForm("Add form item", "Add", "Cancel", items, func(ok bool) {
+						if !ok {
+							return
+						}
+
+						class := "*widget." + insertChose
+						wid1 := Lookup(class).Create()
+						tidyWidget(wid1, wid1)
+						wid2 := Lookup(class).Create()
+						tidyWidget(wid2, wid2)
+
+						obj.(*widget.Form).Items = nil // TODO fix this too!
+						obj.Refresh()
+						formItems = append(formItems, widget.NewFormItem(name.Text, wid1))
+						obj.(*widget.Form).Items = formItems
+						obj.Refresh()
+
+						var row *fyne.Container
+						edit := widget.NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
+							index := getCurrentIndex(row, items)
+							editItem(index)
+						})
+						remove := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
+							index := getCurrentIndex(row, items)
+							removeItem(index)
+						})
+						row = container.NewBorder(nil, nil, edit, remove, wid2)
+						items = append(items, widget.NewFormItem(insertChose, row))
+						refresh(append(items, addLine))
+					}, w)
+				}
+
+				editItem = func(i int) {
+					editText := widget.NewEntry()
+					editText.SetText(formItems[i].Text)
+
+					dialog.ShowForm("Edit form item", "Save", "Cancel", []*widget.FormItem{widget.NewFormItem("Name", editText)}, func(ok bool) {
+						if !ok {
+							return
+						}
+
+						formItems[i].Text = editText.Text
+						obj.Refresh()
+
+						items[i].Text = editText.Text
+						refresh(append(items, addLine))
+					}, w)
+				}
+				removeItem = func(i int) {
+					obj.(*widget.Form).Items = nil
+					obj.Refresh() // working around Form refresh bug
+
+					formItems = removeFormItem(i, formItems)
+					obj.(*widget.Form).Items = formItems
+					obj.Refresh()
+					items = removeFormItem(i, items)
+					refresh(append(items, addLine))
+				}
+
+				for _, o := range formItems {
+					// copy items so the widgets can be in both places
+					class := reflect.TypeOf(o.Widget).String()
+					wid := Lookup(class).Create()
+					tidyWidget(wid, o.Widget)
+
+					var row *fyne.Container
+					edit := widget.NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
+						index := getCurrentIndex(row, items)
+						editItem(index)
+					})
+					remove := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
+						index := getCurrentIndex(row, items)
+						removeItem(index)
+					})
+					row = container.NewBorder(nil, nil, edit, remove, wid)
+					items = append(items, widget.NewFormItem(o.Text, row))
+				}
+
+				return append(items, addLine)
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
-				return widgetRef(props[obj], defs,
-					"&widget.Form{Items: []*widget.FormItem{widget.NewFormItem(\"Username\", widget.NewEntry()), widget.NewFormItem(\"Password\", widget.NewPasswordEntry())}, OnSubmit: func() {}, OnCancel: func() {}}")
+				str := &strings.Builder{}
+				str.WriteString("&widget.Form{Items: []*widget.FormItem{")
+				for _, i := range obj.(*widget.Form).Items {
+					str.WriteString("widget.NewFormItem(\"" + i.Text + "\", ")
+					writeGoStringExcluding(str, nil, props, defs, i.Widget)
+					str.WriteString("),")
+				}
+				str.WriteString("}, OnSubmit: func() {}, OnCancel: func() {}}")
+				return widgetRef(props[obj], defs, str.String())
 			},
 		},
 		"*widget.MultiLineEntry": {
