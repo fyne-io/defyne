@@ -632,7 +632,14 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 			} else if typeName == "float32" {
 				f.SetFloat(reflect.ValueOf(v).Float())
 			} else if v != nil {
-				f.Set(reflect.ValueOf(v))
+				func() {
+					defer func() {
+						if r := recover(); r != nil {
+							log.Println("Panicked decoding", k, "of", e.Type().String(), ":", r)
+						}
+					}()
+					f.Set(reflect.ValueOf(v))
+				}()
 			}
 		}
 	}
@@ -646,7 +653,12 @@ func decodeWidget(m map[string]interface{}) fyne.CanvasObject {
 		log.Println("Failed to detect type of object")
 		return nil
 	}
-	obj := guidefs.Lookup(class).Create()
+	def := guidefs.Lookup(class)
+	if def == nil {
+		log.Println("Failed to find object definition for", class)
+		return nil
+	}
+	obj := def.Create()
 	e := reflect.ValueOf(obj).Elem()
 
 	data, ok := m["Struct"]
