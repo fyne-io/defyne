@@ -65,7 +65,23 @@ func newIconSelectorButton(ic fyne.Resource, fn func(fyne.Resource), showName bo
 	return iconSel
 }
 
+func getFormIndex(obj fyne.CanvasObject, list []*widget.FormItem) int {
+	for i, item := range list {
+		if item.Widget == obj {
+			return i
+		}
+	}
+
+	return 0
+}
+
 func removeFormItem(i int, l []*widget.FormItem) []*widget.FormItem {
+	copy(l[i:], l[i+1:])
+	l[len(l)-1] = nil
+	return l[:len(l)-1]
+}
+
+func removeToolbarItem(i int, l []widget.ToolbarItem) []widget.ToolbarItem {
 	copy(l[i:], l[i+1:])
 	l[len(l)-1] = nil
 	return l[:len(l)-1]

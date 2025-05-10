@@ -310,23 +310,28 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 		}()
 		return wid, nil
 	case *widget.Toolbar:
-		for id, i := range c.Items {
-			switch t := i.(type) {
-			case *widget.ToolbarAction:
-				ic := t.Icon
-				t.Icon = guidefs.WrapResource(t.Icon)
-				go func() { // TODO find a better way to reset this after encoding
-					time.Sleep(time.Millisecond * 100)
-					t.Icon = ic
-				}()
-			case *widget.ToolbarSeparator:
-				c.Items[id] = toolbarItem{Type: "Separator"}
-			case *widget.ToolbarSpacer:
-				c.Items[id] = toolbarItem{Type: "Spacer"}
-			}
-		}
+		node := &cntObj{Struct: make(map[string]interface{})}
+		node.Type = "*widget.Toolbar"
+		node.Name = name
 
-		return encodeWidget(c, name, actions), nil
+		items := make([]interface{}, len(c.Items))
+		for i, child := range c.Items {
+			data := map[string]interface{}{}
+			switch t := child.(type) {
+			case *widget.ToolbarAction:
+				data["Icon"] = guidefs.WrapResource(t.Icon)
+				data["Type"] = "Action"
+			case *widget.ToolbarSeparator:
+				data["Type"] = "Separator"
+			case *widget.ToolbarSpacer:
+				data["Type"] = "Spacer"
+			}
+
+			items[i] = data
+		}
+		node.Struct["Items"] = items
+
+		return &node, nil
 	case *container.AppTabs:
 		node := &cntObj{Struct: make(map[string]interface{})}
 		node.Type = "*container.AppTabs"
@@ -511,7 +516,7 @@ func decodeToolbarItem(m map[string]interface{}) widget.ToolbarItem {
 		switch v {
 		case "Separator":
 			return widget.NewToolbarSeparator()
-		default:
+		case "Spacer":
 			return widget.NewToolbarSpacer()
 		}
 	}

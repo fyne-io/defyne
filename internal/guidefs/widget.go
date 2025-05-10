@@ -638,16 +638,6 @@ func initWidgets() {
 					}
 				}
 
-				getCurrentIndex := func(obj fyne.CanvasObject, list []*widget.FormItem) int {
-					for i, item := range list {
-						if item.Widget == obj {
-							return i
-						}
-					}
-
-					return 0
-				}
-
 				// TODO get the window passed in somehow
 				w := fyne.CurrentApp().Driver().AllWindows()[0]
 
@@ -686,11 +676,11 @@ func initWidgets() {
 
 						var row *fyne.Container
 						edit := widget.NewButtonWithIcon("", theme.DocumentCreateIcon(), func() {
-							index := getCurrentIndex(row, items)
+							index := getFormIndex(row, items)
 							editItem(index)
 						})
 						remove := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
-							index := getCurrentIndex(row, items)
+							index := getFormIndex(row, items)
 							removeItem(index)
 						})
 						row = container.NewBorder(nil, nil, edit, remove, wid2)
@@ -734,11 +724,11 @@ func initWidgets() {
 
 					var row *fyne.Container
 					edit := widget.NewButtonWithIcon("", theme.DocumentCreateIcon(), func() {
-						index := getCurrentIndex(row, items)
+						index := getFormIndex(row, items)
 						editItem(index)
 					})
 					remove := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
-						index := getCurrentIndex(row, items)
+						index := getFormIndex(row, items)
 						removeItem(index)
 					})
 					row = container.NewBorder(nil, nil, edit, remove, wid)
@@ -897,19 +887,107 @@ func initWidgets() {
 					widget.NewToolbarAction(Icons["HelpIcon"], func() { fmt.Println("Clicked on HelpIcon") }),
 				)
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
-				return []*widget.FormItem{}
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, refresh func([]*widget.FormItem), _ func()) []*widget.FormItem {
+				items := []*widget.FormItem{}
+				toolItems := obj.(*widget.Toolbar).Items
+
+				add := widget.NewButtonWithIcon("Add...", theme.ContentAddIcon(), nil)
+				addLine := widget.NewFormItem("", add)
+				options := []string{"Action", "Separator", "Spacer"}
+
+				removeItem := func(i int) {
+					toolItems = removeToolbarItem(i, toolItems)
+					obj.(*widget.Toolbar).Items = toolItems
+					obj.Refresh()
+					items = removeFormItem(i, items)
+					refresh(append(items, addLine))
+				}
+
+				newToolEdit := func(id int, o widget.ToolbarItem) *widget.FormItem {
+					chosen := ""
+					holder := container.NewStack()
+					var wid fyne.CanvasObject
+
+					switch t := o.(type) {
+					case *widget.ToolbarSeparator:
+						chosen = options[1]
+					case *widget.ToolbarSpacer:
+						chosen = options[2]
+					case *widget.ToolbarAction:
+						chosen = options[0]
+						wid = newIconSelectorButton(t.Icon, t.SetIcon, false)
+						holder.Objects = []fyne.CanvasObject{wid}
+					}
+
+					chooser := widget.NewSelect(options, func(s string) {
+						switch s {
+						case "Separator":
+							toolItems[id] = widget.NewToolbarSeparator()
+							items[id].Text = "Separator"
+							holder.Objects = nil
+						case "Spacer":
+							toolItems[id] = widget.NewToolbarSpacer()
+							items[id].Text = "Spacer"
+							holder.Objects = nil
+						default:
+							act := widget.NewToolbarAction(theme.QuestionIcon(), nil)
+							toolItems[id] = act
+							items[id].Text = "Action"
+
+							holder.Objects = []fyne.CanvasObject{newIconSelectorButton(act.Icon, act.SetIcon, false)}
+						}
+						//						holder.Refresh()
+
+						obj.Refresh()
+						refresh(append(items, addLine))
+					})
+					chooser.Selected = chosen
+
+					var row *fyne.Container
+					remove := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
+						index := getFormIndex(row, items)
+						removeItem(index)
+					})
+					row = container.NewBorder(nil, nil, chooser, remove, holder)
+					return widget.NewFormItem(chosen, row)
+				}
+
+				add.OnTapped = func() {
+					newID := len(toolItems)
+					newAction := widget.NewToolbarAction(theme.QuestionIcon(), nil)
+					toolItems = append(toolItems, newAction)
+
+					obj.(*widget.Toolbar).Items = toolItems
+					obj.Refresh()
+					items = append(items, newToolEdit(newID, newAction))
+
+					obj.Refresh()
+					refresh(append(items, addLine))
+				}
+
+				for i, o := range toolItems {
+					items = append(items, newToolEdit(i, o))
+				}
+
+				return append(items, addLine)
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
-				return widgetRef(props[obj], defs, `widget.NewToolbar(
-				widget.NewToolbarAction(theme.FileIcon(), func() {}),
-				widget.NewToolbarSeparator(),
-				widget.NewToolbarAction(theme.ViewRefreshIcon(), func() {}),
-				widget.NewToolbarAction(theme.NavigateBackIcon(), func() {}),
-				widget.NewToolbarAction(theme.NavigateNextIcon(), func() {}),
-				widget.NewToolbarSpacer(),
-				widget.NewToolbarAction(theme.HelpIcon(), func() {}),
-			)`)
+				str := &strings.Builder{}
+				str.WriteString("widget.NewToolbar(\n")
+				for _, i := range obj.(*widget.Toolbar).Items {
+					switch t := i.(type) {
+					case *widget.ToolbarSeparator:
+						str.WriteString("\t\t\t\twidget.NewToolbarSeparator(),\n")
+					case *widget.ToolbarSpacer:
+						str.WriteString("\t\t\t\twidget.NewToolbarSpacer(),\n")
+					case *widget.ToolbarAction:
+						res := "theme." + IconName(t.Icon) + "()"
+						str.WriteString(fmt.Sprintf("\t\t\t\twidget.NewToolbarAction(%s, func() {}),\n", res))
+						// TODO action handler
+					}
+				}
+				str.WriteString(")")
+				return widgetRef(props[obj], defs, str.String())
 			},
 		},
 	}
