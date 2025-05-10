@@ -922,7 +922,6 @@ func initWidgets() {
 
 							holder.Objects = []fyne.CanvasObject{newIconSelectorButton(act.Icon, act.SetIcon, false)}
 						}
-						//						holder.Refresh()
 
 						obj.Refresh()
 						refresh(append(items, addLine))
