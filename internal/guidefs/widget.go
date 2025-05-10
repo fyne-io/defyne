@@ -1083,7 +1083,8 @@ func initWidgets() {
 				return []*widget.FormItem{}
 			},
 			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
-				return `widget.NewTreeWithStrings(
+				return widgetRef(props[obj], defs,
+					`widget.NewTreeWithStrings(
 map[string][]string{
 	"":  {"A"},
 	"A": {"B", "D", "H", "J", "L", "O", "P", "S", "V"},
@@ -1107,7 +1108,7 @@ map[string][]string{
 	"X": {"Y"},
 	"Y": {"Z"},
 	"Z": {"avwxyz"},
-})`
+})`)
 			},
 		},
 	}
