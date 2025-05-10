@@ -601,20 +601,6 @@ func initWidgets() {
 					fmt.Sprintf("widget.NewAccordion(%s)", items))
 			},
 		},
-		"*widget.Menu": {
-			Name: "Menu",
-			Create: func() fyne.CanvasObject {
-				myMenu := fyne.NewMenu("Menu Name", fyne.NewMenuItem("Item 1", func() { fmt.Println("From Item 1") }), fyne.NewMenuItem("Item 2", func() { fmt.Println("From Item 2") }), fyne.NewMenuItem("Item 3", func() { fmt.Println("From Item 3") }))
-				return widget.NewMenu(myMenu)
-			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
-				return []*widget.FormItem{}
-			},
-			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
-				return widgetRef(props[obj], defs,
-					"widget.NewMenu(fyne.NewMenu(\"Menu Name\", fyne.NewMenuItem(\"Item 1\", func() {}), fyne.NewMenuItem(\"Item 2\", func() {}), fyne.NewMenuItem(\"Item 3\", func() {})))")
-			},
-		},
 		"*widget.Form": {
 			Name: "Form",
 			Create: func() fyne.CanvasObject {
