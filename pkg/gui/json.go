@@ -13,7 +13,6 @@ import (
 
 	"github.com/fyne-io/defyne/internal/guidefs"
 
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 
 	"fyne.io/fyne/v2"
@@ -186,24 +185,6 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 
 		meta[obj] = props
 		return obj, nil
-	case "*canvas.Rectangle":
-		obj := &canvas.Rectangle{}
-		e := reflect.ValueOf(obj).Elem()
-
-		err := decodeFields(e, m["Struct"].(map[string]interface{}))
-		return obj, err
-	case "*canvas.LinearGradient":
-		obj := &canvas.LinearGradient{}
-		e := reflect.ValueOf(obj).Elem()
-
-		err := decodeFields(e, m["Struct"].(map[string]interface{}))
-		return obj, err
-	case "*canvas.RadialGradient":
-		obj := &canvas.RadialGradient{}
-		e := reflect.ValueOf(obj).Elem()
-
-		err := decodeFields(e, m["Struct"].(map[string]interface{}))
-		return obj, err
 	}
 
 	obj := decodeWidget(m)
