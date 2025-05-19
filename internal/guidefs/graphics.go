@@ -114,6 +114,62 @@ func initGraphics() {
 				return []string{"canvas", "image/color"}
 			},
 		},
+		"*canvas.Text": {
+			Name: "Text",
+			Create: func() fyne.CanvasObject {
+				rect := canvas.NewText("Text", color.Black)
+				return rect
+			},
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
+				t := obj.(*canvas.Text)
+				e := widget.NewEntry()
+				e.SetText(t.Text)
+				e.OnChanged = func(text string) {
+					t.Text = text
+					t.Refresh()
+					onchanged()
+				}
+
+				bold := widget.NewCheck("", func(on bool) {
+					t.TextStyle.Bold = on
+					t.Refresh()
+					onchanged()
+				})
+				bold.Checked = t.TextStyle.Bold
+				italic := widget.NewCheck("", func(on bool) {
+					t.TextStyle.Italic = on
+					t.Refresh()
+					onchanged()
+				})
+				italic.Checked = t.TextStyle.Italic
+				mono := widget.NewCheck("", func(on bool) {
+					t.TextStyle.Monospace = on
+					t.Refresh()
+					onchanged()
+				})
+				mono.Checked = t.TextStyle.Monospace
+
+				return []*widget.FormItem{
+					widget.NewFormItem("Text", e),
+					widget.NewFormItem("Color", newColorButton(t.Color, func(c color.Color) {
+						t.Color = c
+						t.Refresh()
+						onchanged()
+					})),
+					widget.NewFormItem("TextSize", newSliderButton(float64(t.TextSize), 4, 64, func(f float64) {
+						t.TextSize = float32(f)
+						t.Refresh()
+						onchanged()
+					})),
+					widget.NewFormItem("Bold", bold),
+					widget.NewFormItem("Italic", italic),
+					widget.NewFormItem("Monospace", mono),
+				}
+			},
+			Packages: func(_ fyne.CanvasObject) []string {
+				return []string{"canvas", "image/color"}
+			},
+		},
 	}
 
 	GraphicsNames = extractNames(Graphics)

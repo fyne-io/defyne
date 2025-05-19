@@ -165,7 +165,7 @@ func varsRequired(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]
 	var ret []string
 	if c, ok := obj.(*fyne.Container); ok {
 		if name != "" {
-			ret = append(ret, name+" "+"*fyne.Container")
+			ret = append(ret, name+" *fyne.Container")
 		}
 
 		for _, w := range c.Objects {
@@ -180,13 +180,12 @@ func varsRequired(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]
 				ret = append(ret, varsRequired(child, props)...)
 			}
 		}
-	}
 
-	if w, ok := obj.(fyne.Widget); ok {
 		if name != "" {
-			_, class := getTypeOf(w)
+			_, class := getTypeOf(obj)
 			ret = append(ret, name+" "+class)
 		}
 	}
+
 	return ret
 }
