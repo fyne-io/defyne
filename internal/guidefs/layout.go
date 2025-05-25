@@ -73,12 +73,11 @@ var (
 						}
 						label = fmt.Sprintf("Container (%s)", name)
 					} else {
-						wid := w.(fyne.Widget)
 						name := props["name"]
 						if name == "" {
 							name = widgetName(w)
 						}
-						label = fmt.Sprintf("%s (%s)", reflect.TypeOf(wid).Elem().Name(), name)
+						label = fmt.Sprintf("%s (%s)", reflect.TypeOf(w).Elem().Name(), name)
 					}
 					list = append(list, label)
 				}
