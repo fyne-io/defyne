@@ -127,7 +127,7 @@ func initContainers() {
 				}
 				for i, c := range tabs.Items {
 					items[i] = newRow(c, i)
-					itemNames[i] = c.Text
+					itemNames[i] = fmt.Sprintf("%s (%d)", c.Text, i+1)
 				}
 
 				items[len(items)-2] = widget.NewFormItem("",
