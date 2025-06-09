@@ -37,8 +37,8 @@ func initContainers() {
 						items = append(items, edit(c, props)...)
 					}
 
-					refresh(items)
 					if ready {
+						refresh(items)
 						onchanged()
 					}
 				}
