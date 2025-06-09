@@ -22,6 +22,37 @@ var (
 
 func initGraphics() {
 	Graphics = map[string]WidgetInfo{
+		"*canvas.Circle": {
+			Name: "Circle",
+			Create: func() fyne.CanvasObject {
+				rect := canvas.NewCircle(color.Black)
+				rect.StrokeColor = color.Black
+				return rect
+			},
+			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
+				r := obj.(*canvas.Circle)
+				return []*widget.FormItem{
+					widget.NewFormItem("Fill", newColorButton(r.FillColor, func(c color.Color) {
+						r.FillColor = c
+						r.Refresh()
+						onchanged()
+					})),
+					widget.NewFormItem("Stroke", newSliderButton(float64(r.StrokeWidth), 0, 32, func(f float64) {
+						r.StrokeWidth = float32(f)
+						r.Refresh()
+						onchanged()
+					})),
+					widget.NewFormItem("Color", newColorButton(r.StrokeColor, func(c color.Color) {
+						r.StrokeColor = c
+						r.Refresh()
+						onchanged()
+					})),
+				}
+			},
+			Packages: func(_ fyne.CanvasObject) []string {
+				return []string{"canvas", "image/color"}
+			},
+		},
 		"*canvas.LinearGradient": {
 			Name: "LinearGradient",
 			Create: func() fyne.CanvasObject {
