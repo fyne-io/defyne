@@ -114,7 +114,7 @@ func packagesRequired(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[stri
 	if c, ok := obj.(*fyne.Container); ok {
 		objs = c.Objects
 		layout, ok := meta[c]["layout"]
-		if ok && layout == "Form" {
+		if ok && (layout == "Form" || layout == "CustomPadded") {
 			ret = append(ret, "layout")
 		}
 	} else {

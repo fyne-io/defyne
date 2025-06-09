@@ -10,6 +10,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -375,6 +376,167 @@ var (
 			},
 			nil,
 			nil,
+		},
+		"CustomPadded": {
+			func(c *fyne.Container, props map[string]string) fyne.Layout {
+				pad := theme.Padding()
+				padStr := strconv.FormatFloat(float64(pad), 'f', -2, 64)
+
+				top := props["top"]
+				if top == "" {
+					top = padStr
+				}
+				bottom := props["bottom"]
+				if bottom == "" {
+					bottom = padStr
+				}
+				left := props["left"]
+				if left == "" {
+					left = padStr
+				}
+				right := props["right"]
+				if right == "" {
+					right = padStr
+				}
+				tt, err := strconv.ParseFloat(top, 64)
+				t := float32(tt)
+				if err != nil {
+					t = pad
+				}
+				bb, err := strconv.ParseFloat(bottom, 64)
+				b := float32(bb)
+				if err != nil {
+					b = pad
+				}
+				ll, err := strconv.ParseFloat(left, 64)
+				l := float32(ll)
+				if err != nil {
+					l = pad
+				}
+				rr, err := strconv.ParseFloat(right, 64)
+				r := float32(rr)
+				if err != nil {
+					r = pad
+				}
+				return layout.NewCustomPaddedLayout(t, b, l, r)
+			},
+			func(c *fyne.Container, props map[string]string) []*widget.FormItem {
+				pad := theme.Padding()
+				padStr := strconv.FormatFloat(float64(pad), 'f', -2, 64)
+				top := props["top"]
+				if top == "" {
+
+				}
+				bottom := props["bottom"]
+				if bottom == "" {
+					bottom = padStr
+				}
+				left := props["left"]
+				if left == "" {
+					left = padStr
+				}
+				right := props["right"]
+				if right == "" {
+					right = padStr
+				}
+
+				topEnt := widget.NewEntry()
+				topEnt.SetText(top)
+				bottomEnt := widget.NewEntry()
+				bottomEnt.SetText(bottom)
+				leftEnt := widget.NewEntry()
+				leftEnt.SetText(left)
+				rightEnt := widget.NewEntry()
+				rightEnt.SetText(right)
+				change := func(string) {
+					if topEnt.Text == "" {
+						return
+					}
+					tt, err := strconv.ParseFloat(topEnt.Text, 64)
+					if err != nil {
+						return
+					}
+					t := float32(tt)
+					if bottomEnt.Text == "" {
+						return
+					}
+					bb, err := strconv.ParseFloat(bottomEnt.Text, 64)
+					if err != nil {
+						return
+					}
+					b := float32(bb)
+					if leftEnt.Text == "" {
+						return
+					}
+					ll, err := strconv.ParseFloat(leftEnt.Text, 64)
+					if err != nil {
+						return
+					}
+					l := float32(ll)
+					if rightEnt.Text == "" {
+						return
+					}
+					rr, err := strconv.ParseFloat(rightEnt.Text, 64)
+					if err != nil {
+						return
+					}
+					r := float32(rr)
+
+					props["top"] = topEnt.Text
+					props["bottom"] = bottomEnt.Text
+					props["left"] = leftEnt.Text
+					props["right"] = rightEnt.Text
+					c.Layout = layout.NewCustomPaddedLayout(t, b, l, r)
+					c.Refresh()
+				}
+				topEnt.OnChanged = change
+				bottomEnt.OnChanged = change
+				leftEnt.OnChanged = change
+				rightEnt.OnChanged = change
+				return []*widget.FormItem{
+					widget.NewFormItem("Top", topEnt),
+					widget.NewFormItem("Bottom", bottomEnt),
+					widget.NewFormItem("Left", leftEnt),
+					widget.NewFormItem("Right", rightEnt),
+				}
+			},
+			func(c *fyne.Container, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+				pad := theme.Padding()
+				padStr := strconv.FormatFloat(float64(pad), 'f', -2, 64)
+
+				topNum := props[c]["top"]
+				if topNum == "" {
+					topNum = padStr
+				}
+				bottomNum := props[c]["bottom"]
+				if bottomNum == "" {
+					bottomNum = padStr
+				}
+				leftNum := props[c]["left"]
+				if leftNum == "" {
+					leftNum = padStr
+				}
+				rightNum := props[c]["right"]
+				if rightNum == "" {
+					rightNum = padStr
+				}
+
+				str := &strings.Builder{}
+				str.WriteString("container.New(layout.NewCustomPaddedLayout(\n\t\t")
+				str.WriteString(topNum)
+				str.WriteString(", \n\t\t")
+				str.WriteString(bottomNum)
+				str.WriteString(", \n\t\t")
+				str.WriteString(leftNum)
+				str.WriteString(", \n\t\t")
+				str.WriteString(rightNum)
+				str.WriteString("), ")
+				writeGoStringExcluding(str, func(o fyne.CanvasObject) bool {
+					return false
+				}, props, defs, c.Objects...)
+				str.WriteString(")")
+				return str.String()
+			},
 		},
 		"Stack": {
 			func(c *fyne.Container, props map[string]string) fyne.Layout {
