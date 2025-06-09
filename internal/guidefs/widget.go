@@ -905,11 +905,12 @@ func initRichTextWidget() WidgetInfo {
 		Create: func() fyne.CanvasObject {
 			return widget.NewRichTextFromMarkdown("## Rich Text")
 		},
-		Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
+		Edit: func(obj fyne.CanvasObject, props map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 			r := obj.(*widget.RichText)
 			entry := widget.NewMultiLineEntry()
-			entry.SetText(r.String()) // TODO re-assemble the markdown !?
+			entry.SetText(props["text"])
 			entry.OnChanged = func(text string) {
+				props["text"] = text
 				r.ParseMarkdown(text)
 				onchanged()
 			}
@@ -936,10 +937,9 @@ func initRichTextWidget() WidgetInfo {
 				widget.NewFormItem("Wrapping", wrap)}
 		},
 		Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
-			l := obj.(*widget.RichText)
 			// TODO wrap
 			return widgetRef(props[obj], defs,
-				fmt.Sprintf("widget.NewRichTextFromMarkdown(`%s`)", l.String())) // TODO re-assemble the markdown !?
+				fmt.Sprintf("widget.NewRichTextFromMarkdown(`%s`)", props[obj]["text"]))
 		},
 	}
 }

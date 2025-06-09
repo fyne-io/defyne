@@ -20,10 +20,11 @@ import (
 )
 
 type canvObj struct {
-	Type    string
-	Name    string            `json:",omitempty"`
-	Actions map[string]string `json:",omitempty"`
-	Struct  fyne.CanvasObject `json:",omitempty"`
+	Type       string
+	Name       string            `json:",omitempty"`
+	Actions    map[string]string `json:",omitempty"`
+	Struct     fyne.CanvasObject `json:",omitempty"`
+	Properties map[string]string `json:",omitempty"`
 }
 
 type cntObj struct {
@@ -193,6 +194,11 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 	}
 	obj.Refresh()
 	props := map[string]string{}
+	if unpacked, ok := m["Properties"].(map[string]interface{}); ok {
+		for k, v := range unpacked {
+			props[k] = v.(string)
+		}
+	}
 	if name, ok := m["Name"]; ok {
 		props["name"] = name.(string)
 	}
@@ -266,12 +272,12 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 		return &node, nil
 	case *widget.Button:
 		if c.Icon == nil {
-			return encodeWidget(c, name, actions), nil
+			return encodeWidget(c, name, actions, props), nil
 		}
 
 		ic := c.Icon
 		c.Icon = guidefs.WrapResource(c.Icon)
-		wid := encodeWidget(c, name, actions)
+		wid := encodeWidget(c, name, actions, props)
 		go func() { // TODO find a better way to reset this after encoding
 			time.Sleep(time.Millisecond * 100)
 			c.Icon = ic
@@ -279,12 +285,12 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 		return wid, nil
 	case *widget.Icon:
 		if c.Resource == nil {
-			return encodeWidget(c, name, actions), nil
+			return encodeWidget(c, name, actions, props), nil
 		}
 
 		ic := c.Resource
 		c.Resource = guidefs.WrapResource(c.Resource)
-		wid := encodeWidget(c, name, actions)
+		wid := encodeWidget(c, name, actions, props)
 		go func() { // TODO find a better way to reset this after encoding
 			time.Sleep(time.Millisecond * 100)
 			c.Resource = ic
@@ -358,7 +364,7 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 		if form, ok := c.(*widget.Form); ok {
 			return encodeForm(form, name), nil
 		}
-		return encodeWidget(c, name, actions), nil
+		return encodeWidget(c, name, actions, props), nil
 	case *fyne.Container:
 		var node cont
 		node.Type = "*fyne.Container"
@@ -394,7 +400,7 @@ func encodeForm(obj *widget.Form, name string) interface{} {
 			&formItem{
 				HintText: o.HintText,
 				Text:     o.Text,
-				Widget:   encodeWidget(o.Widget, "", nil),
+				Widget:   encodeWidget(o.Widget, "", nil, nil),
 			})
 	}
 
@@ -411,11 +417,14 @@ func encodeForm(obj *widget.Form, name string) interface{} {
 	return &node
 }
 
-func encodeWidget(obj fyne.CanvasObject, name string, actions map[string]string) *canvObj {
+func encodeWidget(obj fyne.CanvasObject, name string, actions map[string]string, meta map[string]string) *canvObj {
 	w := &canvObj{Type: reflect.TypeOf(obj).String(), Name: name, Struct: obj}
 
 	if len(actions) > 0 {
 		w.Actions = actions
+	}
+	if len(meta) > 0 {
+		w.Properties = meta
 	}
 
 	return w
