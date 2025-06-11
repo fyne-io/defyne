@@ -54,7 +54,8 @@ func initContainers() {
 				}
 				lay := Layouts[l]
 				if lay.goText != nil {
-					return lay.goText(c, props, defs)
+					code := lay.goText(c, props, defs)
+					return widgetRef(props[obj], defs, code)
 				}
 
 				str := &strings.Builder{}
