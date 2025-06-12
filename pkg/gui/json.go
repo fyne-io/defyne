@@ -424,8 +424,14 @@ func encodeWidget(obj fyne.CanvasObject, name string, actions map[string]string,
 		w.Actions = actions
 	}
 	if len(meta) > 0 {
-		w.Properties = meta
-		delete(w.Properties, "name") // it's a separate field set above
+		w.Properties = make(map[string]string)
+		for k, v := range meta {
+			if k == "name" {
+				continue // it's a separate field set above
+			}
+
+			w.Properties[k] = v
+		}
 	}
 
 	return w
