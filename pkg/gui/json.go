@@ -198,7 +198,11 @@ func DecodeMap(m map[string]interface{}, d DefyneContext) (fyne.CanvasObject, er
 		if !ok || data == "" {
 			data = "{}"
 		}
-		th, err := theme.FromJSONWithFallback(data.(string), d.Theme())
+		fallback := d.Theme()
+		if fallback == nil {
+			fallback = theme.DefaultTheme()
+		}
+		th, err := theme.FromJSONWithFallback(data.(string), fallback)
 		if err != nil {
 			fyne.LogError("Theme decode error", err)
 		}
