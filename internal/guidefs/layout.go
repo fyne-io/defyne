@@ -435,7 +435,7 @@ var (
 				padStr := strconv.FormatFloat(float64(pad), 'f', -2, 64)
 				top := props["top"]
 				if top == "" {
-
+					top = padStr
 				}
 				bottom := props["bottom"]
 				if bottom == "" {

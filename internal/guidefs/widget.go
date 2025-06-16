@@ -56,7 +56,7 @@ type WidgetInfo struct {
 	Packages func(fyne.CanvasObject, DefyneContext) []string
 }
 
-// IsContainer indicates wether a widget children or not
+// IsContainer indicates whether a widget children or not
 func (w WidgetInfo) IsContainer() bool {
 	return w.Children != nil
 }
