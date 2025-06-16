@@ -72,8 +72,18 @@ func exportCode(pkgs, vars []string, obj fyne.CanvasObject, d DefyneContext, nam
 	_, clazz := getTypeOf(obj)
 	main := guidefs.GoString(clazz, obj, d, defs)
 	setup := ""
-	for k, v := range defs {
-		setup += "g." + k + " = " + v + "\n"
+
+	keys := make([]string, len(defs))
+	i := 0
+	for k := range defs {
+		keys[i] = k
+		i++
+	}
+	sort.Strings(keys)
+
+	for _, key := range vars {
+		name := strings.Split(key, " ")[0]
+		setup += "g." + name + " = " + defs[name] + "\n"
 	}
 
 	guiName := "gui"
