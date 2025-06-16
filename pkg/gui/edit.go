@@ -11,11 +11,11 @@ import (
 type DefyneContext = guidefs.DefyneContext
 
 // CreateNew returns a new instance of the given widget type
-func CreateNew(name string, _ DefyneContext) fyne.CanvasObject {
+func CreateNew(name string, d DefyneContext) fyne.CanvasObject {
 	guidefs.InitOnce()
 
 	if match := guidefs.Lookup(name); match != nil {
-		return match.Create()
+		return match.Create(d)
 	}
 
 	return nil

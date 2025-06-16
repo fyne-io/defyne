@@ -24,7 +24,7 @@ func initGraphics() {
 	Graphics = map[string]WidgetInfo{
 		"*canvas.Circle": {
 			Name: "Circle",
-			Create: func() fyne.CanvasObject {
+			Create: func(DefyneContext) fyne.CanvasObject {
 				rect := canvas.NewCircle(color.Black)
 				rect.StrokeColor = color.Black
 				return rect
@@ -55,7 +55,7 @@ func initGraphics() {
 		},
 		"*canvas.LinearGradient": {
 			Name: "LinearGradient",
-			Create: func() fyne.CanvasObject {
+			Create: func(DefyneContext) fyne.CanvasObject {
 				return &canvas.LinearGradient{StartColor: color.White}
 			},
 			Edit: func(obj fyne.CanvasObject, _ DefyneContext, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
@@ -87,7 +87,7 @@ func initGraphics() {
 		},
 		"*canvas.RadialGradient": {
 			Name: "RadialGradient",
-			Create: func() fyne.CanvasObject {
+			Create: func(DefyneContext) fyne.CanvasObject {
 				return &canvas.RadialGradient{StartColor: color.White}
 			},
 			Edit: func(obj fyne.CanvasObject, _ DefyneContext, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
@@ -111,7 +111,7 @@ func initGraphics() {
 		},
 		"*canvas.Rectangle": {
 			Name: "Rectangle",
-			Create: func() fyne.CanvasObject {
+			Create: func(DefyneContext) fyne.CanvasObject {
 				rect := canvas.NewRectangle(color.Black)
 				rect.StrokeColor = color.Black
 				return rect
@@ -147,7 +147,7 @@ func initGraphics() {
 		},
 		"*canvas.Text": {
 			Name: "Text",
-			Create: func() fyne.CanvasObject {
+			Create: func(DefyneContext) fyne.CanvasObject {
 				rect := canvas.NewText("Text", color.Black)
 				return rect
 			},

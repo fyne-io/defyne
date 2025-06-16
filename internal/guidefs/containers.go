@@ -16,7 +16,7 @@ func initContainers() {
 	Containers = map[string]WidgetInfo{
 		"*fyne.Container": {
 			Name: "Container",
-			Create: func() fyne.CanvasObject {
+			Create: func(DefyneContext) fyne.CanvasObject {
 				return container.NewVBox()
 			},
 			Edit: func(obj fyne.CanvasObject, ctx DefyneContext, refresh func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
@@ -88,7 +88,7 @@ func initContainers() {
 				item := container.NewTabItem("Untitled", o)
 				tabs.Append(item)
 			},
-			Create: func() fyne.CanvasObject {
+			Create: func(DefyneContext) fyne.CanvasObject {
 				return container.NewAppTabs(container.NewTabItem("Untitled", container.NewStack()))
 			},
 			Edit: func(obj fyne.CanvasObject, _ DefyneContext, setItems func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
@@ -208,7 +208,7 @@ func initContainers() {
 				scr.Content = o
 				scr.Refresh()
 			},
-			Create: func() fyne.CanvasObject {
+			Create: func(DefyneContext) fyne.CanvasObject {
 				return container.NewScroll(container.NewStack())
 			},
 			Edit: func(obj fyne.CanvasObject, c DefyneContext, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
@@ -242,7 +242,7 @@ func initContainers() {
 				}
 				split.Refresh()
 			},
-			Create: func() fyne.CanvasObject {
+			Create: func(DefyneContext) fyne.CanvasObject {
 				return container.NewHSplit(container.NewStack(), container.NewStack())
 			},
 			Edit: func(obj fyne.CanvasObject, c DefyneContext, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
@@ -293,9 +293,8 @@ func initContainers() {
 				over.Content = o
 				over.Refresh()
 			},
-			Create: func() fyne.CanvasObject {
-				th, _ := theme.FromJSON("{}")
-				return container.NewThemeOverride(container.NewStack(), th)
+			Create: func(c DefyneContext) fyne.CanvasObject {
+				return container.NewThemeOverride(container.NewStack(), c.Theme())
 			},
 			Edit: func(obj fyne.CanvasObject, c DefyneContext, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				props := c.Metadata()[obj]

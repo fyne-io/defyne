@@ -221,7 +221,7 @@ func (b *Builder) buildLibrary() fyne.CanvasObject {
 	return container.NewBorder(searchBox, widget.NewButtonWithIcon("Insert", theme.ContentAddIcon(), func() {
 		if c, ok := b.current.(*fyne.Container); ok {
 			if selected != nil {
-				c.Objects = append(c.Objects, selected.Create())
+				c.Objects = append(c.Objects, selected.Create(b))
 				c.Refresh()
 				// cause property editor to refresh
 				b.choose(c)
@@ -231,7 +231,7 @@ func (b *Builder) buildLibrary() fyne.CanvasObject {
 
 		class := reflect.TypeOf(b.current).String()
 		if wid := guidefs.Lookup(class); wid != nil && wid.IsContainer() {
-			wid.AddChild(b.current, selected.Create())
+			wid.AddChild(b.current, selected.Create(b))
 
 			return
 		}

@@ -198,7 +198,7 @@ func DecodeMap(m map[string]interface{}, d DefyneContext) (fyne.CanvasObject, er
 		if !ok || data == "" {
 			data = "{}"
 		}
-		th, err := theme.FromJSON(data.(string))
+		th, err := theme.FromJSONWithFallback(data.(string), d.Theme())
 		if err != nil {
 			fyne.LogError("Theme decode error", err)
 		}
@@ -215,7 +215,7 @@ func DecodeMap(m map[string]interface{}, d DefyneContext) (fyne.CanvasObject, er
 		return obj, nil
 	}
 
-	obj := decodeWidget(m)
+	obj := decodeWidget(m, d)
 	if obj == nil {
 		return nil, errors.New("failed to parse object from JSON")
 	}
@@ -474,7 +474,7 @@ func encodeWidget(obj fyne.CanvasObject, name string, actions map[string]string,
 	return w
 }
 
-func decodeAccordionItem(m map[string]interface{}) *widget.AccordionItem {
+func decodeAccordionItem(m map[string]interface{}, d DefyneContext) *widget.AccordionItem {
 	f := &widget.AccordionItem{}
 	if str, ok := m["Title"]; ok {
 		f.Title = str.(string)
@@ -483,12 +483,12 @@ func decodeAccordionItem(m map[string]interface{}) *widget.AccordionItem {
 		f.Open = on.(bool)
 	}
 	if wid, ok := m["Detail"]; ok {
-		f.Detail = decodeWidget(wid.(map[string]interface{}))
+		f.Detail = decodeWidget(wid.(map[string]interface{}), d)
 	}
 	return f
 }
 
-func decodeFormItem(m map[string]interface{}) *widget.FormItem {
+func decodeFormItem(m map[string]interface{}, d DefyneContext) *widget.FormItem {
 	f := &widget.FormItem{}
 	if str, ok := m["HintText"]; ok {
 		f.HintText = str.(string)
@@ -497,7 +497,7 @@ func decodeFormItem(m map[string]interface{}) *widget.FormItem {
 		f.Text = str.(string)
 	}
 	if wid, ok := m["Widget"]; ok {
-		f.Widget = decodeWidget(wid.(map[string]interface{}))
+		f.Widget = decodeWidget(wid.(map[string]interface{}), d)
 	}
 	return f
 }
@@ -570,7 +570,7 @@ func decodeRichTextStyle(m map[string]interface{}) (s widget.RichTextStyle) {
 	return
 }
 
-func decodeFields(e reflect.Value, in map[string]interface{}) error {
+func decodeFields(e reflect.Value, in map[string]interface{}, d DefyneContext) error {
 	for k, v := range in {
 		f := e.FieldByName(k)
 
@@ -602,13 +602,13 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 		case "[]*widget.AccordionItem":
 			var items []*widget.AccordionItem
 			for _, item := range reflect.ValueOf(v).Interface().([]interface{}) {
-				items = append(items, decodeAccordionItem(item.(map[string]interface{})))
+				items = append(items, decodeAccordionItem(item.(map[string]interface{}), d))
 			}
 			f.Set(reflect.ValueOf(items))
 		case "[]*widget.FormItem":
 			var items []*widget.FormItem
 			for _, item := range reflect.ValueOf(v).Interface().([]interface{}) {
-				items = append(items, decodeFormItem(item.(map[string]interface{})))
+				items = append(items, decodeFormItem(item.(map[string]interface{}), d))
 			}
 			f.Set(reflect.ValueOf(items))
 		case "[]widget.ToolbarItem":
@@ -621,7 +621,7 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 			var items []widget.RichTextSegment
 			for _, item := range reflect.ValueOf(v).Interface().([]interface{}) {
 				obj := &widget.TextSegment{}
-				_ = decodeFields(reflect.ValueOf(obj).Elem(), item.(map[string]interface{}))
+				_ = decodeFields(reflect.ValueOf(obj).Elem(), item.(map[string]interface{}), d)
 				items = append(items, obj)
 			}
 			f.Set(reflect.ValueOf(items))
@@ -686,7 +686,7 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 	return nil
 }
 
-func decodeWidget(m map[string]interface{}) fyne.CanvasObject {
+func decodeWidget(m map[string]interface{}, d DefyneContext) fyne.CanvasObject {
 	class, ok := m["Type"].(string)
 	if !ok {
 		log.Println("Failed to detect type of object", m)
@@ -697,7 +697,7 @@ func decodeWidget(m map[string]interface{}) fyne.CanvasObject {
 		log.Println("Failed to find object definition for", class)
 		return nil
 	}
-	obj := def.Create()
+	obj := def.Create(d)
 	e := reflect.ValueOf(obj).Elem()
 
 	data, ok := m["Struct"]
@@ -706,7 +706,7 @@ func decodeWidget(m map[string]interface{}) fyne.CanvasObject {
 		return obj
 	}
 
-	err := decodeFields(e, data.(map[string]interface{}))
+	err := decodeFields(e, data.(map[string]interface{}), d)
 	if err != nil {
 		fyne.LogError("Failed to handle type "+class, err)
 	}
