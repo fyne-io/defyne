@@ -11,12 +11,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fyne-io/defyne/internal/guidefs"
-
-	"fyne.io/fyne/v2/container"
-
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+
+	"github.com/fyne-io/defyne/internal/guidefs"
 )
 
 type canvObj struct {
@@ -53,7 +53,7 @@ type cont struct {
 
 // DecodeObject returns a tree of `CanvasObject` elements from the provided JSON `Reader` and
 // updates the metadata map to include any additional information.
-func DecodeObject(r io.Reader) (fyne.CanvasObject, map[fyne.CanvasObject]map[string]string, error) {
+func DecodeObject(r io.Reader, d DefyneContext) (fyne.CanvasObject, map[fyne.CanvasObject]map[string]string, error) {
 	guidefs.InitOnce()
 
 	var data interface{}
@@ -65,13 +65,13 @@ func DecodeObject(r io.Reader) (fyne.CanvasObject, map[fyne.CanvasObject]map[str
 	meta := make(map[fyne.CanvasObject]map[string]string)
 	root := data.(map[string]interface{})
 
-	obj, err := DecodeMap(root, meta)
+	obj, err := DecodeMap(root, d)
 	return obj, meta, err
 }
 
 // DecodeMap returns a tree of `CanvasObject` elements from the provided JSON map and
 // updates the metadata map to include any additional information.
-func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]string) (fyne.CanvasObject, error) {
+func DecodeMap(m map[string]interface{}, d DefyneContext) (fyne.CanvasObject, error) {
 	guidefs.InitOnce()
 
 	switch m["Type"] {
@@ -80,6 +80,7 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 		name := m["Layout"].(string)
 
 		props := map[string]string{"layout": name}
+		d.Metadata()[obj] = props
 		if m["Properties"] != nil {
 			for k, v := range m["Properties"].(map[string]interface{}) {
 				props[k] = v.(string)
@@ -97,18 +98,17 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 					// Nil object?
 					continue
 				}
-				child, _ := DecodeMap(data.(map[string]interface{}), meta)
+				child, _ := DecodeMap(data.(map[string]interface{}), d)
 				if child != nil {
 					obj.Objects = append(obj.Objects, child)
 				}
 			}
 		}
-		obj.Layout = guidefs.Layouts[name].Create(obj, props)
+		obj.Layout = guidefs.Layouts[name].Create(obj, d)
 		if name, ok := m["Name"]; ok {
 			props["name"] = name.(string)
 		}
 
-		meta[obj] = props
 		return obj, nil
 	case "*container.AppTabs":
 		obj := &container.AppTabs{}
@@ -128,7 +128,7 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 						item.Icon = res
 					}
 				}
-				item.Content, _ = DecodeMap(data["Content"].(map[string]interface{}), meta)
+				item.Content, _ = DecodeMap(data["Content"].(map[string]interface{}), d)
 				obj.Append(item)
 			}
 		}
@@ -141,7 +141,7 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 			obj.SelectIndex(int(index.(float64)))
 		}
 
-		meta[obj] = props
+		d.Metadata()[obj] = props
 		return obj, nil
 	case "*container.Scroll":
 		obj := &container.Scroll{}
@@ -150,7 +150,7 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 			obj.Direction = container.ScrollDirection(off.(float64))
 		}
 		if info["Content"] != nil {
-			child, _ := DecodeMap(info["Content"].(map[string]interface{}), meta)
+			child, _ := DecodeMap(info["Content"].(map[string]interface{}), d)
 			obj.Content = child
 		}
 
@@ -159,7 +159,7 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 			props["name"] = name.(string)
 		}
 
-		meta[obj] = props
+		d.Metadata()[obj] = props
 		return obj, nil
 	case "*container.Split":
 		obj := &container.Split{}
@@ -171,11 +171,11 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 			obj.Offset = off.(float64)
 		}
 		if info["Leading"] != nil {
-			child, _ := DecodeMap(info["Leading"].(map[string]interface{}), meta)
+			child, _ := DecodeMap(info["Leading"].(map[string]interface{}), d)
 			obj.Leading = child
 		}
 		if info["Trailing"] != nil {
-			child, _ := DecodeMap(info["Trailing"].(map[string]interface{}), meta)
+			child, _ := DecodeMap(info["Trailing"].(map[string]interface{}), d)
 			obj.Trailing = child
 		}
 
@@ -184,7 +184,7 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 			props["name"] = name.(string)
 		}
 
-		meta[obj] = props
+		d.Metadata()[obj] = props
 		return obj, nil
 	}
 
@@ -211,19 +211,20 @@ func DecodeMap(m map[string]interface{}, meta map[fyne.CanvasObject]map[string]s
 		}
 	}
 
-	meta[obj] = props
+	d.Metadata()[obj] = props
 	return obj, nil
 }
 
 // EncodeObject writes a JSON stream for the tree of `CanvasObject` elements provided.
 // If an error occurs it will be returned, otherwise nil.
-func EncodeObject(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string, w io.Writer) error {
+func EncodeObject(obj fyne.CanvasObject, d DefyneContext, w io.Writer) error {
 	guidefs.InitOnce()
+	meta := d.Metadata()
 
 	if meta == nil {
 		meta = make(map[fyne.CanvasObject]map[string]string)
 	}
-	tree, _ := EncodeMap(obj, meta)
+	tree, _ := EncodeMap(obj, d)
 
 	e := json.NewEncoder(w)
 	e.SetIndent("", "  ")
@@ -232,15 +233,15 @@ func EncodeObject(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]s
 
 // EncodeMap returns a JSON map for the tree of `CanvasObject` elements provided, using additional metadata if required.
 // If an error occurs it will be returned, otherwise nil.
-func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string) (interface{}, error) {
+func EncodeMap(obj fyne.CanvasObject, d DefyneContext) (interface{}, error) {
 	guidefs.InitOnce()
 
-	props := meta[obj]
+	props := d.Metadata()[obj]
 	name := ""
 	actions := map[string]string{}
 	if props == nil {
 		props = make(map[string]string)
-		meta[obj] = props
+		d.Metadata()[obj] = props
 	} else {
 		name = props["name"]
 
@@ -262,7 +263,7 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 			data := map[string]interface{}{
 				"Title": child.Title,
 			}
-			data["Detail"], _ = EncodeMap(child.Detail, meta)
+			data["Detail"], _ = EncodeMap(child.Detail, d)
 
 			items[i] = data
 		}
@@ -332,7 +333,7 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 			if child.Icon != nil {
 				data["Icon"] = guidefs.WrapResource(child.Icon)
 			}
-			data["Content"], _ = EncodeMap(child.Content, meta)
+			data["Content"], _ = EncodeMap(child.Content, d)
 
 			items[i] = data
 		}
@@ -346,7 +347,7 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 		node.Struct["Direction"] = c.Direction
 		node.Name = name
 
-		node.Struct["Content"], _ = EncodeMap(c.Content, meta)
+		node.Struct["Content"], _ = EncodeMap(c.Content, d)
 
 		return &node, nil
 	case *container.Split:
@@ -356,8 +357,8 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 		node.Struct["Offset"] = c.Offset
 		node.Name = name
 
-		node.Struct["Leading"], _ = EncodeMap(c.Leading, meta)
-		node.Struct["Trailing"], _ = EncodeMap(c.Trailing, meta)
+		node.Struct["Leading"], _ = EncodeMap(c.Leading, d)
+		node.Struct["Trailing"], _ = EncodeMap(c.Trailing, d)
 
 		return &node, nil
 	case fyne.Widget:
@@ -383,10 +384,10 @@ func EncodeMap(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]stri
 			}
 		}
 		for _, o := range c.Objects {
-			enc, _ := EncodeMap(o, meta)
+			enc, _ := EncodeMap(o, d)
 			node.Objects = append(node.Objects, enc)
 		}
-		node.Properties = meta[c]
+		node.Properties = d.Metadata()[c]
 		return &node, nil
 	}
 

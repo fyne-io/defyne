@@ -28,10 +28,13 @@ var (
 
 // Builder is a simple type handle for a GUI builder instance.
 type Builder struct {
+	gui.DefyneContext
+
 	root, current fyne.CanvasObject
 	uri           fyne.URI
 	win           fyne.Window
 	meta          map[fyne.CanvasObject]map[string]string
+	th            fyne.Theme
 }
 
 // NewBuilder returns an instance of the GUI builder for the specified URI.
@@ -44,11 +47,12 @@ func NewBuilder(u fyne.URI, win fyne.Window) *Builder {
 	}
 
 	meta := make(map[fyne.CanvasObject]map[string]string)
+	builder := &Builder{uri: u, win: win, meta: meta}
 	var obj fyne.CanvasObject
 	if r == nil {
 		obj = previewUI()
 	} else {
-		obj, meta, err = gui.DecodeObject(r)
+		obj, meta, err = gui.DecodeObject(r, builder)
 		if err != nil {
 			dialog.ShowError(err, win)
 		}
@@ -62,7 +66,16 @@ func NewBuilder(u fyne.URI, win fyne.Window) *Builder {
 		}
 	}
 
-	return &Builder{root: obj, uri: u, win: win, meta: meta}
+	builder.root = obj
+	return builder
+}
+
+func (b *Builder) Metadata() map[fyne.CanvasObject]map[string]string {
+	return b.meta
+}
+
+func (b *Builder) Theme() fyne.Theme {
+	return b.th
 }
 
 // MakeUI builds the UI for the current GUI builder.
@@ -86,7 +99,7 @@ func (b *Builder) Run() {
 		fyne.LogError("Failed get storage writer", err)
 		return
 	}
-	err = gui.ExportGoPreview(b.root, b.meta, w)
+	err = gui.ExportGoPreview(b.root, b, w)
 	if err != nil {
 		fyne.LogError("Failed to export go preview", err)
 		return
@@ -124,7 +137,7 @@ func (b *Builder) Save() error {
 	if err != nil {
 		return err
 	}
-	err = gui.ExportGo(b.root, b.meta, name, w)
+	err = gui.ExportGo(b.root, b, name, w)
 	if err != nil {
 		return err
 	}
@@ -144,7 +157,7 @@ func (b *Builder) Save() error {
 }
 
 func (b *Builder) save(w fyne.URIWriteCloser) error {
-	err := gui.EncodeObject(b.root, b.meta, w)
+	err := gui.EncodeObject(b.root, b, w)
 	_ = w.Close()
 	return err
 }
@@ -264,7 +277,7 @@ func (b *Builder) choose(o fyne.CanvasObject) {
 	}
 	nameItem := widget.NewFormItem("Type", widget.NewLabel(gui.NameOf(o)))
 	editForm = widget.NewForm()
-	items := gui.EditorFor(o, props, func(items []*widget.FormItem) {
+	items := gui.EditorFor(o, b, func(items []*widget.FormItem) {
 		editForm.Items = nil
 		editForm.Refresh()
 		editForm.Items = append([]*widget.FormItem{nameItem}, items...)

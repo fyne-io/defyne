@@ -19,7 +19,8 @@ func initContainers() {
 			Create: func() fyne.CanvasObject {
 				return container.NewVBox()
 			},
-			Edit: func(obj fyne.CanvasObject, props map[string]string, refresh func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, ctx DefyneContext, refresh func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
+				props := ctx.Metadata()[obj]
 				c := obj.(*fyne.Container)
 
 				choose := widget.NewFormItem("Layout", widget.NewSelect(layoutNames, nil))
@@ -28,13 +29,13 @@ func initContainers() {
 				choose.Widget.(*widget.Select).OnChanged = func(l string) {
 					lay := Layouts[l]
 					props["layout"] = l
-					c.Layout = lay.Create(c, props)
+					c.Layout = lay.Create(c, ctx)
 					c.Refresh()
 
 					edit := lay.Edit
 					items = []*widget.FormItem{choose}
 					if edit != nil {
-						items = append(items, edit(c, props)...)
+						items = append(items, edit(c, ctx)...)
 					}
 
 					if ready {
@@ -46,7 +47,8 @@ func initContainers() {
 				ready = true
 				return items
 			},
-			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+			Gostring: func(obj fyne.CanvasObject, ctx DefyneContext, defs map[string]string) string {
+				props := ctx.Metadata()
 				c := obj.(*fyne.Container)
 				l := props[c]["layout"]
 				if l == "" {
@@ -54,7 +56,7 @@ func initContainers() {
 				}
 				lay := Layouts[l]
 				if lay.goText != nil {
-					code := lay.goText(c, props, defs)
+					code := lay.goText(c, ctx, defs)
 					return widgetRef(props[obj], defs, code)
 				}
 
@@ -64,7 +66,7 @@ func initContainers() {
 				} else {
 					str.WriteString(fmt.Sprintf("container.New%s(", l))
 				}
-				writeGoStringExcluding(str, nil, props, defs, c.Objects...)
+				writeGoStringExcluding(str, nil, ctx, defs, c.Objects...)
 				str.WriteString(")")
 				return widgetRef(props[obj], defs, str.String())
 			},
@@ -89,7 +91,7 @@ func initContainers() {
 			Create: func() fyne.CanvasObject {
 				return container.NewAppTabs(container.NewTabItem("Untitled", container.NewStack()))
 			},
-			Edit: func(obj fyne.CanvasObject, props map[string]string, setItems func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, _ DefyneContext, setItems func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				tabs := obj.(*container.AppTabs)
 				items := make([]*widget.FormItem, len(tabs.Items)+2)
 				itemNames := make([]string, len(tabs.Items))
@@ -159,7 +161,8 @@ func initContainers() {
 				items[len(items)-1] = widget.NewFormItem("Selected", selected)
 				return items
 			},
-			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+			Gostring: func(obj fyne.CanvasObject, ctx DefyneContext, defs map[string]string) string {
+				props := ctx.Metadata()
 				tabs := obj.(*container.AppTabs)
 				str := &strings.Builder{}
 				str.WriteString("container.NewAppTabs(")
@@ -178,13 +181,13 @@ func initContainers() {
 					if hasIcon {
 						str.WriteString("theme." + IconName(c.Icon) + "(), ")
 					}
-					writeGoStringExcluding(str, nil, props, defs, c.Content)
+					writeGoStringExcluding(str, nil, ctx, defs, c.Content)
 					str.WriteString(")")
 				}
 				str.WriteString(")")
 				return widgetRef(props[obj], defs, str.String())
 			},
-			Packages: func(obj fyne.CanvasObject) []string {
+			Packages: func(obj fyne.CanvasObject, _ DefyneContext) []string {
 				tabs := obj.(*container.AppTabs)
 				for _, c := range tabs.Items {
 					if c.Icon != nil {
@@ -208,18 +211,19 @@ func initContainers() {
 			Create: func() fyne.CanvasObject {
 				return container.NewScroll(container.NewStack())
 			},
-			Edit: func(obj fyne.CanvasObject, props map[string]string, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, c DefyneContext, _ func([]*widget.FormItem), _ func()) []*widget.FormItem {
 				return []*widget.FormItem{}
 			},
-			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+			Gostring: func(obj fyne.CanvasObject, c DefyneContext, defs map[string]string) string {
+				props := c.Metadata()
 				s := obj.(*container.Scroll)
 				str := &strings.Builder{}
 				str.WriteString("container.NewScroll(")
-				writeGoStringExcluding(str, nil, props, defs, s.Content)
+				writeGoStringExcluding(str, nil, c, defs, s.Content)
 				str.WriteString(")")
 				return widgetRef(props[obj], defs, str.String())
 			},
-			Packages: func(_ fyne.CanvasObject) []string {
+			Packages: func(_ fyne.CanvasObject, _ DefyneContext) []string {
 				return []string{"container"}
 			},
 		},
@@ -241,7 +245,7 @@ func initContainers() {
 			Create: func() fyne.CanvasObject {
 				return container.NewHSplit(container.NewStack(), container.NewStack())
 			},
-			Edit: func(obj fyne.CanvasObject, _ map[string]string, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
+			Edit: func(obj fyne.CanvasObject, c DefyneContext, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 				split := obj.(*container.Split)
 				offset := widget.NewEntry()
 				offset.SetText(fmt.Sprintf("%f", split.Offset))
@@ -263,17 +267,18 @@ func initContainers() {
 					widget.NewFormItem("Vertical", vert),
 				}
 			},
-			Gostring: func(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+			Gostring: func(obj fyne.CanvasObject, c DefyneContext, defs map[string]string) string {
+				props := c.Metadata()
 				s := obj.(*container.Split)
 				str := &strings.Builder{}
 				str.WriteString(fmt.Sprintf("&container.Split{Horizontal: %t, Offset: %f, Leading: ", s.Horizontal, s.Offset))
-				writeGoStringExcluding(str, nil, props, defs, s.Leading)
+				writeGoStringExcluding(str, nil, c, defs, s.Leading)
 				str.WriteString(", Trailing: ")
-				writeGoStringExcluding(str, nil, props, defs, s.Trailing)
+				writeGoStringExcluding(str, nil, c, defs, s.Trailing)
 				str.WriteString("}")
 				return widgetRef(props[obj], defs, str.String())
 			},
-			Packages: func(_ fyne.CanvasObject) []string {
+			Packages: func(_ fyne.CanvasObject, _ DefyneContext) []string {
 				return []string{"container"}
 			},
 		},

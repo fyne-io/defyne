@@ -9,19 +9,19 @@ import (
 )
 
 // GoString generates Go code for the given type and object
-func GoString(clazz string, obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+func GoString(clazz string, obj fyne.CanvasObject, c DefyneContext, defs map[string]string) string {
 	info := Lookup(clazz)
 	if info == nil {
 		return ""
 	}
 
 	if fn := info.Gostring; fn != nil {
-		return fn(obj, props, defs)
+		return fn(obj, c, defs)
 	}
 
 	buf := bytes.Buffer{}
 	fallbackPrint(reflect.ValueOf(obj), &buf)
-	return widgetRef(props[obj], defs, buf.String())
+	return widgetRef(c.Metadata()[obj], defs, buf.String())
 }
 
 // fallbackPrint is derived from printValue in the BSD licensed Go source code at: src/fmt/print.go.

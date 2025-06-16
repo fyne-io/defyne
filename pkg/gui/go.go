@@ -14,35 +14,35 @@ import (
 )
 
 // ExportGo generates a full Go package for the given object and writes it to the provided file handle
-func ExportGo(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string, name string, w io.Writer) error {
+func ExportGo(obj fyne.CanvasObject, d DefyneContext, name string, w io.Writer) error {
 	guidefs.InitOnce()
 
-	packagesList := packagesRequired(obj, meta)
+	packagesList := packagesRequired(obj, d)
 
 	// Really this needs to be a full dependency analysis but for now a simple sort of widgets before containers may work
-	varListWidgets, varListContainers := varsRequired(obj, meta)
+	varListWidgets, varListContainers := varsRequired(obj, d)
 	sort.Strings(varListWidgets)
 	sort.Strings(varListContainers)
 
-	code := exportCode(packagesList, append(varListWidgets, varListContainers...), obj, meta, name)
+	code := exportCode(packagesList, append(varListWidgets, varListContainers...), obj, d, name)
 
 	_, err := w.Write([]byte(code))
 	return err
 }
 
 // ExportGoPreview generates a preview version of the Go code with a `main()` method for the given object and writes it to the file handle
-func ExportGoPreview(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string, w io.Writer) error {
+func ExportGoPreview(obj fyne.CanvasObject, d DefyneContext, w io.Writer) error {
 	guidefs.InitOnce()
 
-	packagesList := packagesRequired(obj, meta)
+	packagesList := packagesRequired(obj, d)
 	packagesList = append(packagesList, "app")
 
 	// Really this needs to be a full dependency analysis but for now a simple sort of widgets before containers may work
-	varListWidgets, varListContainers := varsRequired(obj, meta)
+	varListWidgets, varListContainers := varsRequired(obj, d)
 	sort.Strings(varListWidgets)
 	sort.Strings(varListContainers)
 
-	code := exportCode(packagesList, append(varListWidgets, varListContainers...), obj, meta, "main")
+	code := exportCode(packagesList, append(varListWidgets, varListContainers...), obj, d, "main")
 
 	code += `
 func main() {
@@ -58,7 +58,7 @@ func main() {
 	return err
 }
 
-func exportCode(pkgs, vars []string, obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string, name string) string {
+func exportCode(pkgs, vars []string, obj fyne.CanvasObject, d DefyneContext, name string) string {
 	for i := 0; i < len(pkgs); i++ {
 		if pkgs[i] != "fmt" && pkgs[i] != "net/url" && pkgs[i] != "image/color" {
 			pkgs[i] = "fyne.io/fyne/v2/" + pkgs[i]
@@ -70,7 +70,7 @@ func exportCode(pkgs, vars []string, obj fyne.CanvasObject, meta map[fyne.Canvas
 	defs := make(map[string]string)
 
 	_, clazz := getTypeOf(obj)
-	main := guidefs.GoString(clazz, obj, meta, defs)
+	main := guidefs.GoString(clazz, obj, d, defs)
 	setup := ""
 	for k, v := range defs {
 		setup += "g." + k + " = " + v + "\n"
@@ -119,12 +119,12 @@ func (g *%s) makeUI() fyne.CanvasObject {
 	return string(formatted)
 }
 
-func packagesRequired(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[string]string) []string {
+func packagesRequired(obj fyne.CanvasObject, d DefyneContext) []string {
 	ret := []string{"container"}
 	var objs []fyne.CanvasObject
 	if c, ok := obj.(*fyne.Container); ok {
 		objs = c.Objects
-		layout, ok := meta[c]["layout"]
+		layout, ok := d.Metadata()[c]["layout"]
 		if ok && (layout == "Form" || layout == "CustomPadded") {
 			ret = append(ret, "layout")
 		}
@@ -133,15 +133,15 @@ func packagesRequired(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[stri
 		info := guidefs.Lookup(class)
 
 		if info != nil && info.IsContainer() {
-			ret = packagesRequiredForWidget(obj)
+			ret = packagesRequiredForWidget(obj, d)
 			objs = info.Children(obj)
 		} else {
-			return packagesRequiredForWidget(obj)
+			return packagesRequiredForWidget(obj, d)
 		}
 	}
 
 	for _, w := range objs {
-		for _, p := range packagesRequired(w, meta) {
+		for _, p := range packagesRequired(w, d) {
 			added := false
 			for _, exists := range ret {
 				if p == exists {
@@ -157,10 +157,10 @@ func packagesRequired(obj fyne.CanvasObject, meta map[fyne.CanvasObject]map[stri
 	return ret
 }
 
-func packagesRequiredForWidget(w fyne.CanvasObject) []string {
+func packagesRequiredForWidget(w fyne.CanvasObject, d DefyneContext) []string {
 	name := reflect.TypeOf(w).String()
 	if pkgs := guidefs.Lookup(name).Packages; pkgs != nil {
-		return pkgs(w)
+		return pkgs(w, d)
 	}
 
 	if _, ok := w.(fyne.Widget); ok {
@@ -170,8 +170,8 @@ func packagesRequiredForWidget(w fyne.CanvasObject) []string {
 	return []string{}
 }
 
-func varsRequired(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string) (widgets, containers []string) {
-	name := props[obj]["name"]
+func varsRequired(obj fyne.CanvasObject, d DefyneContext) (widgets, containers []string) {
+	name := d.Metadata()[obj]["name"]
 
 	if c, ok := obj.(*fyne.Container); ok {
 		if name != "" {
@@ -179,7 +179,7 @@ func varsRequired(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]
 		}
 
 		for _, w := range c.Objects {
-			w2, c2 := varsRequired(w, props)
+			w2, c2 := varsRequired(w, d)
 			if len(w2) > 0 {
 				widgets = append(widgets, w2...)
 			}
@@ -193,7 +193,7 @@ func varsRequired(obj fyne.CanvasObject, props map[fyne.CanvasObject]map[string]
 
 		if info != nil && info.IsContainer() {
 			for _, child := range info.Children(obj) {
-				w2, c2 := varsRequired(child, props)
+				w2, c2 := varsRequired(child, d)
 
 				if len(w2) > 0 {
 					widgets = append(widgets, w2...)

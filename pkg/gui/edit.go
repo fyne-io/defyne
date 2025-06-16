@@ -8,8 +8,10 @@ import (
 	"github.com/fyne-io/defyne/internal/guidefs"
 )
 
+type DefyneContext = guidefs.DefyneContext
+
 // CreateNew returns a new instance of the given widget type
-func CreateNew(name string) fyne.CanvasObject {
+func CreateNew(name string, _ DefyneContext) fyne.CanvasObject {
 	guidefs.InitOnce()
 
 	if match := guidefs.Lookup(name); match != nil {
@@ -21,7 +23,7 @@ func CreateNew(name string) fyne.CanvasObject {
 
 // EditorFor returns an array of FormItems for editing, taking the widget, properties, callback to refresh the form items,
 // and an optional callback that fires after changes to the widget.
-func EditorFor(o fyne.CanvasObject, props map[string]string, refresh func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
+func EditorFor(o fyne.CanvasObject, d DefyneContext, refresh func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
 	guidefs.InitOnce()
 
 	_, clazz := getTypeOf(o)
@@ -31,20 +33,20 @@ func EditorFor(o fyne.CanvasObject, props map[string]string, refresh func([]*wid
 	}
 
 	if match := guidefs.Lookup(clazz); match != nil {
-		return match.Edit(o, props, refresh, onchanged)
+		return match.Edit(o, d, refresh, onchanged)
 	}
 
 	return nil
 }
 
 // GoStringFor generates the Go code for the given widget
-func GoStringFor(o fyne.CanvasObject, props map[fyne.CanvasObject]map[string]string, defs map[string]string) string {
+func GoStringFor(o fyne.CanvasObject, d DefyneContext, defs map[string]string) string {
 	guidefs.InitOnce()
 
 	name := reflect.TypeOf(o).String()
 
 	if match := guidefs.Lookup(name); match != nil {
-		return match.Gostring(o, props, defs)
+		return match.Gostring(o, d, defs)
 	}
 
 	return ""
