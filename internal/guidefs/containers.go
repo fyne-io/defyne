@@ -282,6 +282,58 @@ func initContainers() {
 				return []string{"container"}
 			},
 		},
+		"*container.ThemeOverride": {
+			Name: "ThemeOverride",
+			Children: func(o fyne.CanvasObject) []fyne.CanvasObject {
+				over := o.(*container.ThemeOverride)
+				return []fyne.CanvasObject{over.Content}
+			},
+			AddChild: func(parent, o fyne.CanvasObject) {
+				over := o.(*container.ThemeOverride)
+				over.Content = o
+				over.Refresh()
+			},
+			Create: func() fyne.CanvasObject {
+				th, _ := theme.FromJSON("{}")
+				return container.NewThemeOverride(container.NewStack(), th)
+			},
+			Edit: func(obj fyne.CanvasObject, c DefyneContext, _ func([]*widget.FormItem), onchanged func()) []*widget.FormItem {
+				props := c.Metadata()[obj]
+				over := obj.(*container.ThemeOverride)
+				custom := widget.NewMultiLineEntry()
+				custom.SetText(props["data"])
+				custom.OnChanged = func(s string) {
+					th, err := theme.FromJSONWithFallback(s, c.Theme())
+					if err != nil {
+						return
+					}
+
+					props["data"] = custom.Text
+					over.Theme = th
+					over.Refresh()
+					onchanged()
+				}
+
+				return []*widget.FormItem{
+					widget.NewFormItem("Theme Data", custom),
+				}
+			},
+			Gostring: func(obj fyne.CanvasObject, c DefyneContext, defs map[string]string) string {
+				props := c.Metadata()[obj]
+				over := obj.(*container.ThemeOverride)
+				str := &strings.Builder{}
+				str.WriteString("container.NewThemeOverride(")
+				writeGoStringExcluding(str, nil, c, defs, over.Content)
+				str.WriteString(", ")
+				str.WriteString("func() fyne.Theme { th, _ := theme.FromJSONWithFallback(`")
+				str.WriteString(props["data"])
+				str.WriteString("`, fyne.CurrentApp().Settings().Theme()); return th}())")
+				return widgetRef(props, defs, str.String())
+			},
+			Packages: func(_ fyne.CanvasObject, _ DefyneContext) []string {
+				return []string{"container", "theme"}
+			},
+		},
 	}
 
 	Containers["*widget.Scroll"] = Containers["*container.Scroll"] // internal widget name may be used

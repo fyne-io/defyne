@@ -186,6 +186,33 @@ func DecodeMap(m map[string]interface{}, d DefyneContext) (fyne.CanvasObject, er
 
 		d.Metadata()[obj] = props
 		return obj, nil
+	case "*container.ThemeOverride":
+		var content fyne.CanvasObject
+		info := m["Struct"].(map[string]interface{})
+		if info["Content"] != nil {
+			child, _ := DecodeMap(info["Content"].(map[string]interface{}), d)
+			content = child
+		}
+
+		data, ok := info["Theme"]
+		if !ok || data == "" {
+			data = "{}"
+		}
+		th, err := theme.FromJSON(data.(string))
+		if err != nil {
+			fyne.LogError("Theme decode error", err)
+		}
+		obj := container.NewThemeOverride(content, th)
+
+		props := map[string]string{
+			"data": data.(string),
+		}
+		if name, ok := m["Name"]; ok {
+			props["name"] = name.(string)
+		}
+
+		d.Metadata()[obj] = props
+		return obj, nil
 	}
 
 	obj := decodeWidget(m)
@@ -348,6 +375,15 @@ func EncodeMap(obj fyne.CanvasObject, d DefyneContext) (interface{}, error) {
 		node.Name = name
 
 		node.Struct["Content"], _ = EncodeMap(c.Content, d)
+
+		return &node, nil
+	case *container.ThemeOverride:
+		node := &cntObj{Struct: make(map[string]interface{})}
+		node.Type = "*container.ThemeOverride"
+		node.Name = name
+
+		node.Struct["Content"], _ = EncodeMap(c.Content, d)
+		node.Struct["Theme"] = d.Metadata()[c]["data"]
 
 		return &node, nil
 	case *container.Split:
@@ -653,7 +689,7 @@ func decodeFields(e reflect.Value, in map[string]interface{}) error {
 func decodeWidget(m map[string]interface{}) fyne.CanvasObject {
 	class, ok := m["Type"].(string)
 	if !ok {
-		log.Println("Failed to detect type of object")
+		log.Println("Failed to detect type of object", m)
 		return nil
 	}
 	def := guidefs.Lookup(class)
